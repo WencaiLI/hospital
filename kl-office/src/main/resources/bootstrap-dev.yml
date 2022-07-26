@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${SERVER_ADDR:10.10.49.220:8848}
+        namespace: ${NAMESPACE:}
+      config:
+        server-addr: ${SERVER_ADDR:10.10.49.220:8848}
+        namespace: ${NAMESPACE:}
