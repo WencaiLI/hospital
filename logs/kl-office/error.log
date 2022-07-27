@@ -1,0 +1,48 @@
+[2022-07-27 09:04:45.224] [kl-office,,] [main]
+                [ERROR] [o.s.b.d.LoggingFailureAnalysisReporter:40] - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+A component required a bean of type 'com.thtf.office.dto.VehicleCategoryConvert' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.thtf.office.dto.VehicleCategoryConvert' in your configuration.
+
+[2022-07-27 09:11:46.998] [kl-office,,] [main]
+                [ERROR] [o.s.b.d.LoggingFailureAnalysisReporter:40] - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+A component required a bean of type 'com.thtf.office.dto.VehicleCategoryConvert' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.thtf.office.dto.VehicleCategoryConvert' in your configuration.
+
+[2022-07-27 09:15:01.448] [kl-office,,] [main]
+                [ERROR] [o.s.b.d.LoggingFailureAnalysisReporter:40] - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+A component required a bean of type 'com.thtf.office.dto.VehicleCategoryConvert' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.thtf.office.dto.VehicleCategoryConvert' in your configuration.
+

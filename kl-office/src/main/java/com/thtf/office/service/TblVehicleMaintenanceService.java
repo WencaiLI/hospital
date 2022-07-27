@@ -1,7 +1,10 @@
 package com.thtf.office.service;
 
+import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface TblVehicleMaintenanceService extends IService<TblVehicleMaintenance> {
 
+    boolean deleteById(Long mid);
+
+    List<TblVehicleMaintenance> select(VehicleMaintenanceParamVO vehicleMaintenanceParamVO);
 }
