@@ -1,7 +1,10 @@
 package com.thtf.office.mapper;
 
+import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import java.util.List;
+
 
 /**
  * <p>
@@ -12,5 +15,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2022-07-26
  */
 public interface TblVehicleCategoryMapper extends BaseMapper<TblVehicleCategory> {
+
+    List<TblVehicleCategory> select(VehicleCategoryParamVO vehicleCategoryParamVO);
 
 }
