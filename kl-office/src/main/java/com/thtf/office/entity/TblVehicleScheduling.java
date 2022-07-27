@@ -1,125 +1,142 @@
 package com.thtf.office.entity;
 
-    import java.time.LocalDateTime;
-    import java.io.Serializable;
-    import lombok.Data;
-    import lombok.EqualsAndHashCode;
-    import lombok.experimental.Accessors;
+import java.time.LocalDateTime;
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
-* <p>
-    * 车辆调度表
-    * </p>
-*
-* @author guola
-* @since 2022-07-26
-*/
-    @Data
-        @EqualsAndHashCode(callSuper = false)
-    @Accessors(chain = true)
-    public class TblVehicleScheduling implements Serializable {
+ * <p>
+ * 车辆调度表
+ * </p>
+ *
+ * @author guola
+ * @since 2022-07-26
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
+public class TblVehicleScheduling implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+private static final long serialVersionUID = 1L;
 
-            /**
-            * 调度流水号
-            */
+    /**
+     * id
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long id;
+
+    /**
+     * 调度流水号
+     */
     private String code;
 
-            /**
-            * 关联的车辆类别id
-            */
+    /**
+     * 关联的车辆类别id
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long vehicleCategoryId;
 
-            /**
-            * 描述
-            */
+    /**
+     * 描述
+     */
     private String description;
 
-            /**
-            * 创建时间
-            */
+    /**
+     * 创建时间
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime createTime;
 
-            /**
-            * 创建人
-            */
+    /**
+     * 创建人
+     */
     private String createBy;
 
-            /**
-            * 修改时间
-            */
+    /**
+     * 修改时间
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime updateTime;
 
-            /**
-            * 修改人
-            */
+    /**
+     * 修改人
+     */
     private String updateBy;
 
-            /**
-            * 删除时间
-            */
+    /**
+     * 删除时间
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime deleteTime;
 
-            /**
-            * 删除人
-            */
+    /**
+     * 删除人
+     */
     private String deleteBy;
 
-            /**
-            * 关联的车辆信息id
-            */
+    /**
+     * 关联的车辆信息id
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long vehicleInfoId;
 
-            /**
-            * 车牌号
-            */
+    /**
+     * 车牌号
+     */
     private String carNumber;
 
-            /**
-            * 调度开始时间
-            */
+    /**
+     * 调度开始时间
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime startTime;
 
-            /**
-            * 调度结束时间
-            */
+    /**
+     * 调度结束时间
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime endTime;
 
-            /**
-            * 司机
-            */
+    /**
+     * 司机
+     */
     private String driverName;
 
-            /**
-            * 调度用途 0：出车；1：维保；2：淘汰
-            */
+    /**
+     * 调度用途 0：出车；1：维保；2：淘汰
+     */
     private Integer purpose;
 
-            /**
-            * 关联的使用部门id
-            */
+    /**
+     * 关联的使用部门id
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long organizationId;
 
-            /**
-            * 使用人姓名
-            */
+    /**
+     * 使用人姓名
+     */
     private String userName;
 
-            /**
-            * 目的地
-            */
+    /**
+     * 目的地
+     */
     private String destination;
 
-            /**
-            * 司机关联的用户id
-            */
+    /**
+     * 司机关联的用户id
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long driverId;
 
-            /**
-            * 关联的使用部门名称
-            */
+    /**
+     * 关联的使用部门名称
+     */
     private String organizationName;
-
-
 }
