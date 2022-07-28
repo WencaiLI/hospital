@@ -3,13 +3,12 @@ package com.thtf.office.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleSchedulingConvert;
+import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +34,6 @@ public class VehicleSchedulingController {
 
     @Resource
     VehicleSchedulingConvert vehicleSchedulingConvert;
-
-    @Autowired
-    private IdGeneratorSnowflake idGeneratorSnowflake;
 
     /**
      * @Author: liwencai
@@ -104,5 +100,29 @@ public class VehicleSchedulingController {
     public ResponseEntity<JsonResult<List<TblVehicleScheduling>>> select(@RequestBody VehicleSchedulingParamVO paramVO){
         List<TblVehicleScheduling> result = vehicleSchedulingService.select(paramVO);
         return ResponseEntity.ok(JsonResult.success(result));
+    }
+
+    /**
+     * @Description 生成最新的调度流水号
+     * @param
+     * @return  调度流水号字符串
+     * @author guola
+     * @date 2022-07-28
+     */
+    @GetMapping("/createSerialNumber")
+    public ResponseEntity<JsonResult<String>> createSerialNumber() {
+        JsonResult result = new JsonResult();
+        try {
+            String num = vehicleSchedulingService.createSerialNumber();
+            result.setCode(200);
+            result.setData(num);
+            result.setStatus("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setData(e.getClass().getName() + ":" + e.getMessage());
+            result.setStatus("error");
+            result.setCode(500);
+        }
+        return ResponseEntity.ok(result);
     }
 }
