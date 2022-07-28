@@ -38,6 +38,7 @@ public class TblUserScheduleDTO implements Serializable {
     private String name;
 
     /**
+     *
      * 当日出车次数
      */
     private int dayDriveNum;
