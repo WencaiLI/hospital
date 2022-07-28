@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/hospital.iml" filepath="$PROJECT_DIR$/.idea/hospital.iml" />
       <module fileurl="file://$PROJECT_DIR$/kl-office/kl-office.iml" filepath="$PROJECT_DIR$/kl-office/kl-office.iml" />
-      <module fileurl="file://$PROJECT_DIR$/office/office.iml" filepath="$PROJECT_DIR$/office/office.iml" />
     </modules>
   </component>
 </project>

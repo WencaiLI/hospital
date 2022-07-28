@@ -7,7 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="office" />
+        <module name="kl-office" />
       </profile>
       <profile name="Annotation profile for kl-office" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -36,7 +36,6 @@
     <bytecodeTargetLevel>
       <module name="hospital" target="1.8" />
       <module name="kl-office" target="1.8" />
-      <module name="office" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

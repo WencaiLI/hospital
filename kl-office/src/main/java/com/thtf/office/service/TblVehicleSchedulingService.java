@@ -1,5 +1,6 @@
 package com.thtf.office.service;
 
+import com.thtf.office.dto.TblUserScheduleDTO;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -19,4 +20,13 @@ public interface TblVehicleSchedulingService extends IService<TblVehicleScheduli
     boolean deleteById(Long sid);
 
     List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO);
+
+    /**
+     * @Description 查询未调度司机列表
+     * @param positionTitle
+     * @return
+     * @author guola
+     * @Date 2022-07-28
+     */
+    List<TblUserScheduleDTO> findDriverForSchedule(String positionTitle);
 }
