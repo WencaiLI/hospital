@@ -3,7 +3,9 @@ package com.thtf.office.service;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -25,4 +27,25 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
     boolean insertBatch(List<TblVehicleInfo> list);
 
     boolean updateSpec(VehicleInfoParamVO paramVO);
+
+    /**
+     * @Dsscription 批量导入进度
+     * @return
+     * @author guola
+     */
+    BigDecimal importProgress();
+
+    /**
+     * Excel批量导入车辆信息
+     *
+     * @param type 类型id
+     * @param uploadFile 导入文件
+     * @param user 操作用户主键
+     * @param originalFilename 导入文件名称
+     * @return {@link String} 导入情况说明
+     * @author guola
+     * @date 2022-06-14
+     */
+    String batchImport(MultipartFile uploadFile, String originalFilename, String type, String user);
+
 }

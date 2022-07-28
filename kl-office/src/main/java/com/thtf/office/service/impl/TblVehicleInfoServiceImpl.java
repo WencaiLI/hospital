@@ -1,21 +1,34 @@
 package com.thtf.office.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.SplitListUtil;
 import com.thtf.office.dto.VehicleInfoConvert;
+import com.thtf.office.entity.TblVehicleCategory;
+import com.thtf.office.mapper.TblVehicleCategoryMapper;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -40,6 +53,15 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
 
     @Autowired
     IdGeneratorSnowflake idGeneratorSnowflake;
+
+    @Autowired
+    TblVehicleCategoryMapper vehicleCategoryMapper;
+
+
+    /**
+     * 实时统计导入进度最大100
+     */
+    private static BigDecimal countData = new BigDecimal(0);
 
     /**
      * @Author: liwencai
@@ -184,6 +206,116 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             // todo 自定义注解
             throw new Exception();
         }
+    }
+
+    @Override
+    public BigDecimal importProgress() {
+        return countData;
+    }
+
+    @Override
+    public String batchImport(MultipartFile uploadFile, String originalFilename, String type, String user){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer2 = new StringBuilder();
+        countData = new BigDecimal(0);
+        try {
+            List<String[]> list = ExcelVehicleUtils.importExtendToList(uploadFile, originalFilename);
+            int num = 0;
+            int fail = 0;
+            TblVehicleCategory vehicleCategory = vehicleCategoryMapper.selectOne(new QueryWrapper<TblVehicleCategory>().eq("id", type));
+            for (String[] strings : list) {
+                if(strings[0] == null || strings[1] == null || strings[2] == null || strings[3] == null || strings[0].equals("") || strings[1].equals("") || strings[2].equals("") || strings[3].equals("")){
+                    fail++;
+                    countData = new BigDecimal(fail).add(new BigDecimal(num)).divide(new BigDecimal(list.size()),
+                            2, BigDecimal.ROUND_UP).multiply(new BigDecimal(100));
+                    buffer.append("第").append(num + fail + 1).append("行存在必填项未填写").append("；<br />");
+                }  else {
+                    List<TblVehicleInfo> tblVehicleInfos = vehicleInfoMapper.selectList(new QueryWrapper<TblVehicleInfo>().eq("car_number", strings[0]));
+                    if(!tblVehicleInfos.isEmpty()){
+                        fail++;
+                        countData = new BigDecimal(fail).add(new BigDecimal(num)).divide(new BigDecimal(list.size()),
+                                2, BigDecimal.ROUND_UP).multiply(new BigDecimal(100));
+                        buffer.append("第").append(num + fail + 1).append("行车牌号在本服务中已存在，略过本条").append("；<br />");
+                        continue;
+                    }
+                    TblVehicleInfo item = new TblVehicleInfo();
+                    item.setId(idGeneratorSnowflake.snowflakeId());
+                    item.setCreateBy(user);
+                    item.setCreateTime(LocalDateTime.now());
+                    item.setUpdateBy(user);
+                    item.setUpdateTime(LocalDateTime.now());
+                    item.setCarNumber(strings[0]);
+                    item.setModel(strings[1]);
+                    item.setEngineNumber(strings[2]);
+                    item.setFrameNumber(strings[3]);
+                    item.setVehicleCategoryId(Long.valueOf(type));
+                    if(strings[4] != null && !"".equals(strings[4])){
+                        item.setColor(strings[4]);
+                    }
+                    if(strings[5] != null && !"".equals(strings[5])){
+                        item.setDistributor(strings[5]);
+                    }
+                    if(strings[6] != null && !"".equals(strings[6])){
+                        if(!StringUtils.isNumeric(strings[6])){
+                            fail++;
+                            countData = new BigDecimal(fail).add(new BigDecimal(num)).divide(new BigDecimal(list.size()),
+                                    2, BigDecimal.ROUND_UP).multiply(new BigDecimal(100));
+                            buffer.append("第").append(num + fail + 1).append("行购买价格格式错误，请参照模板中红色字体").append("；<br />");
+                            continue;
+                        }
+                    }
+                    if(strings[7] != null && !"".equals(strings[7])){
+                        try{
+                            //增加强判断条件，否则 诸如2022-02-29也可判断出去
+                            sdf.setLenient(false);
+                            Date date = sdf.parse(strings[7]);
+                        } catch(Exception e){
+                            fail++;
+                            countData = new BigDecimal(fail).add(new BigDecimal(num)).divide(new BigDecimal(list.size()),
+                                    2, BigDecimal.ROUND_UP).multiply(new BigDecimal(100));
+                            buffer.append("第").append(num + fail + 1).append("行出厂日期格式错误，请参照模板中红色字体").append("；<br />");
+                        }
+                    }
+                    if(strings[8] != null && !"".equals(strings[8])){
+                        try{
+                            sdf.setLenient(false);
+                            Date date = sdf.parse(strings[8]);
+                        } catch(Exception e){
+                            fail++;
+                            countData = new BigDecimal(fail).add(new BigDecimal(num)).divide(new BigDecimal(list.size()),
+                                    2, BigDecimal.ROUND_UP).multiply(new BigDecimal(100));
+                            buffer.append("第").append(num + fail + 1).append("行购买日期格式错误，请参照模板中红色字体").append("；<br />");
+                        }
+                    }
+                    if(strings[9] != null && !"".equals(strings[9])){
+                        item.setInsurance(strings[9]);
+                    }
+                    if(strings[10] != null && !"".equals(strings[10])){
+                        item.setMaintenance(strings[10]);
+                    }
+                    if(strings[11] != null && !"".equals(strings[11])){
+                        item.setDescription(strings[11]);
+                    }
+
+                    vehicleInfoMapper.insert(item);
+
+                    num++;
+                    countData = new BigDecimal(fail).add(new BigDecimal(num)).divide(new BigDecimal(list.size()),
+                            2, BigDecimal.ROUND_UP).multiply(new BigDecimal(100));
+                }
+            }
+            buffer2.append("共导入").append(list.size()).append("条仪表信息，成功导入").append(num).append("条，失败").append(fail).append("条。");
+            if(fail > 0){
+                buffer2.append("<br />失败原因：").append(buffer);
+            } else if(buffer.toString().length() > 0){
+                buffer2.append("<br />结果：").append(buffer);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        countData = new BigDecimal(100);
+        return buffer2.toString();
     }
 
 }

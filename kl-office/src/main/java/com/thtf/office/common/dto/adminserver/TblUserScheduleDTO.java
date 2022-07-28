@@ -1,4 +1,4 @@
-package com.thtf.office.dto;
+package com.thtf.office.common.dto.adminserver;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

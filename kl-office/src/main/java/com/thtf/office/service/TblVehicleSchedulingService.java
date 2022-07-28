@@ -1,6 +1,6 @@
 package com.thtf.office.service;
 
-import com.thtf.office.dto.TblUserScheduleDTO;
+import com.thtf.office.common.dto.adminserver.TblUserScheduleDTO;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -29,4 +29,13 @@ public interface TblVehicleSchedulingService extends IService<TblVehicleScheduli
      * @Date 2022-07-28
      */
     List<TblUserScheduleDTO> findDriverForSchedule(String positionTitle);
+
+    /**
+     * @Description 生成最新的调度流水号
+     * @param
+     * @return  调度流水号字符串
+     * @author guola
+     * @date 2022-07-28
+     */
+    String createSerialNumber();
 }
