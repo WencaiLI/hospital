@@ -19,4 +19,8 @@ public interface TblVehicleSchedulingService extends IService<TblVehicleScheduli
     boolean deleteById(Long sid);
 
     List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO);
+
+    boolean insert(VehicleSchedulingParamVO paramVO);
+
+    boolean updateSpec(VehicleSchedulingParamVO paramVO);
 }

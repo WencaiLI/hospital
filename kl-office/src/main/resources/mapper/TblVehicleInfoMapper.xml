@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.thtf.office.mapper.TblVehicleInfoMapper">
+    <!-- 条件查询公车信息 -->
     <select id="select" parameterType="com.thtf.office.vo.VehicleInfoParamVO" resultType="com.thtf.office.entity.TblVehicleInfo">
         select * from tbl_vehicle_info
         <where>
@@ -16,7 +17,35 @@
             </if>
         </where>
     </select>
+    <!-- 删除与指定公车类别关联的公车信息 -->
     <update id="setCidToNull" parameterType="java.lang.Long">
-        update tbl_vehicle_info set vehicle_category_id = null where vehicle_category_id = #{cid}
+        update tbl_vehicle_info
+        set vehicle_category_id = null
+        where delete_time is null and vehicle_category_id = #{cid}
     </update>
+    <!-- 修改公车状态 -->
+    <update id="changeVehicleStatus" parameterType="java.util.Map">
+        update tbl_vehicle_info
+        set status = #{status},update_time = CURRENT_TIMESTAMP,update_by = #{updateBy}
+        where delete_time is null and id = #{vid}
+    </update>
+
+    <!-- 车辆调度状态实时统计
+    状态：0->待命中 1->出车中 2->维修中 3->已淘汰（该状态不参与统计） 排序按状态升序
+    注意：数据库中某状态没有数据时无法统计 -->
+    <select id="getVehicleStatus" resultType="com.thtf.office.vo.VehicleStatisticsResultVO">
+        select count(*) as number,(case when (status = 0 ) then '待命中' when (status = 1 ) then '出车中' when (status = 2 ) then '维修中' else status end) as attribute
+        from tbl_vehicle_info
+        where delete_time is null
+        group by status
+        order by status desc
+    </select>
+
+    <!-- 各类车辆出车统计
+    -->
+    <select id="getVehicleCategory" resultType="com.thtf.office.vo.VehicleStatisticsResultVO">
+
+    </select>
+
+
 </mapper>

@@ -1,21 +1,14 @@
 package com.thtf.office.controller;
 
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.valid.VehicleParamValid;
-import com.thtf.office.dto.VehicleSchedulingConvert;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,12 +26,6 @@ public class VehicleSchedulingController {
     @Resource
     TblVehicleSchedulingService vehicleSchedulingService;
 
-    @Resource
-    VehicleSchedulingConvert vehicleSchedulingConvert;
-
-    @Autowired
-    private IdGeneratorSnowflake idGeneratorSnowflake;
-
     /**
      * @Author: liwencai
      * @Description: 新增调度记录
@@ -48,13 +35,9 @@ public class VehicleSchedulingController {
      */
     @PostMapping("/insert")
     public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleSchedulingParamVO paramVO){
-        TblVehicleScheduling scheduling = vehicleSchedulingConvert.toVehicleScheduling(paramVO);
-        scheduling.setCreateTime(LocalDateTime.now());
-        // todo scheduling.setCreateBy();
-        if(vehicleSchedulingService.save(scheduling)){
+        if(vehicleSchedulingService.insert(paramVO)){
             return ResponseEntity.ok(JsonResult.success(true));
         }
-        // todo 修改公车的状态
         return ResponseEntity.ok(JsonResult.error("新增调度记录失败"));
     }
 
@@ -82,12 +65,7 @@ public class VehicleSchedulingController {
      */
     @PutMapping("/update")
     public ResponseEntity<JsonResult<Boolean>> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleSchedulingParamVO paramVO){
-        TblVehicleScheduling scheduling = vehicleSchedulingConvert.toVehicleScheduling(paramVO);
-        scheduling.setUpdateTime(LocalDateTime.now());
-        // todo tblVehicleScheduling.setUpdateBy
-        QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("id",paramVO.getId());
-        if(vehicleSchedulingService.update(scheduling,queryWrapper)){
+        if(vehicleSchedulingService.updateSpec(paramVO)){
             return ResponseEntity.ok(JsonResult.success(true));
         }
         return ResponseEntity.ok(JsonResult.error("新增调度记录失败"));
