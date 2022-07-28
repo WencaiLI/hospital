@@ -3,6 +3,9 @@ package com.thtf.office.mapper;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.thtf.office.vo.VehicleRankingsResultVO;
+import com.thtf.office.vo.VehicleStatisticsParamVO;
+
 import java.util.List;
 
 /**
@@ -16,4 +19,6 @@ import java.util.List;
 public interface TblVehicleMaintenanceMapper extends BaseMapper<TblVehicleMaintenance> {
 
     List<TblVehicleMaintenance> select(VehicleMaintenanceParamVO vehicleMaintenanceParamVO);
+
+    List<VehicleRankingsResultVO> getMaintenanceRankings(VehicleStatisticsParamVO paramVO);
 }

@@ -43,6 +43,11 @@ private static final long serialVersionUID = 1L;
     private Long vehicleCategoryId;
 
     /**
+     * 关联的车辆类别名称
+     */
+    private String vehicleCategoryName;
+
+    /**
      * 描述
      */
     private String description;

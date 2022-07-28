@@ -6,6 +6,7 @@ import com.thtf.office.dto.VehicleInfoConvert;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;
+import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,9 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -138,7 +141,16 @@ public class VehicleInfoController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult>
      */
     @GetMapping("/selectByCidAndMonth")
-    public ResponseEntity<JsonResult> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
-        return ResponseEntity.ok(JsonResult.error("删除公车失败"));
+    public ResponseEntity<JsonResult<List<VehicleSelectByDateResult>>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
+        // todo vehicleInfoService.selectByCidByDate(cid);
+        List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(getSelectByCidByDateMap("monthNumber","%Y-%m"));
+        return ResponseEntity.ok(JsonResult.success(result));
+    }
+
+    Map<String,Object> getSelectByCidByDateMap(String numberType,String dateTemplate){
+        Map<String,Object> map = new HashMap<>();
+        map.put("dateTemplate",dateTemplate);
+        map.put("dateType",numberType);
+        return map;
     }
 }

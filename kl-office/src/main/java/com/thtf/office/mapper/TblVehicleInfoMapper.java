@@ -3,6 +3,7 @@ package com.thtf.office.mapper;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
 import org.apache.ibatis.annotations.Param;
@@ -54,14 +55,23 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
      * @Param paramVO:
      * @return: java.util.List<com.thtf.office.vo.VehicleStatisticsResultVO>
      */
-    List<VehicleStatisticsResultVO> getVehicleStatus(VehicleStatisticsParamVO paramVO);
+    List<VehicleStatisticsResultVO> getVehicleStatus();
 
     /**
      * @Author: liwencai
-     * @Description: 各类车辆出车统计(数据库存在的调度状态)
+     * @Description: 各类车辆出车统计
      * @Date: 2022/7/28
      * @Param paramVO:
      * @return: java.util.List<com.thtf.office.vo.VehicleStatisticsResultVO>
      */
     List<VehicleStatisticsResultVO> getVehicleCategory(VehicleStatisticsParamVO paramVO);
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取排行榜信息
+     * @Date: 2022/7/28
+     * @Param map:
+     * @return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
+     */
+    List<VehicleRankingsResultVO> getRankings(Map<String, Object> map);
 }

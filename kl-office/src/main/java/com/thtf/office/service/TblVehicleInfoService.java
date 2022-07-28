@@ -3,8 +3,10 @@ package com.thtf.office.service;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.office.vo.VehicleSelectByDateResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,4 +27,6 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
     boolean insertBatch(List<TblVehicleInfo> list);
 
     boolean updateSpec(VehicleInfoParamVO paramVO);
+
+    List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap);
 }

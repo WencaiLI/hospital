@@ -1,6 +1,5 @@
 package com.thtf.office.vo;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -9,7 +8,6 @@ import lombok.Data;
  * @Description: 统计结果ViewObject
  */
 @Data
-//@AllArgsConstructor
 public class VehicleStatisticsResultVO {
     private String attribute; // 统计属性
     private Long number; // 数量

@@ -41,6 +41,11 @@ public class VehicleSchedulingParamVO {
     private Long vehicleCategoryId;
 
     /**
+     * 关联的车辆类别名称
+     */
+    private String vehicleCategoryName;
+
+    /**
      * 关联的车辆信息id
      */
     @NotNull(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})

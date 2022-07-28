@@ -3,13 +3,7 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="office" />
-      </profile>
-      <profile name="Annotation profile for kl-office" enabled="true">
+      <profile name="Annotation profile for hospital" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -36,7 +30,6 @@
     <bytecodeTargetLevel>
       <module name="hospital" target="1.8" />
       <module name="kl-office" target="1.8" />
-      <module name="office" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -9,6 +9,7 @@ import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -133,6 +135,18 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         queryWrapper_update.isNull("delete_time").eq("id",paramVO.getId());
         // todo vehicleInfo.setUpdateBy();
         return vehicleInfoMapper.update(vehicleInfo,queryWrapper_update) == 1;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询统计某类公车的当月和当日使用情况
+     * @Date: 2022/7/28
+     * @Param selectByCidByDateMap:
+     * @return: java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>
+     */
+    @Override
+    public List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap) {
+        return null;
     }
 
     /**
