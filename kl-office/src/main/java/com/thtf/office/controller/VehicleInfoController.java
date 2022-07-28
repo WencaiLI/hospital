@@ -2,6 +2,7 @@ package com.thtf.office.controller;
 
 import com.thtf.office.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.response.JsonResult;
+import com.thtf.office.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoConvert;
 import com.thtf.office.feign.AdminAPI;
@@ -47,6 +48,9 @@ public class VehicleInfoController {
     @Autowired
     private AdminAPI adminAPI;
 
+    @Autowired
+    private FileUtil fileUtil;
+
     /**
      * 根据token获取当前用户信息
      * @className userBuildingData
@@ -68,7 +72,17 @@ public class VehicleInfoController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO){
+    public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
+                                                      List<MultipartFile> carImageFile,List<MultipartFile> drivingBookImageFile) throws Exception {
+
+        //上传文件后获取文件名字符串和url字符串
+        String[] carImageFileNameAndUrl = fileUtil.uploadMultiFile(carImageFile);
+        paramVO.setCarImage(carImageFileNameAndUrl[0]);
+        paramVO.setCarImageUrl(carImageFileNameAndUrl[1]);
+        String[] bookImageFileNameAndUrl = fileUtil.uploadMultiFile(drivingBookImageFile);
+        paramVO.setDrivingBookImage(bookImageFileNameAndUrl[0]);
+        paramVO.setDrivingBookImageUrl(bookImageFileNameAndUrl[1]);
+
         TblVehicleInfo vehicleInfo = vehicleInfoConvert.toVehicleInfo(paramVO);
         if(vehicleInfoService.insert(vehicleInfo)){
             return ResponseEntity.ok(JsonResult.success(true));
