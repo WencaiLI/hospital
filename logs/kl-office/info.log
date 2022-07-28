@@ -742,3 +742,177 @@
                 [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
 [2022-07-28 10:30:41.503] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
                 [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:30:57.351] [kl-office,,] [main]
+                [INFO ] [c.t.office.common.init.NacosInitializer:43] - NacosInitializer initialize 开始执行
+[2022-07-28 10:30:57.354] [kl-office,,] [main]
+                [INFO ] [c.a.n.c.c.impl.LocalConfigInfoProcessor:195] - LOCAL_SNAPSHOT_PATH:C:\Users\WenCaiLi\nacos\config
+[2022-07-28 10:30:57.370] [kl-office,,] [main]
+                [INFO ] [c.a.nacos.client.config.impl.Limiter:53] - limitTime:5.0
+[2022-07-28 10:30:57.414] [kl-office,,] [main]
+                [INFO ] [c.a.nacos.client.config.utils.JVMUtil:47] - isMultiInstance:false
+[2022-07-28 10:30:57.420] [kl-office,,] [main]
+                [INFO ] [c.t.office.common.init.NacosInitializer:49] - NacosInitializer initialize 执行成功
+[2022-07-28 10:30:57.630] [kl-office,,] [main]
+                [INFO ] [o.s.c.b.c.PropertySourceBootstrapConfiguration:105] - Located property source: [BootstrapPropertySource {name='bootstrapProperties-kl-office-dev.yml,hospital'}, BootstrapPropertySource {name='bootstrapProperties-kl-office.yml,hospital'}, BootstrapPropertySource {name='bootstrapProperties-kl-office,hospital'}, BootstrapPropertySource {name='bootstrapProperties-common-dev.yml,hospital'}]
+[2022-07-28 10:30:57.633] [kl-office,,] [main]
+                [INFO ] [com.thtf.office.OfficeServerMain9001:655] - The following profiles are active: dev
+[2022-07-28 10:30:58.206] [kl-office,,] [main]
+                [INFO ] [o.s.d.r.c.RepositoryConfigurationDelegate:249] - Multiple Spring Data modules found, entering strict repository configuration mode!
+[2022-07-28 10:30:58.208] [kl-office,,] [main]
+                [INFO ] [o.s.d.r.c.RepositoryConfigurationDelegate:127] - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2022-07-28 10:30:58.233] [kl-office,,] [main]
+                [INFO ] [o.s.d.r.c.RepositoryConfigurationDelegate:187] - Finished Spring Data repository scanning in 16ms. Found 0 Redis repository interfaces.
+[2022-07-28 10:30:58.388] [kl-office,,] [main]
+                [INFO ] [o.s.cloud.context.scope.GenericScope:295] - BeanFactory id=2b758d8f-27e3-39af-852a-6ea0cfc05e35
+[2022-07-28 10:30:58.645] [kl-office,,] [main]
+                [INFO ] [o.s.b.w.embedded.tomcat.TomcatWebServer:92] - Tomcat initialized with port(s): 9001 (http)
+[2022-07-28 10:30:58.652] [kl-office,,] [main]
+                [INFO ] [org.apache.catalina.core.StandardService:173] - Starting service [Tomcat]
+[2022-07-28 10:30:58.652] [kl-office,,] [main]
+                [INFO ] [org.apache.catalina.core.StandardEngine:173] - Starting Servlet engine: [Apache Tomcat/9.0.31]
+[2022-07-28 10:30:58.789] [kl-office,,] [main]
+                [INFO ] [o.a.c.c.C.[.[localhost].[/kl-office]:173] - Initializing Spring embedded WebApplicationContext
+[2022-07-28 10:30:58.789] [kl-office,,] [main]
+                [INFO ] [o.s.web.context.ContextLoader:284] - Root WebApplicationContext: initialization completed in 1142 ms
+[2022-07-28 10:30:59.252] [kl-office,,] [main]
+                [INFO ] [com.alibaba.nacos.client.naming:56] - initializer namespace from System Property :null
+[2022-07-28 10:30:59.253] [kl-office,,] [main]
+                [INFO ] [com.alibaba.nacos.client.naming:65] - initializer namespace from System Environment :null
+[2022-07-28 10:30:59.254] [kl-office,,] [main]
+                [INFO ] [com.alibaba.nacos.client.naming:75] - initializer namespace from System Property :null
+[2022-07-28 10:30:59.272] [kl-office,,] [main]
+                [INFO ] [c.a.d.s.b.a.DruidDataSourceAutoConfigure:56] - Init DruidDataSource
+[2022-07-28 10:31:00.033] [kl-office,,] [main]
+                [INFO ] [com.alibaba.druid.pool.DruidDataSource:998] - {dataSource-1} inited
+[2022-07-28 10:31:00.463] [kl-office,,] [main]
+                [INFO ] [c.t.o.common.util.IdGeneratorSnowflake:48] - 当前机器的workerId：2887409665
+[2022-07-28 10:31:00.861] [kl-office,,] [main]
+                [INFO ] [c.n.c.sources.URLConfigurationSource:122] - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+[2022-07-28 10:31:00.864] [kl-office,,] [main]
+                [INFO ] [c.n.c.sources.URLConfigurationSource:122] - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+[2022-07-28 10:31:00.993] [kl-office,,] [main]
+                [INFO ] [o.s.s.concurrent.ThreadPoolTaskExecutor:181] - Initializing ExecutorService 'applicationTaskExecutor'
+[2022-07-28 10:31:01.075] [kl-office,,] [main]
+                [INFO ] [o.s.s.concurrent.ThreadPoolTaskScheduler:181] - Initializing ExecutorService 'Nacso-Watch-Task-Scheduler'
+[2022-07-28 10:31:01.640] [kl-office,,] [main]
+                [INFO ] [o.s.b.a.e.web.EndpointLinksResolver:58] - Exposing 20 endpoint(s) beneath base path '/actuator'
+[2022-07-28 10:31:01.721] [kl-office,,] [main]
+                [INFO ] [o.s.b.w.embedded.tomcat.TomcatWebServer:204] - Tomcat started on port(s): 9001 (http) with context path '/kl-office'
+[2022-07-28 10:31:01.723] [kl-office,,] [main]
+                [INFO ] [com.alibaba.nacos.client.naming:66] - [BEAT] adding beat: {"cluster":"DEFAULT","ip":"10.10.82.154","metadata":{"preserved.register.source":"SPRING_CLOUD"},"period":5000,"port":9001,"scheduled":false,"serviceName":"DEFAULT_GROUP@@kl-office","stopped":false,"weight":1.0} to beat map.
+[2022-07-28 10:31:01.782] [kl-office,,] [main]
+                [INFO ] [com.alibaba.nacos.client.naming:196] - [REGISTER-SERVICE] public registering service DEFAULT_GROUP@@kl-office with instance: {"clusterName":"DEFAULT","enabled":true,"ephemeral":true,"healthy":true,"instanceHeartBeatInterval":5000,"instanceHeartBeatTimeOut":15000,"ip":"10.10.82.154","ipDeleteTimeout":30000,"metadata":{"preserved.register.source":"SPRING_CLOUD"},"port":9001,"weight":1.0}
+[2022-07-28 10:31:01.792] [kl-office,,] [main]
+                [INFO ] [c.a.c.n.registry.NacosServiceRegistry:65] - nacos registry, DEFAULT_GROUP kl-office 10.10.82.154:9001 register finished
+[2022-07-28 10:31:02.135] [kl-office,,] [main]
+                [INFO ] [com.thtf.office.OfficeServerMain9001:61] - Started OfficeServerMain9001 in 7.05 seconds (JVM running for 7.981)
+[2022-07-28 10:31:02.141] [kl-office,,] [main]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:197] - [fixed-10.10.49.220_8848] [subscribe] kl-office+hospital
+[2022-07-28 10:31:02.141] [kl-office,,] [main]
+                [INFO ] [c.a.nacos.client.config.impl.CacheData:92] - [fixed-10.10.49.220_8848] [add-listener] ok, tenant=, dataId=kl-office, group=hospital, cnt=1
+[2022-07-28 10:31:02.142] [kl-office,,] [main]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:197] - [fixed-10.10.49.220_8848] [subscribe] kl-office.yml+hospital
+[2022-07-28 10:31:02.142] [kl-office,,] [main]
+                [INFO ] [c.a.nacos.client.config.impl.CacheData:92] - [fixed-10.10.49.220_8848] [add-listener] ok, tenant=, dataId=kl-office.yml, group=hospital, cnt=1
+[2022-07-28 10:31:02.143] [kl-office,,] [main]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:197] - [fixed-10.10.49.220_8848] [subscribe] kl-office-dev.yml+hospital
+[2022-07-28 10:31:02.143] [kl-office,,] [main]
+                [INFO ] [c.a.nacos.client.config.impl.CacheData:92] - [fixed-10.10.49.220_8848] [add-listener] ok, tenant=, dataId=kl-office-dev.yml, group=hospital, cnt=1
+[2022-07-28 10:31:02.157] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:31:02.774] [kl-office,,] [RMI TCP Connection(4)-172.26.96.1]
+                [INFO ] [o.a.c.c.C.[.[localhost].[/kl-office]:173] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2022-07-28 10:31:02.775] [kl-office,,] [RMI TCP Connection(4)-172.26.96.1]
+                [INFO ] [o.s.web.servlet.DispatcherServlet:525] - Initializing Servlet 'dispatcherServlet'
+[2022-07-28 10:31:02.779] [kl-office,,] [RMI TCP Connection(4)-172.26.96.1]
+                [INFO ] [o.s.web.servlet.DispatcherServlet:547] - Completed initialization in 4 ms
+[2022-07-28 10:31:31.859] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:32:01.898] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:32:31.420] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:33:00.928] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:33:30.456] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:33:59.970] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:34:29.478] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:34:59.002] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:35:28.515] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:35:58.043] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:36:27.567] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:36:57.101] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:37:26.622] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:37:56.144] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:38:25.672] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:38:55.201] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:39:24.722] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:39:54.257] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:40:23.772] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:40:53.291] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:41:22.804] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:41:52.328] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:42:21.848] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:42:51.371] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:43:20.892] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:43:50.399] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:44:19.907] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:44:49.413] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:45:18.918] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:45:48.424] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:46:17.952] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:46:47.483] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:47:17.030] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:47:46.559] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:48:16.082] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:48:45.601] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:49:15.131] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:49:44.648] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:50:14.165] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:50:43.689] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:51:13.216] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:51:42.740] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:52:12.262] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:52:41.789] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]
+[2022-07-28 10:53:11.334] [kl-office,,] [com.alibaba.nacos.client.Worker.longPolling.fixed-10.10.49.220_8848]
+                [INFO ] [c.a.n.client.config.impl.ClientWorker:522] - get changedGroupKeys:[]

@@ -6,6 +6,9 @@ import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.VehicleSchedulingConvert;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
+import com.thtf.office.dto.TblUser;
+import com.thtf.office.dto.TblUserScheduleDTO;
+import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
@@ -87,6 +90,9 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      * @Param sid:
      * @return: boolean
      */
+    @Autowired
+    private AdminAPI adminAPI;
+
     @Override
     public boolean deleteById(Long sid) {
         LocalDateTime now = LocalDateTime.now();
@@ -153,5 +159,14 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
     @Override
     public List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO) {
         return vehicleSchedulingMapper.select(paramVO);
+    }
+
+    @Override
+    public List<TblUserScheduleDTO> findDriverForSchedule(String positionTitle) {
+        //获取外部接口人员数据
+        JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition(positionTitle);
+        List<TblUser> data = dataJsonResult.getData();
+        //组装人员信息及出车次数信息
+        return null;
     }
 }
