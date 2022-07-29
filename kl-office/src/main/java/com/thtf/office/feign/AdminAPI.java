@@ -7,6 +7,7 @@ import com.thtf.office.dto.TblOrganizationDTO;
 import com.thtf.office.dto.TblUser;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,8 @@ import java.util.Set;
 
 @Service
 
-//@FeignClient(value = "admin-server",url="10.10.82.33:8001")
-@FeignClient(value = "admin-server")
+@FeignClient(value = "admin-server",url="10.10.82.33:8001")
+//@FeignClient(value = "admin-server")
 @RequestMapping("/admin-server")
 public interface AdminAPI {
 
@@ -29,7 +30,7 @@ public interface AdminAPI {
      * @return 用户集合
      * @author ligh
      */
-    @GetMapping("/user/searchUserByPosition")
+    @GetMapping(value = "/user/searchUserByPosition")
     JsonResult<List<TblUser>> searchUserByPosition(@RequestParam("positionTitle") String positionTitle);
 
     /**

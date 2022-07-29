@@ -13,15 +13,19 @@ import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.service.TblVehicleSchedulingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -123,7 +127,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      */
     @Override
     public boolean updateSpec(VehicleSchedulingParamVO paramVO) {
-        /* 新增业务逻辑 假定：开始时间不能改变 */
+        /* 修改业务逻辑 假定：开始时间不能改变 */
         // 1、查询是否有这么一个调度：它的调度结束时间在新调度的开始时间与结束时间之间
         QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").between("end_time",paramVO.getStartTime(),paramVO.getEndTime());
@@ -157,12 +161,64 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         return vehicleSchedulingMapper.select(paramVO);
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 查询司机
+     * @Date: 2022/7/29
+     * @Param positionTitle:
+     * @return: java.util.List<com.thtf.office.dto.TblUserScheduleDTO>
+     */
     @Override
-    public List<TblUserScheduleDTO> findDriverForSchedule(String positionTitle) {
+    public List<TblUser> findDriverForSchedule(String positionTitle) {
         //获取外部接口人员数据
         JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition(positionTitle);
         List<TblUser> data = dataJsonResult.getData();
         //组装人员信息及出车次数信息
+        return data;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询待命状态的司机的日、月出车情况
+     * @Date: 2022/7/29
+     * @return: java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>
+     */
+    @Override
+    public List<VehicleSelectByDateResult> selectInfoAboutDri() {
+        // 获取每月司机出车情况
+        List<VehicleSelectByDateResult> monthData = vehicleSchedulingMapper.selectScheAboutDir(getSelectScheAboutDirMap("monthNumber","%Y-%m"));
+        // 获取每日司机出车情况
+        List<VehicleSelectByDateResult> dayData = vehicleSchedulingMapper.selectScheAboutDir(getSelectScheAboutDirMap("dayNumber","%Y-%m-%d"));
+
+
+        ArrayList<Long> monthId = monthData.stream().map(VehicleSelectByDateResult::getId).collect(Collectors.toCollection(ArrayList::new));
+//        ArrayList<Long> dayId = dayData.stream().map(VehicleSelectByDateResult::getId).collect(Collectors.toCollection(ArrayList::new));
+        JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition("司机");
+        ArrayList<Long> allId = dataJsonResult.getData().stream().map(TblUser::getId).collect(Collectors.toCollection(ArrayList::new));
+
+        // 求差集这一步分不用做计算
+//        boolean b = allId.remove(monthId);
+//        monthId.removeAll()
+
+        //
+
+        System.out.println(monthData.toString());
+        System.out.println(dayData.toString());
         return null;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询待命状态的司机的日、月出车情况的传参Map
+     * @Date: 2022/7/29
+     * @Param numberType: 每月：monthNumber 每日：dayNumber
+     * @Param dateTemplate: 每月："%Y-%m" 每日："%Y-%m-%d"
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getSelectScheAboutDirMap(String numberType,String dateTemplate){
+        Map<String,Object> map = new HashMap<>();
+        map.put("numberType",numberType);
+        map.put("dateTemplate",dateTemplate);
+        return map;
     }
 }

@@ -1,11 +1,8 @@
 package com.thtf.office.mapper;
 
-import com.thtf.office.vo.VehicleInfoParamVO;
+import com.thtf.office.vo.*;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.thtf.office.vo.VehicleRankingsResultVO;
-import com.thtf.office.vo.VehicleStatisticsParamVO;
-import com.thtf.office.vo.VehicleStatisticsResultVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -74,4 +71,15 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
      * @return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
      */
     List<VehicleRankingsResultVO> getRankings(Map<String, Object> map);
+
+    /**
+     * @Author: liwencai
+     * @Description: 通过公车类别和按日或月查询公车信息
+     * @Date: 2022/7/28
+     * @Param selectByCidByDateMap:
+     * @return: java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>
+     */
+    List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap);
+
+    Integer changeBind(Map<String,Object> map);
 }

@@ -68,24 +68,30 @@
         ) as rate
     </select>
 
-    <!--  -->
+    <!-- 查询统计某类公车的当月和当日使用情况 注意：排序按照id升序，方便日、月数据合并，业务层再进行排序 -->
     <select id="selectByCidByDate" parameterType="java.util.Map" resultType="com.thtf.office.vo.VehicleSelectByDateResult">
-        select info.id as id,info.car_number as attribute,count(scheduling.id) as monthNumber
+        select info.id as id,info.car_number as attribute,count(scheduling.id) as ${dateType}
         from tbl_vehicle_info as info
         left join tbl_vehicle_scheduling as scheduling on (info.id = scheduling.vehicle_info_id
-        and DATE_FORMAT(end_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+        and DATE_FORMAT(end_time, #{dateTemplate}) = DATE_FORMAT(NOW(), #{dateTemplate})
         and scheduling.vehicle_category_name = (
           select distinct tbl_vehicle_category.name
             from tbl_vehicle_info
             inner join tbl_vehicle_category on (tbl_vehicle_info.vehicle_category_id = tbl_vehicle_category.id)
             where tbl_vehicle_info.delete_time is null and tbl_vehicle_category.delete_time is null
-            and tbl_vehicle_info.vehicle_category_id = 1552123781802229760
+            and tbl_vehicle_info.vehicle_category_id = #{categoryId}
             limit 1
             )
         )
-        where info.delete_time is null and scheduling.delete_time is null
-
+        where info.delete_time is null and scheduling.delete_time is null and info.vehicle_category_id = #{categoryId}
         group by info.car_number
-        order by monthNumber
+        order by id
     </select>
+
+    <!-- 更新公车的类别 -->
+    <update id="changeBind" parameterType="java.util.Map">
+            update tbl_vehicle_info
+            set  vehicle_category_id = #{newCid}
+            where id = #{vid} and delete_time is null and vehicle_category_id = #{oldCid}
+    </update>
 </mapper>

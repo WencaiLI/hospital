@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.SplitListUtil;
 import com.thtf.office.dto.VehicleInfoConvert;
+import com.thtf.office.entity.TblVehicleScheduling;
+import com.thtf.office.mapper.TblVehicleSchedulingMapper;
+import com.thtf.office.service.TblVehicleSchedulingService;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
@@ -16,12 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -36,6 +39,9 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
 
     @Resource
     TblVehicleInfoMapper vehicleInfoMapper;
+
+    @Resource
+    TblVehicleSchedulingMapper vehicleSchedulingMapper;
 
     @Resource
     VehicleInfoConvert vehicleInfoConvert;
@@ -137,16 +143,41 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         return vehicleInfoMapper.update(vehicleInfo,queryWrapper_update) == 1;
     }
 
+
     /**
      * @Author: liwencai
-     * @Description: 查询统计某类公车的当月和当日使用情况
+     * @Description: 更新所有公车的状态
+     * 注意：原符号       <       <=      >       >=      <>
+     * 对应函数    lt()     le()    gt()    ge()    ne()
      * @Date: 2022/7/28
-     * @Param selectByCidByDateMap:
-     * @return: java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>
+     * @return: boolean
      */
     @Override
-    public List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap) {
-        return null;
+    @Transactional
+    public boolean updateInfoStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        // 更新为出车中状态
+        QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("delete_time").lt("start_time",now).gt("end_time",now).orderByAsc("end_time");
+        List<TblVehicleScheduling> schedulings = vehicleSchedulingMapper.selectList(queryWrapper);
+        if(schedulings.size()>=1){
+            // 修改该公车为出车中状态
+            for (TblVehicleScheduling tblVehicleScheduling : schedulings) {
+                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,null));
+            }
+        }
+        // 查询所有处在出车中和待命中的车
+        QueryWrapper<TblVehicleInfo> queryWrapper_1 = new QueryWrapper<>();
+        queryWrapper_1.isNull("delete_time").eq("status",0).or().eq("status",1);
+        List<Long> ids = vehicleInfoMapper.selectList(queryWrapper_1).stream().map(TblVehicleInfo::getId).collect(Collectors.toList());
+        ids.removeAll(schedulings.stream().map(TblVehicleScheduling::getVehicleInfoId).collect(Collectors.toList()));
+        if(ids.size() == 0 ){
+            return false;
+        }
+        for (Long id : ids) {
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(id,0,null));
+        }
+        return true;
     }
 
     /**
@@ -198,6 +229,91 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             // todo 自定义注解
             throw new Exception();
         }
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询统计某类公车的当月和当日使用情况
+     * @Date: 2022/7/28
+     * @Param cid: 公车类别id
+     * @return: java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>
+     */
+    @Override
+    public List<VehicleSelectByDateResult> selectByCidByDate(Long cid) {
+        QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("delete_time").eq("vehicle_category_id",cid);
+        if(vehicleInfoMapper.selectList(queryWrapper).size() == 0){
+            return null;
+        }
+        // 每月的类别为cid的公车调用情况
+        List<VehicleSelectByDateResult> monthResult = vehicleInfoMapper.selectByCidByDate(getSelectByCidByDateMap("monthNumber", "%Y-%m", cid));
+        // 每日的类别为cid的公车调用情况
+        List<VehicleSelectByDateResult> dayResult = vehicleInfoMapper.selectByCidByDate(getSelectByCidByDateMap("dayNumber", "%Y-%m-%d", cid));
+
+        // 两个结果集合
+        if(monthResult.size() < dayResult.size()){
+            return null;
+        }
+        // todo 填补id在按月查时不为空，按日却为空时的数据
+        for (VehicleSelectByDateResult vehicleSelectByDateResult : dayResult) {
+            int j = 0;
+            while (!monthResult.get(j).getId().equals(vehicleSelectByDateResult.getId())) {
+                monthResult.get(j).setDayNumber(0L);
+                j = j + 1;
+                if (monthResult.get(j).getId().equals(vehicleSelectByDateResult.getId())) {
+                    break;
+                }
+            }
+            monthResult.get(j).setDayNumber(vehicleSelectByDateResult.getDayNumber());
+        }
+
+        // todo 需知道先月排还是先日排，目前先月排
+        monthResult.sort((o1, o2) -> {
+            int i = o1.getMonthNumber().compareTo(o2.getMonthNumber());
+            if (i == 0) {
+                i = o1.getDayNumber().compareTo(o2.getDayNumber());
+                if (i == 0) {
+                    i = o1.getDayNumber().compareTo(o2.getDayNumber());
+                }
+            }
+            return i;
+        });
+        return monthResult;
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取修改公车状态的参数map
+     * @Date: 2022/7/29
+     * @Param vehicleId:
+     * @Param newStatus:
+     * @Param updateBy:
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,Long updateBy){
+        Map<String,Object> map = new HashMap<>();
+        map.put("vid", vehicleId);
+        map.put("status",newStatus);
+        map.put("updateBy",updateBy);
+        return map;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 根据日期和类别查询该类别下汽车的调度排行的参数Map
+     * @Date: 2022/7/28
+     * @Param numberType: 每月：monthNumber 每日：dayNumber
+     * @Param dateTemplate: 每月："%Y-%m" 每日："%Y-%m-%d"
+     * @Param categoryId: 类别id
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getSelectByCidByDateMap(String numberType,String dateTemplate,Long categoryId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("dateTemplate",dateTemplate);
+        map.put("dateType",numberType);
+        map.put("categoryId",categoryId);
+        return map;
     }
 
 }

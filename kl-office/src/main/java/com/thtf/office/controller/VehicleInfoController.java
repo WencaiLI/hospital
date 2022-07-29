@@ -135,7 +135,7 @@ public class VehicleInfoController {
 
     /**
      * @Author: liwencai
-     * @Description: 查询所有未指派状态的车辆按当月使用次数升序
+     * @Description: 根据日期和类别查询该类别下汽车的调度排行
      * @Date: 2022/7/26
      * @Param cid:
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult>
@@ -143,14 +143,23 @@ public class VehicleInfoController {
     @GetMapping("/selectByCidAndMonth")
     public ResponseEntity<JsonResult<List<VehicleSelectByDateResult>>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
         // todo vehicleInfoService.selectByCidByDate(cid);
-        List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(getSelectByCidByDateMap("monthNumber","%Y-%m"));
+        List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(cid);
         return ResponseEntity.ok(JsonResult.success(result));
     }
 
-    Map<String,Object> getSelectByCidByDateMap(String numberType,String dateTemplate){
-        Map<String,Object> map = new HashMap<>();
-        map.put("dateTemplate",dateTemplate);
-        map.put("dateType",numberType);
-        return map;
+    /**
+     * @Author: liwencai
+     * @Description: 修改公车状态,此接口前端需定时请求
+     * @Date: 2022/7/28
+     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     */
+    @GetMapping("/updateInfoStatus")
+    public ResponseEntity<JsonResult<Boolean>> updateInfoStatus(){
+        if(vehicleInfoService.updateInfoStatus()){
+            return ResponseEntity.ok(JsonResult.success(true));
+        }else {
+            return ResponseEntity.ok(JsonResult.error("更新公车状态失败"));
+        }
+
     }
 }

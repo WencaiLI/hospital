@@ -3,8 +3,10 @@ package com.thtf.office.mapper;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.thtf.office.vo.VehicleSelectByDateResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -17,4 +19,6 @@ import java.util.List;
 public interface TblVehicleSchedulingMapper extends BaseMapper<TblVehicleScheduling> {
 
     List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO);
+
+    List<VehicleSelectByDateResult> selectScheAboutDir(Map<String, Object> monthNumber);
 }

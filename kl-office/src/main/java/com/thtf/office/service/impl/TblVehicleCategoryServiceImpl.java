@@ -3,6 +3,7 @@ package com.thtf.office.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.VehicleCategoryConvert;
+import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;
@@ -13,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * <p>
@@ -117,6 +120,42 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         QueryWrapper<TblVehicleCategory> queryWrapper_update = new QueryWrapper<>();
         queryWrapper_update.isNull("delete_time").eq("id", vehicleCategoryParamVO.getId());
         return vehicleCategoryMapper.update(category, queryWrapper_update) == 1;
+    }
+
+    /**
+     * @Author: liwencai 
+     * @Description: 移除绑定车辆
+     * @Date: 2022/7/29
+     * @Param vehicleCategoryChangeBindVO: 
+     * @return: boolean 
+     */
+    @Override
+    @Transactional
+    public boolean changeBind(VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO) {
+        if(vehicleCategoryChangeBindVO.getVidList().size() == 0){
+            return true;
+        }
+        for (String vid : vehicleCategoryChangeBindVO.getVidList()) {
+            vehicleInfoMapper.changeBind(getChangeBindMap(Long.valueOf(vid),vehicleCategoryChangeBindVO.getTargetId(),vehicleCategoryChangeBindVO.getOriginId()));
+        }
+        return true;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取更新类别传参map
+     * @Date: 2022/7/29
+     * @Param vid:
+     * @Param newCid:
+     * @Param oldCid:
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getChangeBindMap(Long vid,Long newCid,Long oldCid){
+        Map<String,Object> map = new HashMap<>();
+        map.put("vid",vid);
+        map.put("newCid",newCid);
+        map.put("oldCid",oldCid);
+        return map;
     }
 
     /**

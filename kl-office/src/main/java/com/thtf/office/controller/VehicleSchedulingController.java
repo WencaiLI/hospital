@@ -5,6 +5,7 @@ import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
+import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -82,5 +83,17 @@ public class VehicleSchedulingController {
     public ResponseEntity<JsonResult<List<TblVehicleScheduling>>> select(@RequestBody VehicleSchedulingParamVO paramVO){
         List<TblVehicleScheduling> result = vehicleSchedulingService.select(paramVO);
         return ResponseEntity.ok(JsonResult.success(result));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询待命状态的司机的日、月出车情况
+     * @Date: 2022/7/29
+     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>>>
+     */
+    @GetMapping("/selectInfoAboutDri")
+    public ResponseEntity<JsonResult<List<VehicleSelectByDateResult>>> selectInfoAboutDri(){
+        List<VehicleSelectByDateResult> results = vehicleSchedulingService.selectInfoAboutDri();
+        return ResponseEntity.ok(JsonResult.success(results));
     }
 }

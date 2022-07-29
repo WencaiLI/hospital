@@ -1,5 +1,6 @@
 package com.thtf.office.service;
 
+import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -28,5 +29,9 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
 
     boolean updateSpec(VehicleInfoParamVO paramVO);
 
-    List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap);
+
+    List<VehicleSelectByDateResult> selectByCidByDate(Long cid);
+
+    boolean updateInfoStatus();
+
 }
