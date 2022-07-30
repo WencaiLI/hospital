@@ -281,4 +281,53 @@ public class FileUtil {
 
 
     }
+
+    /**
+     * 多文件上传
+     *
+     * @param uploadFile 文件
+     * @return
+     * @author guola
+     * @date 2022-07-28
+     */
+    public String[] uploadMultiFile(List<MultipartFile> uploadFile) throws Exception{
+        String[] fileNameAndUrl = new String[2];
+        StringBuilder fileUrl = new StringBuilder();
+        StringBuilder fileName = new StringBuilder();
+        if (!CollectionUtils.isEmpty(uploadFile)) {
+            for (int i = 0; i < uploadFile.size(); i++) {
+                MultipartFile file = uploadFile.get(i);
+                String originalFilename = file.getOriginalFilename();
+                Assert.notNull(originalFilename, "文件名不能为null");
+                int index = originalFilename.lastIndexOf(".");
+                Assert.isTrue(index > 0, "文件名必须包含.");
+                String newFileName = System.currentTimeMillis() + originalFilename.substring(index);
+                boolean flag = fileUtil.uploadFileToMinio(file.getInputStream(), newFileName);
+                if (!flag) {
+                    throw new AddException("上传文件失败!");
+                }
+
+                if(fileUrl != null){
+                    fileUrl.append(fileUtil.getUrlByObjectName(newFileName));
+                    if(i < uploadFile.size() - 1){
+                        fileUrl.append(",");
+                    }
+                }else{
+                    fileUrl.append(fileUtil.getUrlByObjectName(newFileName)).append(",");
+                }
+
+                if(fileName != null){
+                    fileName.append(originalFilename);
+                    if(i < uploadFile.size() - 1){
+                        fileName.append(",");
+                    }
+                }else{
+                    fileName.append(originalFilename).append(",");
+                }
+            }
+            fileNameAndUrl[0] = fileName.toString();
+            fileNameAndUrl[1] = fileUrl.toString();
+        }
+        return fileNameAndUrl;
+    }
 }

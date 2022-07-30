@@ -1,4 +1,4 @@
-package com.thtf.office.dto;
+package com.thtf.office.common.dto.adminserver;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -38,6 +38,7 @@ public class TblUserScheduleDTO implements Serializable {
     private String name;
 
     /**
+     *
      * 当日出车次数
      */
     private int dayDriveNum;

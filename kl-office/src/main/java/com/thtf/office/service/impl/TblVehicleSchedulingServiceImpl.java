@@ -5,8 +5,8 @@ import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.VehicleSchedulingConvert;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
-import com.thtf.office.dto.TblUser;
-import com.thtf.office.dto.TblUserScheduleDTO;
+import com.thtf.office.common.entity.adminserver.TblBasicData;
+import com.thtf.office.common.entity.adminserver.TblUser;
 import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
@@ -15,6 +15,7 @@ import com.thtf.office.service.TblVehicleSchedulingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
@@ -26,6 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -161,21 +168,21 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         return vehicleSchedulingMapper.select(paramVO);
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 查询司机
-     * @Date: 2022/7/29
-     * @Param positionTitle:
-     * @return: java.util.List<com.thtf.office.dto.TblUserScheduleDTO>
-     */
-    @Override
-    public List<TblUser> findDriverForSchedule(String positionTitle) {
-        //获取外部接口人员数据
-        JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition(positionTitle);
-        List<TblUser> data = dataJsonResult.getData();
-        //组装人员信息及出车次数信息
-        return data;
-    }
+//    /**
+//     * @Author: liwencai
+//     * @Description: 查询司机
+//     * @Date: 2022/7/29
+//     * @Param positionTitle:
+//     * @return: java.util.List<com.thtf.office.dto.TblUserScheduleDTO>
+//     */
+//    @Override
+//    public List<TblUser> findDriverForSchedule(String positionTitle) {
+//        //获取外部接口人员数据
+//        JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition(positionTitle);
+//        List<TblUser> data = dataJsonResult.getData();
+//        //组装人员信息及出车次数信息
+//        return data;
+//    }
 
     /**
      * @Author: liwencai
@@ -215,10 +222,28 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      * @Param dateTemplate: 每月："%Y-%m" 每日："%Y-%m-%d"
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
-    Map<String,Object> getSelectScheAboutDirMap(String numberType,String dateTemplate){
-        Map<String,Object> map = new HashMap<>();
-        map.put("numberType",numberType);
-        map.put("dateTemplate",dateTemplate);
+    Map<String,Object> getSelectScheAboutDirMap(String numberType,String dateTemplate) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("numberType", numberType);
+        map.put("dateTemplate", dateTemplate);
         return map;
+    }
+    @Override
+    public String createSerialNumber() {
+        ResponseEntity<JsonResult<List<TblBasicData>>> datas = adminAPI.searchBasicDataByType(30);
+        List<TblBasicData> basicDatas = Objects.requireNonNull(datas.getBody()).getData();
+        TblBasicData basicData = basicDatas.stream().filter(obj -> obj.getBasicName().contains("入库")).findFirst().get();
+        String num = basicData.getBasicCode();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyyMMdd");
+        List<TblVehicleScheduling> infos = vehicleSchedulingMapper.selectList(new QueryWrapper<TblVehicleScheduling>().like("update_time", formatter.format(LocalDateTime.now(ZoneId.of("+8")))).orderByDesc("update_time"));
+        if(!infos.isEmpty()){
+            DecimalFormat dft = new DecimalFormat("000");
+            num += formatter2.format(LocalDateTime.now(ZoneId.of("+8"))) +
+                    dft.format(Integer.parseInt(infos.get(0).getCode().substring(infos.get(0).getCode().length()-3))+1);
+        } else {
+            num += formatter2.format(LocalDateTime.now(ZoneId.of("+8"))) + "001";
+        }
+        return num;
     }
 }

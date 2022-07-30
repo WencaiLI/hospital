@@ -3,6 +3,8 @@ package com.thtf.office.mapper;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 
@@ -14,6 +16,7 @@ import java.util.List;
  * @author guola
  * @since 2022-07-26
  */
+@Component
 public interface TblVehicleCategoryMapper extends BaseMapper<TblVehicleCategory> {
 
     List<TblVehicleCategory> select(VehicleCategoryParamVO vehicleCategoryParamVO);

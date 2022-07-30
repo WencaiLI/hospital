@@ -1,11 +1,11 @@
 package com.thtf.office.feign;
 
 
-import cn.hutool.system.UserInfo;
 import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.dto.TblOrganizationDTO;
-import com.thtf.office.dto.TblUser;
-import org.apache.ibatis.annotations.Param;
+import com.thtf.office.common.entity.adminserver.TblBasicData;
+import com.thtf.office.common.dto.adminserver.TblOrganizationDTO;
+import com.thtf.office.common.entity.adminserver.TblUser;
+import com.thtf.office.common.dto.adminserver.UserInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 
 @Service
 
@@ -61,4 +60,28 @@ public interface AdminAPI {
      **/
     @GetMapping("/user/findOrganizationTree")
     JsonResult<List<TblOrganizationDTO>> findOrganizationTree();
+
+    /**
+     * 根据type 查询基础信息
+     *
+     * @className searchBasicDataByType
+     * @Params [type]
+     * @Return org.springframework.http.ResponseEntity<com.thtf.basicserver.common.JsonResult>
+     * @Author 邓玉磊
+     * @Date 2020/7/2 10:12
+     */
+    @GetMapping("/basic/searchBasicDataByType")
+    ResponseEntity<JsonResult<List<TblBasicData>>> searchBasicDataByType(@RequestParam("type") int type);
+
+    /**
+     * redis获取登录用户详情
+     *
+     * @param token token
+     * @return UserInfo
+     * @Description: redis获取登录用户详情
+     * @Author: zhangw
+     * @Date: 2022/5/19
+     */
+    @GetMapping("/user/userInfo")
+    UserInfo userInfo(@RequestParam("token") String token);
 }

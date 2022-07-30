@@ -1,4 +1,4 @@
-package com.thtf.office.dto;
+package com.thtf.office.common.entity.adminserver;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;

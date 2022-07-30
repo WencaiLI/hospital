@@ -1,22 +1,32 @@
 package com.thtf.office.controller;
 
+import com.thtf.office.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.response.JsonResult;
+import com.thtf.office.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoConvert;
+import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -35,6 +45,25 @@ public class VehicleInfoController {
     @Resource
     VehicleInfoConvert vehicleInfoConvert;
 
+    @Autowired
+    private AdminAPI adminAPI;
+
+    @Autowired
+    private FileUtil fileUtil;
+
+    /**
+     * 根据token获取当前用户信息
+     * @className userBuildingData
+     * @return 当前登录用户信息
+     * @Author 邓玉磊
+     * @Date 2021/3/16 14:24
+     */
+    public UserInfo searchUserData(HttpServletRequest request){
+        String token = request.getHeader("Authorization");
+        UserInfo userInfo = adminAPI.userInfo("de786585-465b-4215-bc74-607e395554ba");
+        return userInfo;
+    }
+
     /**
      * @Author: liwencai
      * @Description: 新增公车信息
@@ -43,7 +72,17 @@ public class VehicleInfoController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO){
+    public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
+                                                      List<MultipartFile> carImageFile,List<MultipartFile> drivingBookImageFile) throws Exception {
+
+        //上传文件后获取文件名字符串和url字符串
+        String[] carImageFileNameAndUrl = fileUtil.uploadMultiFile(carImageFile);
+        paramVO.setCarImage(carImageFileNameAndUrl[0]);
+        paramVO.setCarImageUrl(carImageFileNameAndUrl[1]);
+        String[] bookImageFileNameAndUrl = fileUtil.uploadMultiFile(drivingBookImageFile);
+        paramVO.setDrivingBookImage(bookImageFileNameAndUrl[0]);
+        paramVO.setDrivingBookImageUrl(bookImageFileNameAndUrl[1]);
+
         TblVehicleInfo vehicleInfo = vehicleInfoConvert.toVehicleInfo(paramVO);
         if(vehicleInfoService.insert(vehicleInfo)){
             return ResponseEntity.ok(JsonResult.success(true));
@@ -96,6 +135,59 @@ public class VehicleInfoController {
         return ResponseEntity.ok(JsonResult.success(vehicleInfoService.select(paramVO)));
     }
 
+    /**
+     * Excel批量导入车辆信息
+     *
+     * @param type 类型id
+     * @param uploadFile 导入文件
+     * @return {@link String} 导入情况说明
+     * @author guola
+     * @date 2022-06-14
+     */
+    @PostMapping("/itemImport")
+    public ResponseEntity<JsonResult<String>> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
+        JsonResult result = new JsonResult();
+        try{
+            UserInfo userDTO = searchUserData(request);
+            String originalFilename = uploadFile.getOriginalFilename();
+            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, userDTO.getRealname());
+            result.setData(string);
+            result.setStatus("success");
+            result.setCode(200);
+        } catch (Exception e){
+            e.printStackTrace();
+            result.setData(e.getClass().getName() + ":" + e.getMessage());
+            result.setStatus("error");
+            result.setCode(500);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 获取Excel批量导入设备信息进度
+     *
+     * @author deng
+     * @date 2022-06-14
+     */
+    @GetMapping("/importProgress")
+    public ResponseEntity<JsonResult> importProgress() {
+        JsonResult result = new JsonResult();
+        try{
+            BigDecimal map = vehicleInfoService.importProgress();
+            result.setData(map);
+            result.setCode(200);
+            result.setStatus("success");
+        } catch (Exception e){
+            e.printStackTrace();
+            result.setData(e.getClass().getName() + ":" + e.getMessage());
+            result.setStatus("error");
+            result.setCode(500);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+
+
 
     /**
      * @Author: liwencai
@@ -104,8 +196,31 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/importTemplateDownload")
-    public void importTemplateDownload(){
+    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response){
         // todo 公车模板下载
+        try {
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Pragma", "No-Cache");
+            response.setHeader("Cache-Control", "No-Cache");
+            response.setDateHeader("Expires", 0);
+            response.setContentType("application/msexcel; charset=UTF-8");
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("设备导入模板.xlsx", "UTF-8"));
+            ServletOutputStream out;
+            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
+                    + "ExcelTemplate/vehicleTemplate.xlsx";
+            FileInputStream in = new FileInputStream(filePath);
+            out = response.getOutputStream();
+            out.flush();
+            int aRead;
+            while ((aRead = in.read()) != -1) {
+                out.write(aRead);
+            }
+            out.flush();
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

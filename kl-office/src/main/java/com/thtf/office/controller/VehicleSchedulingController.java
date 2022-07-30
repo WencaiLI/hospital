@@ -6,6 +6,7 @@ import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
+import com.thtf.office.dto.VehicleSchedulingConvert;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,10 @@ public class VehicleSchedulingController {
 
     @Resource
     TblVehicleSchedulingService vehicleSchedulingService;
+
+
+    @Resource
+    VehicleSchedulingConvert vehicleSchedulingConvert;
 
     /**
      * @Author: liwencai
@@ -92,8 +97,31 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>>>
      */
     @GetMapping("/selectInfoAboutDri")
-    public ResponseEntity<JsonResult<List<VehicleSelectByDateResult>>> selectInfoAboutDri(){
+    public ResponseEntity<JsonResult<List<VehicleSelectByDateResult>>> selectInfoAboutDri() {
         List<VehicleSelectByDateResult> results = vehicleSchedulingService.selectInfoAboutDri();
         return ResponseEntity.ok(JsonResult.success(results));
+    }
+    /**
+     * @Description 生成最新的调度流水号
+     * @param
+     * @return  调度流水号字符串
+     * @author guola
+     * @date 2022-07-28
+     */
+    @GetMapping("/createSerialNumber")
+    public ResponseEntity<JsonResult<String>> createSerialNumber() {
+        JsonResult result = new JsonResult();
+        try {
+            String num = vehicleSchedulingService.createSerialNumber();
+            result.setCode(200);
+            result.setData(num);
+            result.setStatus("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setData(e.getClass().getName() + ":" + e.getMessage());
+            result.setStatus("error");
+            result.setCode(500);
+        }
+        return ResponseEntity.ok(result);
     }
 }
