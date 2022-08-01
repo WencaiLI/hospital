@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.thtf.office.common.valid.VehicleParamValid;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +26,9 @@ public class VehicleInfoParamVO implements Serializable {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id; // 公车id
 
-    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    // 异常BindException
+    @Pattern(regexp = "^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]$",groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+//    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
     private String carNumber; // 车牌号
 
     @NotNull(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
@@ -52,9 +56,11 @@ public class VehicleInfoParamVO implements Serializable {
 
     private String distributor; // 经销商
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime outDate; // 出厂日期
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime buyDate; // 购买日期
 

@@ -1,5 +1,6 @@
 package com.thtf.office.service;
 
+import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -7,6 +8,7 @@ import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -22,9 +24,9 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
 
     boolean deleteById(Long vid);
 
-    boolean insert(TblVehicleInfo paramVO);
+    Map<String,Object> insert(TblVehicleInfo paramVO);
 
-    boolean insertBatch(List<TblVehicleInfo> list);
+    Map<String,Object> insertBatch(List<VehicleInfoExcelImportDTO> list);
 
     boolean updateSpec(VehicleInfoParamVO paramVO);
 

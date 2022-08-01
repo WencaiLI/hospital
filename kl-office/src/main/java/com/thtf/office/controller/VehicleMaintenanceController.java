@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.valid.VehicleParamValid;
-import com.thtf.office.dto.VehicleMaintenanceConvert;
+import com.thtf.office.dto.converter.VehicleMaintenanceConverter;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.service.TblVehicleMaintenanceService;
@@ -35,7 +35,7 @@ public class VehicleMaintenanceController {
     TblVehicleMaintenanceService vehicleMaintenanceService;
 
     @Resource
-    VehicleMaintenanceConvert vehicleMaintenanceConvert;
+    VehicleMaintenanceConverter vehicleMaintenanceConverter;
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
@@ -49,7 +49,7 @@ public class VehicleMaintenanceController {
      */
     @PostMapping("/insert")
     public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
-        TblVehicleMaintenance maintenance = vehicleMaintenanceConvert.toVehicleMaintenance(vehicleMaintenanceParamVO);
+        TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
         maintenance.setCreateTime(LocalDateTime.now());
         // todo maintenance.setCreateBy();
         if(vehicleMaintenanceService.save(maintenance)){
@@ -82,7 +82,7 @@ public class VehicleMaintenanceController {
      */
     @PutMapping("/update")
     public ResponseEntity<JsonResult<Boolean>> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
-        TblVehicleMaintenance maintenance = vehicleMaintenanceConvert.toVehicleMaintenance(vehicleMaintenanceParamVO);
+        TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
         maintenance.setUpdateTime(LocalDateTime.now());
         // todo maintenance.setUpdateBy();
         QueryWrapper<TblVehicleMaintenance> queryWrapper = new QueryWrapper<>();

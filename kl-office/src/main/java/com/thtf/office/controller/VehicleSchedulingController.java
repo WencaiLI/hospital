@@ -2,11 +2,11 @@ package com.thtf.office.controller;
 
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
+import com.thtf.office.dto.converter.VehicleSchedulingConverter;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
-import com.thtf.office.dto.VehicleSchedulingConvert;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +28,8 @@ public class VehicleSchedulingController {
     @Resource
     TblVehicleSchedulingService vehicleSchedulingService;
 
-
     @Resource
-    VehicleSchedulingConvert vehicleSchedulingConvert;
+    VehicleSchedulingConverter vehicleSchedulingConverter;
 
     /**
      * @Author: liwencai
@@ -101,6 +100,7 @@ public class VehicleSchedulingController {
         List<VehicleSelectByDateResult> results = vehicleSchedulingService.selectInfoAboutDri();
         return ResponseEntity.ok(JsonResult.success(results));
     }
+
     /**
      * @Description 生成最新的调度流水号
      * @param

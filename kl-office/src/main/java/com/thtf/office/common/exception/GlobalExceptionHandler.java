@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
@@ -103,6 +105,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<JsonResult> exceptionHandler(HttpServletRequest req, HandlerMethod method, Exception e){
         log.warn("访问 {} -> {} 出现异常! ", req.getRequestURI(), method, e);
         return new ResponseEntity<>(JsonResult.error(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /* 以下为自定义拦截器 */
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<JsonResult> bindExceptionHandLer(HttpServletRequest req, HandlerMethod method, BindException e){
+        log.warn("访问 {} -> {} 出现异常! ", req.getRequestURI(), method, e);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (FieldError fieldError : e.getFieldErrors()) {
+            log.info("{} 数据格式错误",fieldError.getRejectedValue());
+            stringBuilder.append(" "+fieldError.getRejectedValue());
+        }
+        return new ResponseEntity<>(JsonResult.error("数据格式错误"+stringBuilder), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

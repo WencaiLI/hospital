@@ -1,4 +1,4 @@
-package com.thtf.office.dto;
+package com.thtf.office.dto.converter;
 
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
@@ -8,11 +8,9 @@ import org.mapstruct.factory.Mappers;
 /**
  * @Auther: liwencai
  * @Date: 2022/7/26 23:06
- * @Description:
+ * @Description: 公车维保信息bean映射转换器
  */
 @Mapper(componentModel = "spring")
-public interface VehicleMaintenanceConvert {
-
-    VehicleMaintenanceConvert INSTANCE = Mappers.getMapper(VehicleMaintenanceConvert.class);
+public interface VehicleMaintenanceConverter {
     TblVehicleMaintenance toVehicleMaintenance(VehicleMaintenanceParamVO vehicleMaintenanceParamVO);
 }

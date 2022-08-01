@@ -10,11 +10,5 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = OfficeServerMain9001.class,webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class TblVehicleSchedulingServiceImplTest {
-
-    @Autowired
-    private TblVehicleSchedulingService tblVehicleSchedulingService;
-    @Test
-    void findDriverForSchedule() {
-        tblVehicleSchedulingService.findDriverForSchedule("司机");
-    }
+    
 }

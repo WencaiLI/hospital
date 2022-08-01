@@ -15,6 +15,9 @@
             <if test="status != null">
                 and status = #{status}
             </if>
+            <if test="vehicleCategoryId != null">
+                and vehicle_category_id = #{vehicleCategoryId}
+            </if>
         </where>
     </select>
     <!-- 删除与指定公车类别关联的公车信息 -->

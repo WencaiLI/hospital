@@ -1,4 +1,4 @@
-package com.thtf.office.dto;
+package com.thtf.office.dto.converter;
 
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
@@ -11,7 +11,6 @@ import org.mapstruct.factory.Mappers;
  * @Description:
  */
 @Mapper(componentModel = "spring")
-public interface VehicleSchedulingConvert {
-    VehicleSchedulingConvert INSTANCE = Mappers.getMapper(VehicleSchedulingConvert.class);
+public interface VehicleSchedulingConverter {
     TblVehicleScheduling toVehicleScheduling(VehicleSchedulingParamVO vehicleSchedulingParamVO);
 }

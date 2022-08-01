@@ -3,7 +3,7 @@ package com.thtf.office.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
-import com.thtf.office.dto.VehicleSchedulingConvert;
+import com.thtf.office.dto.converter.VehicleSchedulingConverter;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.common.entity.adminserver.TblBasicData;
 import com.thtf.office.common.entity.adminserver.TblUser;
@@ -25,13 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -52,7 +48,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
     TblVehicleInfoMapper vehicleInfoMapper;
 
     @Resource
-    VehicleSchedulingConvert vehicleSchedulingConvert;
+    VehicleSchedulingConverter vehicleSchedulingConverter;
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
@@ -74,7 +70,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         queryWrapper.isNull("delete_time").eq("car_number",paramVO.getCarNumber()).last("ORDER BY start_time DESC LIMIT 1");
         List<TblVehicleScheduling> schedulings = vehicleSchedulingMapper.selectList(queryWrapper);
         // 此前没有调度记录，直接添加
-        TblVehicleScheduling scheduling = vehicleSchedulingConvert.toVehicleScheduling(paramVO);
+        TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
         scheduling.setId(this.idGeneratorSnowflake.snowflakeId());
         scheduling.setCreateTime(LocalDateTime.now());
         // todo scheduling.setCreateBy();
@@ -148,7 +144,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             return false;
         }
         // 1.3 剩余情况：没有这样的记录，不会冲突 或 有一条调度记录，但不是原调度，不会冲突，直接修改
-        TblVehicleScheduling scheduling = vehicleSchedulingConvert.toVehicleScheduling(paramVO);
+        TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
         scheduling.setUpdateTime(LocalDateTime.now());
         // todo tblVehicleScheduling.setUpdateBy
         QueryWrapper<TblVehicleScheduling> queryWrapper_update = new QueryWrapper<>();
@@ -192,26 +188,38 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      */
     @Override
     public List<VehicleSelectByDateResult> selectInfoAboutDri() {
+        List<VehicleSelectByDateResult> result = new ArrayList<>();
         // 获取每月司机出车情况
         List<VehicleSelectByDateResult> monthData = vehicleSchedulingMapper.selectScheAboutDir(getSelectScheAboutDirMap("monthNumber","%Y-%m"));
         // 获取每日司机出车情况
         List<VehicleSelectByDateResult> dayData = vehicleSchedulingMapper.selectScheAboutDir(getSelectScheAboutDirMap("dayNumber","%Y-%m-%d"));
-
-
-        ArrayList<Long> monthId = monthData.stream().map(VehicleSelectByDateResult::getId).collect(Collectors.toCollection(ArrayList::new));
-//        ArrayList<Long> dayId = dayData.stream().map(VehicleSelectByDateResult::getId).collect(Collectors.toCollection(ArrayList::new));
+        // 填补id在按月查时不为空，按日却为空时的数据
+        for (VehicleSelectByDateResult vehicleSelectByDateResult : dayData) {
+            int j = 0;
+            while (!monthData.get(j).getId().equals(vehicleSelectByDateResult.getId())) {
+                monthData.get(j).setDayNumber(0L);
+                j = j + 1;
+                if (monthData.get(j).getId().equals(vehicleSelectByDateResult.getId())) {
+                    break;
+                }
+            }
+            monthData.get(j).setDayNumber(vehicleSelectByDateResult.getDayNumber());
+        }
+        // 所有司机信息
         JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition("司机");
-        ArrayList<Long> allId = dataJsonResult.getData().stream().map(TblUser::getId).collect(Collectors.toCollection(ArrayList::new));
-
-        // 求差集这一步分不用做计算
-//        boolean b = allId.remove(monthId);
-//        monthId.removeAll()
-
-        //
-
-        System.out.println(monthData.toString());
-        System.out.println(dayData.toString());
-        return null;
+        List<TblUser> driverList = dataJsonResult.getData();
+        // 填补所有在职司机日月出车信息
+        for (TblUser o : driverList) {
+            result.add(getVehicleSelectByDateResult(o.getId(),o.getName(),0L,0L));
+            for (VehicleSelectByDateResult monthDatum : monthData) {
+                if (o.getId().equals(monthDatum.getId())) {
+                    result.removeIf(e->e.getId()==o.getId());
+                    result.add(getVehicleSelectByDateResult(o.getId(), o.getName(), monthDatum.getMonthNumber(), monthDatum.getDayNumber()));
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -245,5 +253,25 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             num += formatter2.format(LocalDateTime.now(ZoneId.of("+8"))) + "001";
         }
         return num;
+    }
+
+    // todo 此处可创建构造函数替代，但尚未验证构造函数的影响，待验证不影响其他功能后使用构造函数替换
+    /**
+     * @Author: liwencai
+     * @Description: 创建VehicleSelectByDateResult实例
+     * @Date: 2022/7/30
+     * @Param id:
+     * @Param attribute:
+     * @Param monthNumber:
+     * @Param dayNumber:
+     * @return: com.thtf.office.vo.VehicleSelectByDateResult
+     */
+    VehicleSelectByDateResult getVehicleSelectByDateResult(Long id,String attribute,Long monthNumber,Long dayNumber){
+        VehicleSelectByDateResult vehicleSelectByDateResult = new VehicleSelectByDateResult();
+        vehicleSelectByDateResult.setId(id);
+        vehicleSelectByDateResult.setAttribute(attribute);
+        vehicleSelectByDateResult.setMonthNumber(monthNumber);
+        vehicleSelectByDateResult.setDayNumber(dayNumber);
+        return vehicleSelectByDateResult;
     }
 }
