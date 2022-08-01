@@ -2,19 +2,24 @@ package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
-import com.thtf.office.dto.VehicleCategoryConvert;
+import com.thtf.office.dto.converter.VehicleCategoryConverter;
+import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.service.TblVehicleCategoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.office.vo.VehicleCategoryResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * <p>
@@ -28,7 +33,7 @@ import java.time.LocalDateTime;
 public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategoryMapper, TblVehicleCategory> implements TblVehicleCategoryService {
 
     @Resource
-    VehicleCategoryConvert vehicleCategoryConvert;
+    VehicleCategoryConverter vehicleCategoryConverter;
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
@@ -55,7 +60,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         log.error(String.valueOf(vehicleCategoryMapper.selectList(queryWrapper)));
         if(0 == vehicleCategoryMapper.selectList(queryWrapper).size()){
             // 名称不重复则新增
-            TblVehicleCategory vehicleCategory = vehicleCategoryConvert.toVehicleCategory(vehicleCategoryParamVO);
+            TblVehicleCategory vehicleCategory = vehicleCategoryConverter.toVehicleCategory(vehicleCategoryParamVO);
             // todo category.setCreateBy()
             vehicleCategory.setCreateTime(LocalDateTime.now());
             vehicleCategory.setId(this.idGeneratorSnowflake.snowflakeId());
@@ -111,12 +116,48 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         {
             return false;
         }
-        TblVehicleCategory category = vehicleCategoryConvert.toVehicleCategory(vehicleCategoryParamVO);
+        TblVehicleCategory category = vehicleCategoryConverter.toVehicleCategory(vehicleCategoryParamVO);
         category.setUpdateTime(LocalDateTime.now());
         // todo category.setUpdateBy()
         QueryWrapper<TblVehicleCategory> queryWrapper_update = new QueryWrapper<>();
         queryWrapper_update.isNull("delete_time").eq("id", vehicleCategoryParamVO.getId());
         return vehicleCategoryMapper.update(category, queryWrapper_update) == 1;
+    }
+
+    /**
+     * @Author: liwencai 
+     * @Description: 移除绑定车辆
+     * @Date: 2022/7/29
+     * @Param vehicleCategoryChangeBindVO: 
+     * @return: boolean 
+     */
+    @Override
+    @Transactional
+    public boolean changeBind(VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO) {
+        if(vehicleCategoryChangeBindVO.getVidList().size() == 0){
+            return true;
+        }
+        for (String vid : vehicleCategoryChangeBindVO.getVidList()) {
+            vehicleInfoMapper.changeBind(getChangeBindMap(Long.valueOf(vid),vehicleCategoryChangeBindVO.getTargetId(),vehicleCategoryChangeBindVO.getOriginId()));
+        }
+        return true;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取更新类别传参map
+     * @Date: 2022/7/29
+     * @Param vid:
+     * @Param newCid:
+     * @Param oldCid:
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getChangeBindMap(Long vid,Long newCid,Long oldCid){
+        Map<String,Object> map = new HashMap<>();
+        map.put("vid",vid);
+        map.put("newCid",newCid);
+        map.put("oldCid",oldCid);
+        return map;
     }
 
     /**
@@ -127,7 +168,14 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
      * @return: java.awt.List
      */
     @Override
-    public List<TblVehicleCategory> select(VehicleCategoryParamVO vehicleCategoryParamVO) {
-        return vehicleCategoryMapper.select(vehicleCategoryParamVO);
+    public List<VehicleCategoryResultVO> select(VehicleCategoryParamVO vehicleCategoryParamVO) {
+        List<TblVehicleCategory> vehicleCategoryList = vehicleCategoryMapper.select(vehicleCategoryParamVO);
+        List<VehicleCategoryResultVO> vehicleCategoryResultVOS = vehicleCategoryConverter.categoryListToOtherList(vehicleCategoryList);
+        for (VehicleCategoryResultVO o : vehicleCategoryResultVOS) {
+            QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
+            queryWrapper.isNull("delete_time").eq("vehicle_category_id",o.getId());
+            o.setTotalNumber(vehicleInfoMapper.selectCount(queryWrapper));
+        }
+        return vehicleCategoryResultVOS;
     }
 }

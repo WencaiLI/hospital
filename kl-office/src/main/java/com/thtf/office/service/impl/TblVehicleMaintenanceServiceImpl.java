@@ -46,6 +46,13 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
         return false;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 条件查询
+     * @Date: 2022/7/28
+     * @Param vehicleMaintenanceParamVO:
+     * @return: java.util.List<com.thtf.office.entity.TblVehicleMaintenance>
+     */
     @Override
     public List<TblVehicleMaintenance> select(VehicleMaintenanceParamVO vehicleMaintenanceParamVO) {
         return vehicleMaintenanceMapper.select(vehicleMaintenanceParamVO);

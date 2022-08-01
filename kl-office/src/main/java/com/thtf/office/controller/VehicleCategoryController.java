@@ -129,8 +129,11 @@ public class VehicleCategoryController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/changeBind")
-    public ResponseEntity<JsonResult<Boolean>> changeBind(@RequestParam VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO){
+    public ResponseEntity<JsonResult<Boolean>> changeBind(@RequestBody VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO){
         // todo 移除绑定功能待做
-        return ResponseEntity.ok(JsonResult.error("删除公车失败"));
+        if(vehicleCategoryService.changeBind(vehicleCategoryChangeBindVO)){
+            return ResponseEntity.ok(JsonResult.success(true));
+        }
+        return ResponseEntity.ok(JsonResult.error("绑定修改失败"));
     }
 }

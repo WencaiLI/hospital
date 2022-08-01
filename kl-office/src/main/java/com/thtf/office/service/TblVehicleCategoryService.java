@@ -1,8 +1,10 @@
 package com.thtf.office.service;
 
+import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.office.vo.VehicleCategoryResultVO;
 
 import java.util.List;
 
@@ -32,10 +34,11 @@ public interface TblVehicleCategoryService extends IService<TblVehicleCategory> 
      * @Param vehicleCategoryParamVO:
      * @return: java.awt.List
      */
-    List<TblVehicleCategory> select(VehicleCategoryParamVO vehicleCategoryParamVO);
+    List<VehicleCategoryResultVO> select(VehicleCategoryParamVO vehicleCategoryParamVO);
 
     boolean deleteById(Long cid);
 
-
     boolean updateSpec(VehicleCategoryParamVO vehicleCategoryParamVO);
+
+    boolean changeBind(VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO);
 }
