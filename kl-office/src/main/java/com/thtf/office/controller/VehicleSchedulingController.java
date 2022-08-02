@@ -28,9 +28,6 @@ public class VehicleSchedulingController {
     @Resource
     TblVehicleSchedulingService vehicleSchedulingService;
 
-    @Resource
-    VehicleSchedulingConverter vehicleSchedulingConverter;
-
     /**
      * @Author: liwencai
      * @Description: 新增调度记录
@@ -110,7 +107,7 @@ public class VehicleSchedulingController {
      */
     @GetMapping("/createSerialNumber")
     public ResponseEntity<JsonResult<String>> createSerialNumber() {
-        JsonResult result = new JsonResult();
+        JsonResult<String> result = new JsonResult<>();
         try {
             String num = vehicleSchedulingService.createSerialNumber();
             result.setCode(200);

@@ -1,17 +1,16 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.thtf.office.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
-import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
+import com.thtf.office.dto.converter.VehicleInfoConverter;
+import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.listener.VehicleExcelListener;
-import com.thtf.office.vo.VehicleInfoParamVO;
-import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;
+import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,19 +51,19 @@ public class VehicleInfoController {
     @Autowired
     private FileUtil fileUtil;
 
-    /**
-     * 根据token获取当前用户信息
-     * @className userBuildingData
-     * @return 当前登录用户信息
-     * @Author 邓玉磊
-     * @Date 2021/3/16 14:24
-     */
-    public UserInfo searchUserData(HttpServletRequest request){
-        // todo 获取token信息
-        String token = request.getHeader("Authorization");
-        UserInfo userInfo = adminAPI.userInfo("de786585-465b-4215-bc74-607e395554ba");
-        return userInfo;
-    }
+//    /**
+//     * 根据token获取当前用户信息
+//     * @className userBuildingData
+//     * @return 当前登录用户信息
+//     * @Author 邓玉磊
+//     * @Date 2021/3/16 14:24
+//     */
+//    public UserInfo searchUserData(HttpServletRequest request){
+//        // todo 获取token信息
+//        String token = request.getHeader("Authorization");
+//        UserInfo userInfo = adminAPI.userInfo("de786585-465b-4215-bc74-607e395554ba");
+//        return userInfo;
+//    }
 
     /**
      * @Author: liwencai
@@ -88,7 +87,7 @@ public class VehicleInfoController {
         if(vehicleInfoService.insert(vehicleInfo).get("status").equals("success")){
             return ResponseEntity.ok(JsonResult.success(true));
         }else {
-            return ResponseEntity.ok(JsonResult.error(vehicleInfoService.insert(vehicleInfo).get("msg").toString()));
+            return ResponseEntity.ok(JsonResult.error(vehicleInfoService.insert(vehicleInfo).get("errorCause").toString()));
         }
     }
 
@@ -163,9 +162,9 @@ public class VehicleInfoController {
     public ResponseEntity<JsonResult<String>> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
         JsonResult<String> result = new JsonResult<>();
         try{
-            UserInfo userDTO = searchUserData(request);
+//            UserInfo userDTO = HttpUtil.getUserInfo();
             String originalFilename = uploadFile.getOriginalFilename();
-            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, userDTO.getRealname());
+            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, null);
             result.setData(string);
             result.setStatus("success");
             result.setCode(200);

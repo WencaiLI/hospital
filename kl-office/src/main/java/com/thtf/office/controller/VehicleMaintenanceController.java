@@ -1,22 +1,15 @@
 package com.thtf.office.controller;
 
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.valid.VehicleParamValid;
-import com.thtf.office.dto.converter.VehicleMaintenanceConverter;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.service.TblVehicleMaintenanceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -34,12 +27,6 @@ public class VehicleMaintenanceController {
     @Resource
     TblVehicleMaintenanceService vehicleMaintenanceService;
 
-    @Resource
-    VehicleMaintenanceConverter vehicleMaintenanceConverter;
-
-    @Autowired
-    private IdGeneratorSnowflake idGeneratorSnowflake;
-
     /**
      * @Author: liwencai
      * @Description: 新增维保信息
@@ -49,10 +36,7 @@ public class VehicleMaintenanceController {
      */
     @PostMapping("/insert")
     public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
-        TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
-        maintenance.setCreateTime(LocalDateTime.now());
-        // todo maintenance.setCreateBy();
-        if(vehicleMaintenanceService.save(maintenance)){
+        if(vehicleMaintenanceService.insert(vehicleMaintenanceParamVO)){
             return ResponseEntity.ok(JsonResult.success(true));
         }
         return ResponseEntity.ok(JsonResult.error("新增维保信息失败"));
@@ -82,13 +66,7 @@ public class VehicleMaintenanceController {
      */
     @PutMapping("/update")
     public ResponseEntity<JsonResult<Boolean>> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
-        TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
-        maintenance.setUpdateTime(LocalDateTime.now());
-        // todo maintenance.setUpdateBy();
-        QueryWrapper<TblVehicleMaintenance> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("id",vehicleMaintenanceParamVO.getId());
-        boolean x = vehicleMaintenanceService.update(maintenance,queryWrapper);
-        if (x){
+        if (vehicleMaintenanceService.updateSpec(vehicleMaintenanceParamVO)){
             return ResponseEntity.ok(JsonResult.success(true));
         }
         return ResponseEntity.ok(JsonResult.error("修改维保消息失败"));

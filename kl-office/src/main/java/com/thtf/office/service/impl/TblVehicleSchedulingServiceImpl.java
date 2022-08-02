@@ -1,7 +1,9 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.thtf.office.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.response.JsonResult;
+import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.converter.VehicleSchedulingConverter;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
@@ -42,16 +44,19 @@ import java.util.Objects;
 public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSchedulingMapper, TblVehicleScheduling> implements TblVehicleSchedulingService {
 
     @Resource
-    TblVehicleSchedulingMapper vehicleSchedulingMapper;
+    private TblVehicleSchedulingMapper vehicleSchedulingMapper;
 
     @Resource
-    TblVehicleInfoMapper vehicleInfoMapper;
+    private TblVehicleInfoMapper vehicleInfoMapper;
 
     @Resource
-    VehicleSchedulingConverter vehicleSchedulingConverter;
+    private VehicleSchedulingConverter vehicleSchedulingConverter;
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
+
+    @Autowired
+    private AdminAPI adminAPI;
 
     /**
      * @Author: liwencai
@@ -65,7 +70,6 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
     public boolean insert(VehicleSchedulingParamVO paramVO) {
         /* 查询调度记录并看是否有违规调度（在同一辆车的调度时间上存在冲突） */
         QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        // todo 假如接入Redis做数据统计时以下代码有优化空间
         // 取最近一次的调度记录
         queryWrapper.isNull("delete_time").eq("car_number",paramVO.getCarNumber()).last("ORDER BY start_time DESC LIMIT 1");
         List<TblVehicleScheduling> schedulings = vehicleSchedulingMapper.selectList(queryWrapper);
@@ -73,12 +77,11 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
         scheduling.setId(this.idGeneratorSnowflake.snowflakeId());
         scheduling.setCreateTime(LocalDateTime.now());
-        // todo scheduling.setCreateBy();
+        scheduling.setCreateBy(getOperatorName());
         if (schedulings.size() == 0){
             return vehicleSchedulingMapper.insert(scheduling) == 1;
         }
         // 此前有调度记录，比较新调度起始时间与最近调度的结束时间比较是否冲突，不冲突则新增
-        // todo 可以返回Map记录失败具体原因
         LocalDateTime endTime = paramVO.getEndTime();
         if(Duration.between(endTime, schedulings.get(0).getStartTime()).toMillis() > 0){
             return vehicleSchedulingMapper.insert(scheduling) == 1;
@@ -93,9 +96,6 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      * @Param sid:
      * @return: boolean
      */
-    @Autowired
-    private AdminAPI adminAPI;
-
     @Override
     public boolean deleteById(Long sid) {
         LocalDateTime now = LocalDateTime.now();
@@ -110,12 +110,13 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             Map<String,Object> map = new HashMap<>();
             map.put("vid",scheduling.getVehicleInfoId());
             map.put("status",0);
-            map.put("updateBy",null);
-            return vehicleInfoMapper.changeVehicleStatus(map) == 1;
+            map.put("updateBy",getOperatorName());
+            // 修改公车状态为待命中
+            vehicleInfoMapper.changeVehicleStatus(map);
         }
         // 2 调度已经结束时
         scheduling.setDeleteTime(LocalDateTime.now());
-        //todo scheduling.setDeleteBy();
+        scheduling.setDeleteBy(getOperatorName());
         QueryWrapper<TblVehicleScheduling> queryWrapper_delete = new QueryWrapper<>();
         queryWrapper_delete.isNull("delete_time").eq("id",sid);
         return vehicleSchedulingMapper.update(scheduling,queryWrapper_delete) == 1;
@@ -164,22 +165,6 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         return vehicleSchedulingMapper.select(paramVO);
     }
 
-//    /**
-//     * @Author: liwencai
-//     * @Description: 查询司机
-//     * @Date: 2022/7/29
-//     * @Param positionTitle:
-//     * @return: java.util.List<com.thtf.office.dto.TblUserScheduleDTO>
-//     */
-//    @Override
-//    public List<TblUser> findDriverForSchedule(String positionTitle) {
-//        //获取外部接口人员数据
-//        JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition(positionTitle);
-//        List<TblUser> data = dataJsonResult.getData();
-//        //组装人员信息及出车次数信息
-//        return data;
-//    }
-
     /**
      * @Author: liwencai
      * @Description: 查询待命状态的司机的日、月出车情况
@@ -213,7 +198,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             result.add(getVehicleSelectByDateResult(o.getId(),o.getName(),0L,0L));
             for (VehicleSelectByDateResult monthDatum : monthData) {
                 if (o.getId().equals(monthDatum.getId())) {
-                    result.removeIf(e->e.getId()==o.getId());
+                    result.removeIf(e-> e.getId().equals(o.getId()));
                     result.add(getVehicleSelectByDateResult(o.getId(), o.getName(), monthDatum.getMonthNumber(), monthDatum.getDayNumber()));
                     break;
                 }
@@ -222,20 +207,6 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         return result;
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 查询待命状态的司机的日、月出车情况的传参Map
-     * @Date: 2022/7/29
-     * @Param numberType: 每月：monthNumber 每日：dayNumber
-     * @Param dateTemplate: 每月："%Y-%m" 每日："%Y-%m-%d"
-     * @return: java.util.Map<java.lang.String,java.lang.Object>
-     */
-    Map<String,Object> getSelectScheAboutDirMap(String numberType,String dateTemplate) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("numberType", numberType);
-        map.put("dateTemplate", dateTemplate);
-        return map;
-    }
     @Override
     public String createSerialNumber() {
         ResponseEntity<JsonResult<List<TblBasicData>>> datas = adminAPI.searchBasicDataByType(30);
@@ -255,7 +226,6 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         return num;
     }
 
-    // todo 此处可创建构造函数替代，但尚未验证构造函数的影响，待验证不影响其他功能后使用构造函数替换
     /**
      * @Author: liwencai
      * @Description: 创建VehicleSelectByDateResult实例
@@ -273,5 +243,35 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         vehicleSelectByDateResult.setMonthNumber(monthNumber);
         vehicleSelectByDateResult.setDayNumber(dayNumber);
         return vehicleSelectByDateResult;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询待命状态的司机的日、月出车情况的传参Map
+     * @Date: 2022/7/29
+     * @Param numberType: 每月：monthNumber 每日：dayNumber
+     * @Param dateTemplate: 每月："%Y-%m" 每日："%Y-%m-%d"
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getSelectScheAboutDirMap(String numberType,String dateTemplate) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("numberType", numberType);
+        map.put("dateTemplate", dateTemplate);
+        return map;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取操作人姓名
+     * @Date: 2022/8/2
+     * @return: null
+     */
+    public String getOperatorName(){
+        String realName = null;
+        UserInfo userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        if(null !=  userInfo){
+            realName = userInfo.getRealname();
+        }
+        return realName;
     }
 }

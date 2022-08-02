@@ -3,7 +3,6 @@ package com.thtf.office.service;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
-
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import java.util.Map;
  */
 public interface VehicleStatisticsService {
 
-    List<VehicleStatisticsResultVO> getVehicleStatus();
+    List<VehicleStatisticsResultVO> getVehicleStatus(Map<String,Object> map);
 
     List<VehicleStatisticsResultVO> getVehicleCategory(VehicleStatisticsParamVO paramVO);
 

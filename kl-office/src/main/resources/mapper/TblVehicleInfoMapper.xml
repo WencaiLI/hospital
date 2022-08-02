@@ -36,10 +36,13 @@
     <!-- 车辆调度状态实时统计
     状态：0->待命中 1->出车中 2->维修中 3->已淘汰（该状态不参与统计） 排序按状态升序
     注意：数据库中某状态没有数据时无法统计 -->
-    <select id="getVehicleStatus" resultType="com.thtf.office.vo.VehicleStatisticsResultVO">
+    <select id="getVehicleStatus" parameterType="java.util.Map" resultType="com.thtf.office.vo.VehicleStatisticsResultVO">
         select count(*) as number,(case when (status = 0 ) then '待命中' when (status = 1 ) then '出车中' when (status = 2 ) then '维修中' else status end) as attribute
         from tbl_vehicle_info
         where delete_time is null
+        <if test="cid != null">
+            and  vehicle_category_id = #{cid}
+        </if>
         group by status
         order by status desc
 

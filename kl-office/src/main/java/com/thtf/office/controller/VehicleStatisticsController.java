@@ -33,7 +33,7 @@ public class VehicleStatisticsController {
      */
     @GetMapping("/vehicleStatus")
     public ResponseEntity<JsonResult<List<VehicleStatisticsResultVO>>> getVehicleStatus(){
-        return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getVehicleStatus()));
+        return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getVehicleStatus(null)));
     }
 
     /**
