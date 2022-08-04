@@ -1,15 +1,12 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.thtf.common.log.OperateLog;
-import com.thtf.common.log.OperateType;
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.entity.TblVehicleInfo;
-import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.listener.VehicleExcelListener;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleInfoParamVO;
