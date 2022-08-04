@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -67,10 +68,12 @@ public class VehicleInfoController {
         paramVO.setDrivingBookImage(bookImageFileNameAndUrl[0]);
         paramVO.setDrivingBookImageUrl(bookImageFileNameAndUrl[1]);
         TblVehicleInfo vehicleInfo = vehicleInfoConverter.toVehicleInfo(paramVO);
-        if(vehicleInfoService.insert(vehicleInfo).get("status").equals("success")){
+
+        Map<String, Object> result = vehicleInfoService.insert(vehicleInfo);
+        if(result.get("status").equals("success")){
             return ResponseEntity.ok(JsonResult.success(true));
         }else {
-            return ResponseEntity.ok(JsonResult.error(vehicleInfoService.insert(vehicleInfo).get("errorCause").toString()));
+            return ResponseEntity.ok(JsonResult.error(result.get("errorCause").toString()));
         }
     }
 
@@ -130,6 +133,18 @@ public class VehicleInfoController {
     @PostMapping("/select")
     public ResponseEntity<JsonResult<List<TblVehicleInfo>>> select(@RequestBody VehicleInfoParamVO paramVO){
         return ResponseEntity.ok(JsonResult.success(vehicleInfoService.select(paramVO)));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 关键词模糊查询
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List<com.thtf.office.entity.TblVehicleInfo>>>
+     */
+    @GetMapping("/selectByKey")
+    public ResponseEntity<JsonResult<List<TblVehicleInfo>>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
+        return ResponseEntity.ok(JsonResult.success(vehicleInfoService.selectByKey(keywords)));
     }
 
     /**

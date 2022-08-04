@@ -93,6 +93,13 @@
         group by info.car_number
         order by id
     </select>
+    <!-- 关键词模糊查询 -->
+    <select id="selectByKey" resultType="com.thtf.office.entity.TblVehicleInfo">
+        select *
+        from tbl_vehicle_info
+        where delete_time is null
+        and (id like concat('%',#{keywords},'%') or car_number like concat('%',#{keywords},'%') or description like concat('%',#{keywords},'%'))
+    </select>
 
     <!-- 更新公车的类别 -->
     <update id="changeBind" parameterType="java.util.Map">

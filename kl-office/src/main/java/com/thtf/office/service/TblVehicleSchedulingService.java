@@ -7,6 +7,7 @@ import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -22,9 +23,9 @@ public interface TblVehicleSchedulingService extends IService<TblVehicleScheduli
 
     List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO);
 
-    boolean insert(VehicleSchedulingParamVO paramVO);
+    Map<String, Object> insert(VehicleSchedulingParamVO paramVO);
 
-    boolean updateSpec(VehicleSchedulingParamVO paramVO);
+    Map<String, Object> updateSpec(VehicleSchedulingParamVO paramVO);
 
     List<VehicleSelectByDateResult> selectInfoAboutDri();
 

@@ -82,4 +82,12 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
 
     Integer changeBind(Map<String,Object> map);
 
+    /**
+     * @Author: liwencai
+     * @Description: 模糊查询
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: java.util.List<com.thtf.office.entity.TblVehicleInfo>
+     */
+    List<TblVehicleInfo> selectByKey(@Param("keywords") String keywords);
 }

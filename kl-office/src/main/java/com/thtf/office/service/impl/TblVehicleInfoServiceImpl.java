@@ -222,7 +222,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         if(schedulings.size()>=1){
             // 修改该公车为出车中状态
             for (TblVehicleScheduling tblVehicleScheduling : schedulings) {
-                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,null));
+                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,getOperatorName()));
             }
         }
         // 查询所有处在出车中和待命中的车
@@ -249,6 +249,19 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Override
     public List<TblVehicleInfo> select(VehicleInfoParamVO paramVO) {
         return vehicleInfoMapper.select(paramVO);
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 关键词模糊查询
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: java.lang.Object
+     */
+    @Override
+    public List<TblVehicleInfo> selectByKey(String keywords) {
+       return vehicleInfoMapper.selectByKey(keywords);
     }
 
     /**
@@ -476,7 +489,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @Param updateBy:
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
-    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,Long updateBy){
+    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,String updateBy){
         Map<String,Object> map = new HashMap<>();
         map.put("vid", vehicleId);
         map.put("status",newStatus);

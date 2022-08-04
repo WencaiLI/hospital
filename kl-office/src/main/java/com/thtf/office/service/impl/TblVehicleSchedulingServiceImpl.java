@@ -16,6 +16,7 @@ import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.service.TblVehicleSchedulingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.office.vo.VehicleSelectByDateResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ import java.util.Objects;
  * @since 2022-07-26
  */
 @Service
+@Slf4j
 public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSchedulingMapper, TblVehicleScheduling> implements TblVehicleSchedulingService {
 
     @Resource
@@ -67,26 +69,53 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      */
     @Override
     @Transactional
-    public boolean insert(VehicleSchedulingParamVO paramVO) {
-        /* 查询调度记录并看是否有违规调度（在同一辆车的调度时间上存在冲突） */
-        QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        // 取最近一次的调度记录
-        queryWrapper.isNull("delete_time").eq("car_number",paramVO.getCarNumber()).last("ORDER BY start_time DESC LIMIT 1");
-        List<TblVehicleScheduling> schedulings = vehicleSchedulingMapper.selectList(queryWrapper);
-        // 此前没有调度记录，直接添加
+    public Map<String, Object> insert(VehicleSchedulingParamVO paramVO) {
+
+        /* 查询这么一种调度：它的调度时间处于新增调度之间 */
+        QueryWrapper<TblVehicleScheduling> queryWrapper_1 = new QueryWrapper<>();
+        queryWrapper_1.isNull("delete_time").eq("car_number",paramVO.getCarNumber()).ge("start_time",paramVO.getStartTime()).le("end_time",paramVO.getEndTime());
+        List<TblVehicleScheduling> conflictSchedulingList_1 = vehicleSchedulingMapper.selectList(queryWrapper_1);
+
+        if(conflictSchedulingList_1.size() > 0){
+            log.warn("存在调度处于调度时间段之间，调度时间冲突");
+            return getServiceResultMap("error","存在调度处于调度时间段之间，调度时间冲突",null);
+        }
+
+        /* 查询这么两种情况的调度：
+         * 第一种；新增的调度的开始时间处于它的调度时间范围内；
+         * 第二中调度：新增的调度的结束时间出它的调度时间内
+         */
+        QueryWrapper<TblVehicleScheduling> queryWrapper_2 = new QueryWrapper<>();
+        queryWrapper_2.isNull("delete_time").eq("car_number",paramVO.getCarNumber())
+                .and(x->x.and(e->e.lt("start_time",paramVO.getStartTime()).gt("end_time",paramVO.getStartTime()))
+                        .or(e->e.lt("start_time",paramVO.getEndTime()).gt("end_time",paramVO.getEndTime())));
+        List<TblVehicleScheduling> conflictSchedulingList_2 = vehicleSchedulingMapper.selectList(queryWrapper_2);
+        if(conflictSchedulingList_2.size() > 0){
+            log.warn("新增的调度信息的开始时间或结束时间处于别的调度中间");
+            return getServiceResultMap("error","新增的调度信息的开始时间或结束时间处于别的调度中间",null);
+        }
+
+        /* Bean映射 */
         TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
         scheduling.setId(this.idGeneratorSnowflake.snowflakeId());
         scheduling.setCreateTime(LocalDateTime.now());
         scheduling.setCreateBy(getOperatorName());
-        if (schedulings.size() == 0){
-            return vehicleSchedulingMapper.insert(scheduling) == 1;
+
+        /* 如果该调度的开始时间小于系统时间，结束时间大于系统时间，将公车状态修改为出车中 */
+        LocalDateTime nowTime= LocalDateTime.now();
+        if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
+            Map<String,Object> map = new HashMap<>();
+            map.put("vid", paramVO.getVehicleInfoId());
+            map.put("status",1);
+            map.put("updateBy",getOperatorName());
+            vehicleInfoMapper.changeVehicleStatus(map);
+            log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
         }
-        // 此前有调度记录，比较新调度起始时间与最近调度的结束时间比较是否冲突，不冲突则新增
-        LocalDateTime endTime = paramVO.getEndTime();
-        if(Duration.between(endTime, schedulings.get(0).getStartTime()).toMillis() > 0){
-            return vehicleSchedulingMapper.insert(scheduling) == 1;
+        if(vehicleSchedulingMapper.insert(scheduling) == 1){
+            return getServiceResultMap("success",null,null);
+        }else {
+            return getServiceResultMap("error","新增调度信息失败",null);
         }
-        return false;
     }
 
     /**
@@ -130,27 +159,58 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      * @return: boolean
      */
     @Override
-    public boolean updateSpec(VehicleSchedulingParamVO paramVO) {
-        /* 修改业务逻辑 假定：开始时间不能改变 */
-        // 1、查询是否有这么一个调度：它的调度结束时间在新调度的开始时间与结束时间之间
-        QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").between("end_time",paramVO.getStartTime(),paramVO.getEndTime());
-        List<TblVehicleScheduling> schedulings = vehicleSchedulingMapper.selectList(queryWrapper);
-        // 1.1 假如有多条调度记录，返回false
-        if(schedulings.size() > 1){
-            return false;
+    @Transactional
+    public Map<String, Object> updateSpec(VehicleSchedulingParamVO paramVO) {
+
+        /* 查询这么一种调度：它的调度时间处于新增调度之间(除去自身) */
+        QueryWrapper<TblVehicleScheduling> queryWrapper_1 = new QueryWrapper<>();
+        queryWrapper_1.isNull("delete_time").eq("car_number",paramVO.getCarNumber())
+                .ne("id",paramVO.getId())
+                .ge("start_time",paramVO.getStartTime())
+                .le("end_time",paramVO.getEndTime());
+        List<TblVehicleScheduling> conflictSchedulingList_1 = vehicleSchedulingMapper.selectList(queryWrapper_1);
+        if(conflictSchedulingList_1.size() > 0){
+            log.warn("存在调度处于调度时间段之间，调度时间冲突");
+            return getServiceResultMap("error","存在调度处于调度时间段之间，调度时间冲突",null);
         }
-        // 1.2 假如有一条调度记录，且不是原调度，则调度冲突，返回false
-        if (schedulings.size() == 1 && !schedulings.get(0).getId().equals(paramVO.getId())){
-            return false;
+
+        /* 查询这么两种情况的调度(除去自身)：
+         * 第一种；新增的调度的开始时间处于它的调度时间范围内；
+         * 第二中调度：新增的调度的结束时间出它的调度时间内
+         */
+        QueryWrapper<TblVehicleScheduling> queryWrapper_2 = new QueryWrapper<>();
+        queryWrapper_2.isNull("delete_time").eq("car_number",paramVO.getCarNumber())
+                .ne("id",paramVO.getId())
+                .and(e->e.and(x->x.lt("start_time",paramVO.getStartTime()).gt("end_time",paramVO.getStartTime()))
+                        .or(x->x.lt("start_time",paramVO.getEndTime()).gt("end_time",paramVO.getEndTime())));
+        List<TblVehicleScheduling> conflictSchedulingList_2 = vehicleSchedulingMapper.selectList(queryWrapper_2);
+        if(conflictSchedulingList_2.size() > 0){
+            log.warn("新增的调度信息的开始时间或结束时间处于别的调度中间");
+            return getServiceResultMap("error","新增的调度信息的开始时间或结束时间处于别的调度中间",null);
         }
-        // 1.3 剩余情况：没有这样的记录，不会冲突 或 有一条调度记录，但不是原调度，不会冲突，直接修改
+
+        /* 如果该调度的开始时间小于系统时间，结束时间大于系统时间，将公车状态修改为出车中 */
+        LocalDateTime nowTime= LocalDateTime.now();
+        if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
+            Map<String,Object> map = new HashMap<>();
+            map.put("vid", paramVO.getVehicleInfoId());
+            map.put("status",1);
+            map.put("updateBy",getOperatorName());
+            vehicleInfoMapper.changeVehicleStatus(map);
+            log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
+        }
+
+        /* 修改信息 */
         TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
         scheduling.setUpdateTime(LocalDateTime.now());
-        // todo tblVehicleScheduling.setUpdateBy
+        scheduling.setUpdateBy(getOperatorName());
         QueryWrapper<TblVehicleScheduling> queryWrapper_update = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("id",paramVO.getId());
-        return vehicleSchedulingMapper.update(scheduling,queryWrapper_update) == 1;
+        queryWrapper_update.isNull("delete_time").eq("id",paramVO.getId());
+        if(vehicleSchedulingMapper.update(scheduling,queryWrapper_update) == 1){
+            return getServiceResultMap("success",null,null);
+        }else {
+            return getServiceResultMap("error","新增调度信息失败",null);
+        }
     }
 
     /**
@@ -283,5 +343,22 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             realName = userInfo.getRealname();
         }
         return realName;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: service层结果集封装，需要在service层返回controller层详细信息时使用
+     * @Date: 2022/7/31
+     * @Param status:
+     * @Param msg:
+     * @Param result:
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    Map<String,Object> getServiceResultMap(String status,String errorCause,Object result){
+        Map<String,Object> map = new HashMap<>();
+        map.put("status",status);
+        map.put("errorCause",errorCause);
+        map.put("result",result);
+        return map;
     }
 }

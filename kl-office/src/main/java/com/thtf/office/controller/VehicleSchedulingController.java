@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -43,10 +44,12 @@ public class VehicleSchedulingController {
      */
     @PostMapping("/insert")
     public ResponseEntity<JsonResult<Boolean>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleSchedulingParamVO paramVO){
-        if(vehicleSchedulingService.insert(paramVO)){
+        Map<String, Object> resultMap = vehicleSchedulingService.insert(paramVO);
+        if(resultMap.get("status").equals("error")){
+            return ResponseEntity.ok(JsonResult.error(resultMap.get("errorCause").toString()));
+        }else {
             return ResponseEntity.ok(JsonResult.success(true));
         }
-        return ResponseEntity.ok(JsonResult.error("新增调度记录失败"));
     }
 
     /**
@@ -73,10 +76,12 @@ public class VehicleSchedulingController {
      */
     @PutMapping("/update")
     public ResponseEntity<JsonResult<Boolean>> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleSchedulingParamVO paramVO){
-        if(vehicleSchedulingService.updateSpec(paramVO)){
+        Map<String, Object> resultMap = vehicleSchedulingService.updateSpec(paramVO);
+        if(resultMap.get("status").equals("error")){
+            return ResponseEntity.ok(JsonResult.error(resultMap.get("errorCause").toString()));
+        }else {
             return ResponseEntity.ok(JsonResult.success(true));
         }
-        return ResponseEntity.ok(JsonResult.error("新增调度记录失败"));
     }
 
     /**
@@ -113,19 +118,12 @@ public class VehicleSchedulingController {
      */
     @GetMapping("/createSerialNumber")
     public ResponseEntity<JsonResult<String>> createSerialNumber() {
-        JsonResult<String> result = new JsonResult<>();
         try {
             String num = vehicleSchedulingService.createSerialNumber();
-            result.setCode(200);
-            result.setData(num);
-            result.setStatus("success");
+            return ResponseEntity.ok(JsonResult.success(num));
         } catch (Exception e) {
-            e.printStackTrace();
-            result.setData(e.getClass().getName() + ":" + e.getMessage());
-            result.setStatus("error");
-            result.setCode(500);
+            return ResponseEntity.ok(JsonResult.error("流水号生成失败！"));
         }
-        return ResponseEntity.ok(result);
     }
 
     /**
