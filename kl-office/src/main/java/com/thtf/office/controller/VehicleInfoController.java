@@ -44,28 +44,12 @@ public class VehicleInfoController {
 
     @Resource
     TblVehicleInfoService vehicleInfoService;
+
     @Resource
     VehicleInfoConverter vehicleInfoConverter;
 
     @Autowired
-    private AdminAPI adminAPI;
-
-    @Autowired
     private FileUtil fileUtil;
-
-//    /**
-//     * 根据token获取当前用户信息
-//     * @className userBuildingData
-//     * @return 当前登录用户信息
-//     * @Author 邓玉磊
-//     * @Date 2021/3/16 14:24
-//     */
-//    public UserInfo searchUserData(HttpServletRequest request){
-//        // todo 获取token信息
-//        String token = request.getHeader("Authorization");
-//        UserInfo userInfo = adminAPI.userInfo("de786585-465b-4215-bc74-607e395554ba");
-//        return userInfo;
-//    }
 
     /**
      * @Author: liwencai
@@ -75,7 +59,6 @@ public class VehicleInfoController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    @OperateLog(systemCode = "111",systemName = "ddd",content = "ccc",operatePage = "ccc",operateType = OperateType.INSERT)
     public ResponseEntity<JsonResult<Boolean>> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
