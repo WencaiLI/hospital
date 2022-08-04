@@ -1,12 +1,15 @@
 package com.thtf.office.controller;
 
+import com.thtf.office.common.dto.adminserver.TblOrganizationDTO;
+import com.thtf.office.common.entity.adminserver.TblUser;
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
-import com.thtf.office.dto.converter.VehicleSchedulingConverter;
+import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +30,9 @@ public class VehicleSchedulingController {
 
     @Resource
     TblVehicleSchedulingService vehicleSchedulingService;
+
+    @Autowired
+    AdminAPI adminAPI;
 
     /**
      * @Author: liwencai
@@ -120,5 +126,28 @@ public class VehicleSchedulingController {
             result.setCode(500);
         }
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询所有部门信息
+     * @Date: 2022/8/3
+     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List<com.thtf.office.common.dto.adminserver.TblOrganizationDTO>>>
+     */
+    @GetMapping("/findOrganizationTree")
+    ResponseEntity<JsonResult<List<TblOrganizationDTO>>> findOrganizationTree(){
+        return ResponseEntity.ok(adminAPI.findOrganizationTree());
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 通过组织编码查询用户信息
+     * @Date: 2022/8/3
+     * @Param organizationCode:
+     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List<com.thtf.office.common.entity.adminserver.TblUser>>>
+     */
+    @GetMapping("/searchUserByOrganization")
+    ResponseEntity<JsonResult<List<TblUser>>> searchUserByOrganization(@RequestParam(value = "organizationCode") String organizationCode){
+        return adminAPI.searchUserByOrganization(organizationCode);
     }
 }

@@ -1,6 +1,8 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.thtf.common.log.OperateLog;
+import com.thtf.common.log.OperateType;
 import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
@@ -73,6 +75,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
+    @OperateLog(systemCode = "111",systemName = "ddd",content = "ccc",operatePage = "ccc",operateType = OperateType.INSERT)
     public ResponseEntity<JsonResult<Boolean>> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 

@@ -1,14 +1,10 @@
 package com.thtf.office.common.util;
 
-import com.thtf.office.common.dto.adminserver.UserInfo;
-import com.thtf.office.feign.AdminAPI;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 /**
  * @Auther: liwencai
@@ -25,8 +21,7 @@ public class HttpUtil {
      * @return: javax.servlet.http.HttpServletRequest
      */
     public static HttpServletRequest getRequest() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        return request;
+        return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
     }
     /**
      * @Author: liwencai

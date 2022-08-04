@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -87,6 +88,7 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
      * @return: boolean
      */
     @Override
+    @Transactional
     public boolean updateSpec(VehicleMaintenanceParamVO vehicleMaintenanceParamVO) {
         TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
         maintenance.setUpdateTime(LocalDateTime.now());

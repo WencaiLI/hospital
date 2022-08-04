@@ -190,6 +190,16 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             }
             monthData.get(j).setDayNumber(vehicleSelectByDateResult.getDayNumber());
         }
+
+        // 每日为数据为null时补0
+        monthData.forEach(e->{
+            if(e.getDayNumber() == null){
+                e.setDayNumber(0L);
+            }
+        });
+
+
+
         // 所有司机信息
         JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition("司机");
         List<TblUser> driverList = dataJsonResult.getData();
