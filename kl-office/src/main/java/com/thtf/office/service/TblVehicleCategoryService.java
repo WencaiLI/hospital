@@ -1,5 +1,6 @@
 package com.thtf.office.service;
 
+import com.thtf.office.dto.SelectAllInfoResultDTO;
 import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
@@ -7,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.office.vo.VehicleCategoryResultVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,7 +27,7 @@ public interface TblVehicleCategoryService extends IService<TblVehicleCategory> 
      * @Param vehicleCategoryParamVO:
      * @return: java.lang.Boolean
      */
-    Boolean insert(VehicleCategoryParamVO vehicleCategoryParamVO);
+    Map<String,Object> insert(VehicleCategoryParamVO vehicleCategoryParamVO);
 
     /**
      * @Author: liwencai
@@ -41,4 +43,6 @@ public interface TblVehicleCategoryService extends IService<TblVehicleCategory> 
     boolean updateSpec(VehicleCategoryParamVO vehicleCategoryParamVO);
 
     boolean changeBind(VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO);
+
+    List<SelectAllInfoResultDTO> selectInfoNumberByCategory();
 }

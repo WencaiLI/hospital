@@ -26,4 +26,7 @@ public class VehicleCategoryChangeBindVO implements Serializable {
 
     @JsonSerialize(using = ToStringSerializer.class)
     private List<String> vidList;     // 需要移除的公车id集
+    @JsonSerialize(using = ToStringSerializer.class)
+    @NotNull
+    private Integer type;
 }
