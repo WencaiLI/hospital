@@ -1,7 +1,10 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.thtf.common.dto.adminserver.UserInfo;
+import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
 import com.thtf.office.dto.converter.VehicleCategoryConverter;
 import com.thtf.office.entity.TblVehicleInfo;
@@ -13,10 +16,12 @@ import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.service.TblVehicleCategoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.office.vo.VehicleCategoryResultVO;
+import com.thtf.office.vo.VehicleStatisticsResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.time.LocalDateTime;

@@ -1,10 +1,7 @@
 package com.thtf.office.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.common.response.JsonResult;
-import com.thtf.common.util.IdGeneratorSnowflake;
-import com.thtf.office.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;

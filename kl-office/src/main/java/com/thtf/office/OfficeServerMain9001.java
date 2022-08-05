@@ -9,12 +9,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
-@SpringBootApplication(scanBasePackages = {"com.thtf.office", "com.thtf.office.common"})
+@SpringBootApplication
 @EnableDiscoveryClient
 @MapperScan("com.thtf.office.mapper")
 @EnableTransactionManagement
-@EnableFeignClients
-@ComponentScan(basePackages ={"com.thtf.common"})
+@EnableFeignClients("com.thtf.common")
+@ComponentScan(basePackages = {"com.thtf.office","com.thtf.common"})
 public class OfficeServerMain9001 {
     public static void main(String[] args) {
         SpringApplication.run(OfficeServerMain9001.class, args);

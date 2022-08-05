@@ -1,10 +1,6 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.common.util.FileUtil;
-import com.thtf.common.dto.adminserver.UserInfo;
-import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
@@ -13,9 +9,7 @@ import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.listener.VehicleExcelListener;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
-import com.thtf.office.listener.VehicleExcelListener;
 import com.thtf.office.service.TblVehicleInfoService;
-import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,15 +163,11 @@ public class VehicleInfoController {
         try{
 //            UserInfo userDTO = HttpUtil.getUserInfo();
             String originalFilename = uploadFile.getOriginalFilename();
-            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, userDTO.getRealname());
+            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, null);
             return JsonResult.success(string);
 //            result.setData(string);
 //            result.setStatus("success");
 //            result.setCode(200);
-            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, null);
-            result.setData(string);
-            result.setStatus("success");
-            result.setCode(200);
         } catch (Exception e){
             log.error(e.getClass().getName() + ":" + e.getMessage());
             return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
