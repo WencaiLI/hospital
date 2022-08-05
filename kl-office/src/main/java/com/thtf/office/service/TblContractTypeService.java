@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.thtf.office.common.response.PageResult;
+import com.thtf.common.response.PageResult;
 import com.thtf.office.entity.TblContractType;
 
 

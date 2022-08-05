@@ -1,7 +1,7 @@
 package com.thtf.office.service.impl;
 
-import com.thtf.office.common.response.PageResult;
-import com.thtf.office.common.util.PageUtil;
+import com.thtf.common.response.PageResult;
+import com.thtf.common.util.PageUtil;
 import com.thtf.office.entity.TblContractRemind;
 import com.thtf.office.mapper.TblContractRemindMapper;
 import com.thtf.office.service.TblContractRemindService;

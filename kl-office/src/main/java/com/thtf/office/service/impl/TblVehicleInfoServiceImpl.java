@@ -1,15 +1,15 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.dto.adminserver.UserInfo;
+import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.util.HttpUtil;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.SplitListUtil;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.entity.TblVehicleScheduling;
-import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;

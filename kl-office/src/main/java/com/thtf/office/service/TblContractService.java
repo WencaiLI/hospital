@@ -3,7 +3,7 @@ package com.thtf.office.service;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.thtf.office.common.response.PageResult;
+import com.thtf.common.response.PageResult;
 import com.thtf.office.dto.TblContractDTO;
 import com.thtf.office.dto.TblContractRemindDTO;
 import com.thtf.office.entity.TblContract;

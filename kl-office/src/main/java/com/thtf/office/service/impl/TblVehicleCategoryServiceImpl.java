@@ -1,13 +1,13 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.dto.adminserver.UserInfo;
+import com.thtf.common.dto.adminserver.UserInfo;
+import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.HttpUtil;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
 import com.thtf.office.dto.converter.VehicleCategoryConverter;
 import com.thtf.office.entity.TblVehicleInfo;
-import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
@@ -158,10 +158,10 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
     }
 
     /**
-     * @Author: liwencai 
+     * @Author: liwencai
      * @Description: 查询所有类别对应的各个公车的数量（以公车状态）
      * @Date: 2022/8/2
-     * @return: java.util.List<com.thtf.office.dto.SelectAllInfoResultDTO> 
+     * @return: java.util.List<com.thtf.office.dto.SelectAllInfoResultDTO>
      */
     @Override
     public List<SelectAllInfoResultDTO> selectInfoNumberByCategory() {
