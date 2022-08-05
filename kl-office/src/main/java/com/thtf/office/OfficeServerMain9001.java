@@ -1,12 +1,11 @@
 package com.thtf.office;
 
-import com.thtf.office.common.annotation.EnableIbsFeignClients;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan("com.thtf.office.mapper")
 @EnableTransactionManagement
 @EnableFeignClients
+@ComponentScan(basePackages ={"com.thtf.common"})
 public class OfficeServerMain9001 {
     public static void main(String[] args) {
         SpringApplication.run(OfficeServerMain9001.class, args);

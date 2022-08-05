@@ -1,7 +1,7 @@
 package com.thtf.office.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.response.JsonResult;
+import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;

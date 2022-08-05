@@ -1,6 +1,6 @@
 package com.thtf.office.controller;
 
-import com.thtf.office.common.response.JsonResult;
+import com.thtf.common.response.JsonResult;
 import com.thtf.office.service.*;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;

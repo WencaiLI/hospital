@@ -1,13 +1,13 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
+import com.thtf.common.entity.adminserver.TblBasicData;
+import com.thtf.common.entity.adminserver.TblUser;
+import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.response.JsonResult;
+import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.converter.VehicleSchedulingConverter;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
-import com.thtf.office.common.entity.adminserver.TblBasicData;
-import com.thtf.office.common.entity.adminserver.TblUser;
-import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;

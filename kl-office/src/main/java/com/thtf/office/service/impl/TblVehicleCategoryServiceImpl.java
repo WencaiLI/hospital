@@ -1,7 +1,7 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
+import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.converter.VehicleCategoryConverter;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.vo.VehicleCategoryChangeBindVO;

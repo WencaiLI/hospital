@@ -1,7 +1,7 @@
 package com.thtf.office.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.thtf.office.common.response.PageResult;
+import com.thtf.common.response.PageResult;
 import com.thtf.office.entity.TblContractRemind;
 
 

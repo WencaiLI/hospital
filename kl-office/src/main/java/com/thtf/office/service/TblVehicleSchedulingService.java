@@ -2,8 +2,6 @@ package com.thtf.office.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.thtf.office.common.dto.adminserver.TblUserScheduleDTO;
-import com.thtf.office.common.entity.adminserver.TblUser;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
