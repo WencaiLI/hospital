@@ -46,11 +46,12 @@
             </if>
         </where>
     </select>
-    <!-- 按日、月查询司机的每周月的出车情况 -->
+    <!-- 按日、月查询空闲司机的每周月的出车情况 -->
     <select id="selectScheAboutDir" parameterType="java.util.Map" resultType="com.thtf.office.vo.VehicleSelectByDateResult">
         	select driver_id as id , driver_name as attribute,count(*) as ${numberType}
             from tbl_vehicle_scheduling as scheduling
             where scheduling.delete_time is null and DATE_FORMAT(end_time, #{dateTemplate}) = DATE_FORMAT(NOW(), #{dateTemplate})
+            and driver_id not in (select distinct driver_id from tbl_vehicle_scheduling where start_time &lt; NOW() and now() &lt; end_time )
             group by driver_id
     </select>
 </mapper>

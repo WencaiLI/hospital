@@ -1,12 +1,15 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.office.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
+import com.thtf.office.common.util.HttpUtil;
+import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.SplitListUtil;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.entity.TblVehicleScheduling;
+import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.entity.TblVehicleCategory;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;
@@ -60,6 +63,9 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Autowired
     TblVehicleCategoryMapper vehicleCategoryMapper;
 
+    @Autowired
+    AdminAPI adminAPI;
+
     /**
      * 实时统计导入进度最大100
      */
@@ -68,9 +74,9 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     /**
      * @Author: liwencai
      * @Description: 新增公车信息
-     * @Date: 2022/7/27
+     * @Date: 2022/8/2
      * @Param vehicleInfo:
-     * @return: boolean
+     * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
     @Override
     @Transactional
@@ -86,7 +92,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         vehicleInfo.setId(this.idGeneratorSnowflake.snowflakeId());
         vehicleInfo.setStatus(0);
         vehicleInfo.setCreateTime(LocalDateTime.now());
-        // todo vehicleInfo.setCreateBy()
+        vehicleInfo.setCreateBy(getOperatorName());
         if(vehicleInfoMapper.insert(vehicleInfo) == 1){
             return getServiceResultMap("success",null,null);
         }
@@ -164,7 +170,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         TblVehicleInfo vehicleInfo = vehicleInfoMapper.selectById(vid);
         if(null != vehicleInfo){
             vehicleInfo.setDeleteTime(LocalDateTime.now());
-            // todo vehicleInfo.setDeleteBy();
+            vehicleInfo.setDeleteBy(getOperatorName());
             QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
             queryWrapper.isNull("delete_time").eq("id",vid);
             return vehicleInfoMapper.update(vehicleInfo,queryWrapper) == 1;
@@ -182,25 +188,20 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Override
     @Transactional
     public boolean updateSpec(VehicleInfoParamVO paramVO) {
-        System.out.println(paramVO.toString());
         QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("car_number",paramVO.getCarNumber());
+        queryWrapper.isNull("delete_time").eq("car_number",paramVO.getCarNumber()).ne("id",paramVO.getId());
         List<TblVehicleInfo> infoList = vehicleInfoMapper.selectList(queryWrapper);
-        if (infoList.size() > 1){
+        if (infoList.size() >= 1){
             log.error("公车数据库中出现多条重复数据，重复公车车牌为：{" + paramVO.getCarNumber() + "}"+",总条数："+infoList.size());
-            return false;
-        }
-        if(infoList.size() == 1 && !paramVO.getId().equals(infoList.get(0).getId())) {
             return false;
         }
         TblVehicleInfo vehicleInfo = vehicleInfoConverter.toVehicleInfo(paramVO);
         vehicleInfo.setUpdateTime(LocalDateTime.now());
+        vehicleInfo.setUpdateBy(getOperatorName());
         QueryWrapper<TblVehicleInfo> queryWrapper_update = new QueryWrapper<>();
         queryWrapper_update.isNull("delete_time").eq("id",paramVO.getId());
-        // todo vehicleInfo.setUpdateBy();
         return vehicleInfoMapper.update(vehicleInfo,queryWrapper_update) == 1;
     }
-
 
     /**
      * @Author: liwencai
@@ -221,7 +222,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         if(schedulings.size()>=1){
             // 修改该公车为出车中状态
             for (TblVehicleScheduling tblVehicleScheduling : schedulings) {
-                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,null));
+                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,getOperatorName()));
             }
         }
         // 查询所有处在出车中和待命中的车
@@ -248,6 +249,19 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Override
     public List<TblVehicleInfo> select(VehicleInfoParamVO paramVO) {
         return vehicleInfoMapper.select(paramVO);
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 关键词模糊查询
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: java.lang.Object
+     */
+    @Override
+    public List<TblVehicleInfo> selectByKey(String keywords) {
+       return vehicleInfoMapper.selectByKey(keywords);
     }
 
     /**
@@ -285,8 +299,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             }
             monthResult.get(j).setDayNumber(vehicleSelectByDateResult.getDayNumber());
         }
-
-        // todo 需知道先月排还是先日排，目前先月排
+        // 排序
         monthResult.sort((o1, o2) -> {
             int i = o1.getMonthNumber().compareTo(o2.getMonthNumber());
             if (i == 0) {
@@ -465,6 +478,8 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         }
     }
 
+    /* ********************【复用代码】**********************　*/
+
     /**
      * @Author: liwencai
      * @Description: 获取修改公车状态的参数map
@@ -474,7 +489,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @Param updateBy:
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
-    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,Long updateBy){
+    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,String updateBy){
         Map<String,Object> map = new HashMap<>();
         map.put("vid", vehicleId);
         map.put("status",newStatus);
@@ -509,11 +524,26 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @Param result:
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
-    Map<String,Object> getServiceResultMap(String status,String msg,Object result){
+    Map<String,Object> getServiceResultMap(String status,String errorCause,Object result){
         Map<String,Object> map = new HashMap<>();
         map.put("status",status);
-        map.put("msg",msg);
+        map.put("errorCause",errorCause);
         map.put("result",result);
         return map;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取操作人姓名
+     * @Date: 2022/8/2
+     * @return: null
+     */
+    public String getOperatorName(){
+        String realName = null;
+        UserInfo userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        if(null !=  userInfo){
+            realName = userInfo.getRealname();
+        }
+        return realName;
     }
 }

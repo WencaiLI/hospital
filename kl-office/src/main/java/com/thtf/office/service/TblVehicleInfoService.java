@@ -54,4 +54,12 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
      */
     String batchImport(MultipartFile uploadFile, String originalFilename, String type, String user);
 
+    /**
+     * @Author: liwencai
+     * @Description: 模糊查询数据
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: java.lang.Object
+     */
+    List<TblVehicleInfo> selectByKey(String keywords);
 }

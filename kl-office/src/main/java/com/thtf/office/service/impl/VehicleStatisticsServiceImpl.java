@@ -34,8 +34,8 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
      * @return: java.util.List<com.thtf.office.vo.VehicleStatisticsResultVO>
      */
     @Override
-    public List<VehicleStatisticsResultVO> getVehicleStatus() {
-        List<VehicleStatisticsResultVO> result = vehicleInfoMapper.getVehicleStatus();
+    public List<VehicleStatisticsResultVO> getVehicleStatus(Map<String,Object> map) {
+        List<VehicleStatisticsResultVO> result = vehicleInfoMapper.getVehicleStatus(map);
         ArrayList<String> attributes = result.stream().map(VehicleStatisticsResultVO::getAttribute).collect(Collectors.toCollection(ArrayList::new));
         /* 数据库中不存在的状态设置为空 */
         Stream.of("待命中","出车中","维修中").forEach(e->{

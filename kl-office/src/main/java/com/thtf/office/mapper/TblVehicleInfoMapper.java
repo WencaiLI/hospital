@@ -4,7 +4,6 @@ import com.thtf.office.vo.*;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +51,7 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
      * @Param paramVO:
      * @return: java.util.List<com.thtf.office.vo.VehicleStatisticsResultVO>
      */
-    List<VehicleStatisticsResultVO> getVehicleStatus();
+    List<VehicleStatisticsResultVO> getVehicleStatus(Map<String,Object> map);
 
     /**
      * @Author: liwencai
@@ -82,4 +81,13 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
     List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap);
 
     Integer changeBind(Map<String,Object> map);
+
+    /**
+     * @Author: liwencai
+     * @Description: 模糊查询
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: java.util.List<com.thtf.office.entity.TblVehicleInfo>
+     */
+    List<TblVehicleInfo> selectByKey(@Param("keywords") String keywords);
 }
