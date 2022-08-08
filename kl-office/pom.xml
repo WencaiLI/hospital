@@ -218,11 +218,11 @@
             <version>1.2.0.Final</version>
         </dependency>
 
+        <!-- ibs-common依赖 本地jar包 -->
         <dependency>
             <groupId>com.thtf.springcloud</groupId>
             <artifactId>ibs-common</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <systemPath>C:\Users\WenCaiLi\.m2\repository\com\thtf\springcloud\ibs-common\1.0-SNAPSHOT\ibs-common-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
     </dependencies>
 

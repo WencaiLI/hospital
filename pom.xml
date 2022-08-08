@@ -230,6 +230,12 @@
                 <artifactId>pinyin4j</artifactId>
                 <version>${pinyin4j.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.thtf.springcloud</groupId>
+                <artifactId>ibs-common</artifactId>
+                <version>${ibs.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

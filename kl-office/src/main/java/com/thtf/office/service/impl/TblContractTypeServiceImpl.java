@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.thtf.office.common.response.PageResult;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
-import com.thtf.office.common.util.PageUtil;
+import com.thtf.common.response.PageResult;
+import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.common.util.PageUtil;
 import com.thtf.office.entity.TblContract;
 import com.thtf.office.entity.TblContractType;
 import com.thtf.office.mapper.TblContractMapper;

@@ -5,9 +5,13 @@
  */
 package com.thtf.office.controller;
 
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
 import com.thtf.common.response.JsonResult;
-import com.thtf.office.common.response.PageResult;
-import com.thtf.office.common.util.FileUtil;
+import com.thtf.common.response.PageResult;
+import com.thtf.common.util.FileUtil;
 import com.thtf.office.dto.TblContractDTO;
 import com.thtf.office.dto.TblContractRemindDTO;
 import com.thtf.office.entity.TblContract;
@@ -21,11 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.Resource;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 合同管理 controller

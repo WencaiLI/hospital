@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.thtf.office.common.response.PageResult;
-import com.thtf.office.common.util.DateUtil;
-import com.thtf.office.common.util.IdGeneratorSnowflake;
-import com.thtf.office.common.util.PageUtil;
+import com.thtf.common.response.PageResult;
+import com.thtf.common.util.DateUtil;
+import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.common.util.PageUtil;
 import com.thtf.office.dto.TblContractDTO;
 import com.thtf.office.dto.TblContractRelationDTO;
 import com.thtf.office.dto.TblContractRemindDTO;

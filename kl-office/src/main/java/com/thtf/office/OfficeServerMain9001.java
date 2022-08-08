@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableDiscoveryClient
 @MapperScan("com.thtf.office.mapper")
 @EnableTransactionManagement
-@ComponentScan(basePackages={"com.thtf.common.log","com.thtf.office", "com.thtf.office.common"})
 @EnableFeignClients("com.thtf.common")
+@ComponentScan(basePackages = {"com.thtf.office","com.thtf.common"})
 public class OfficeServerMain9001 {
     public static void main(String[] args) {
         SpringApplication.run(OfficeServerMain9001.class, args);
