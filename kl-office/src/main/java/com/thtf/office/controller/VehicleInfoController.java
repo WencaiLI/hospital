@@ -1,7 +1,7 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.thtf.office.common.response.JsonResult;
+import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -58,7 +59,7 @@ public class VehicleInfoController {
      */
     @PostMapping("/insert")
     public ResponseEntity<JsonResult<Boolean>> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
-                                                      @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
+                                                      @ModelAttribute List<MultipartFile> carImageFile, @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
         //上传文件后获取文件名字符串和url字符串
         String[] carImageFileNameAndUrl = fileUtil.uploadMultiFile(carImageFile);
@@ -146,6 +147,8 @@ public class VehicleInfoController {
     public ResponseEntity<JsonResult<List<TblVehicleInfo>>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
         return ResponseEntity.ok(JsonResult.success(vehicleInfoService.selectByKey(keywords)));
     }
+
+
 
     /**
      * Excel批量导入车辆信息

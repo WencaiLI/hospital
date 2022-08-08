@@ -1,22 +1,20 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.dto.adminserver.UserInfo;
-import com.thtf.office.common.response.JsonResult;
+import com.thtf.common.dto.adminserver.UserInfo;
+import com.thtf.common.feign.AdminAPI;
+
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.converter.VehicleMaintenanceConverter;
-import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.mapper.TblVehicleMaintenanceMapper;
 import com.thtf.office.service.TblVehicleMaintenanceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;

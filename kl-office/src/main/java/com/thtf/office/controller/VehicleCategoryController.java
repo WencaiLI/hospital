@@ -1,18 +1,19 @@
 package com.thtf.office.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.response.JsonResult;
+import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
+import com.thtf.office.entity.TblVehicleCategory;
 import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.service.TblVehicleCategoryService;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
-import com.thtf.office.entity.TblVehicleCategory;
-import com.thtf.office.service.TblVehicleCategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.util.List;

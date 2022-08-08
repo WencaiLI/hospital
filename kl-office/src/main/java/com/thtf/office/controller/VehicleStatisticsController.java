@@ -1,7 +1,9 @@
 package com.thtf.office.controller;
 
-import com.thtf.office.common.response.JsonResult;
-import com.thtf.office.service.*;
+import com.thtf.common.log.OperateLog;
+import com.thtf.common.log.OperateType;
+import com.thtf.common.response.JsonResult;
+import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
@@ -21,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/vehicle/statistics")
 public class VehicleStatisticsController {
+
     @Resource
     VehicleStatisticsService vehicleStatisticsService;
 
@@ -32,7 +35,9 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
      */
     @GetMapping("/vehicleStatus")
+    @OperateLog(content = "x",operateType = OperateType.SELECT,operatePage = "xx",systemCode = "xxx",systemName = "xxxx")
     public ResponseEntity<JsonResult<List<VehicleStatisticsResultVO>>> getVehicleStatus(){
+         //OperateLogAOP
         return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getVehicleStatus(null)));
     }
 

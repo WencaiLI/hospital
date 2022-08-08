@@ -1,15 +1,15 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.office.common.dto.adminserver.UserInfo;
-import com.thtf.office.common.response.JsonResult;
+import com.thtf.common.dto.adminserver.UserInfo;
+import com.thtf.common.entity.adminserver.TblBasicData;
+import com.thtf.common.entity.adminserver.TblUser;
+import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.common.util.IdGeneratorSnowflake;
 import com.thtf.office.dto.converter.VehicleSchedulingConverter;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
-import com.thtf.office.common.entity.adminserver.TblBasicData;
-import com.thtf.office.common.entity.adminserver.TblUser;
-import com.thtf.office.feign.AdminAPI;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
@@ -261,6 +261,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
 
 
         // 所有司机信息
+
         JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition("司机");
         List<TblUser> driverList = dataJsonResult.getData();
         // 填补所有在职司机日月出车信息
