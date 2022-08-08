@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/26 17:19
  * @Description: 移除绑定车辆传参ViewObject
  */

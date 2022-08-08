@@ -3,7 +3,7 @@ package com.thtf.office.vo;
 import lombok.Data;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/28 09:52
  * @Description: 统计结果ViewObject
  */

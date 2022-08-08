@@ -337,8 +337,13 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      * @return: null
      */
     public String getOperatorName(){
+        UserInfo userInfo = null;
         String realName = null;
-        UserInfo userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        try {
+            userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        }catch (Exception e){
+            log.info("远程调用根据token查询用户信息失败失败");
+        }
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }
@@ -349,9 +354,9 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      * @Author: liwencai
      * @Description: service层结果集封装，需要在service层返回controller层详细信息时使用
      * @Date: 2022/7/31
-     * @Param status:
-     * @Param msg:
-     * @Param result:
+     * @Param status: 状态（“success”,"error"）
+     * @Param errorCause: 错误原因
+     * @Param result: 正确结果
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
     Map<String,Object> getServiceResultMap(String status,String errorCause,Object result){

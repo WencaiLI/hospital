@@ -13,7 +13,6 @@ import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,10 +56,10 @@ public class VehicleInfoController {
      * @Description: 新增公车信息
      * @Date: 2022/7/26
      * @Param paramVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    public ResponseEntity<JsonResult<Boolean>> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
+    public JsonResult<Boolean> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile, @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
         //上传文件后获取文件名字符串和url字符串
@@ -74,9 +73,9 @@ public class VehicleInfoController {
 
         Map<String, Object> result = vehicleInfoService.insert(vehicleInfo);
         if(result.get("status").equals("success")){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }else {
-            return ResponseEntity.ok(JsonResult.error(result.get("errorCause").toString()));
+            return JsonResult.error(result.get("errorCause").toString());
         }
     }
 
@@ -85,14 +84,14 @@ public class VehicleInfoController {
      * @Description: 删除公车信息
      * @Date: 2022/7/26
      * @Param vid:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
-    public ResponseEntity<JsonResult<Boolean>> deleteById(@RequestParam("vid") @NotNull Long vid){
+    public JsonResult<Boolean> deleteById(@RequestParam("vid") @NotNull Long vid){
         if(vehicleInfoService.deleteById(vid)){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }else {
-            return ResponseEntity.ok(JsonResult.error("删除公车信息失败"));
+            return JsonResult.error("删除公车信息失败");
         }
     }
 
@@ -101,10 +100,10 @@ public class VehicleInfoController {
      * @Description: 修改公车信息
      * @Date: 2022/7/26
      * @Param paramVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
-    public ResponseEntity<JsonResult<Boolean>> update(@Validated(VehicleParamValid.Update.class) VehicleInfoParamVO paramVO,
+    public JsonResult<Boolean> update(@Validated(VehicleParamValid.Update.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
 
@@ -120,9 +119,9 @@ public class VehicleInfoController {
             paramVO.setDrivingBookImageUrl(bookImageFileNameAndUrl[1]);
         }
         if (vehicleInfoService.updateSpec(paramVO)){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }else {
-            return ResponseEntity.ok(JsonResult.error("修改公车信息失败"));
+            return JsonResult.error("修改公车信息失败");
         }
     }
 
@@ -131,26 +130,24 @@ public class VehicleInfoController {
      * @Description: 查询公车信息
      * @Date: 2022/7/26
      * @Param paramVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
-    public ResponseEntity<JsonResult<List<TblVehicleInfo>>> select(@RequestBody VehicleInfoParamVO paramVO){
-        return ResponseEntity.ok(JsonResult.success(vehicleInfoService.select(paramVO)));
+    public JsonResult<List<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
+        return JsonResult.success(vehicleInfoService.select(paramVO));
     }
 
     /**
      * @Author: liwencai
-     * @Description: 关键词模糊查询
+     * @Description: 关键词模糊查询(车牌号)
      * @Date: 2022/8/4
      * @Param keywords:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List<com.thtf.office.entity.TblVehicleInfo>>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
      */
     @GetMapping("/selectByKey")
-    public ResponseEntity<JsonResult<List<TblVehicleInfo>>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
-        return ResponseEntity.ok(JsonResult.success(vehicleInfoService.selectByKey(keywords)));
+    public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
+        return JsonResult.success(vehicleInfoService.selectByKey(keywords));
     }
-
-
 
     /**
      * Excel批量导入车辆信息
@@ -164,20 +161,12 @@ public class VehicleInfoController {
     @PostMapping("/itemImport")
     public JsonResult<String> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
         try{
-//            UserInfo userDTO = HttpUtil.getUserInfo();
             String originalFilename = uploadFile.getOriginalFilename();
             String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, null);
             return JsonResult.success(string);
-//            result.setData(string);
-//            result.setStatus("success");
-//            result.setCode(200);
         } catch (Exception e){
             log.error(e.getClass().getName() + ":" + e.getMessage());
             return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
-//            e.printStackTrace();
-//            result.setData(e.getClass().getName() + ":" + e.getMessage());
-//            result.setStatus("error");
-//            result.setCode(500);
         }
     }
 
@@ -188,20 +177,13 @@ public class VehicleInfoController {
      * @date 2022-06-14
      */
     @GetMapping("/importProgress")
-    public ResponseEntity<JsonResult> importProgress() {
-        JsonResult result = new JsonResult();
+    public JsonResult<BigDecimal> importProgress() {
         try{
-            BigDecimal map = vehicleInfoService.importProgress();
-            result.setData(map);
-            result.setCode(200);
-            result.setStatus("success");
+            return JsonResult.success(vehicleInfoService.importProgress());
         } catch (Exception e){
             e.printStackTrace();
-            result.setData(e.getClass().getName() + ":" + e.getMessage());
-            result.setStatus("error");
-            result.setCode(500);
+            return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
         }
-        return ResponseEntity.ok(result);
     }
 
 
@@ -213,14 +195,13 @@ public class VehicleInfoController {
      */
     @GetMapping("/importTemplateDownload")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response){
-        // todo 公车模板下载
         try {
             response.setCharacterEncoding("utf-8");
             response.setHeader("Pragma", "No-Cache");
             response.setHeader("Cache-Control", "No-Cache");
             response.setDateHeader("Expires", 0);
             response.setContentType("application/msexcel; charset=UTF-8");
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("设备导入模板.xlsx", "UTF-8"));
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xlsx", "UTF-8"));
             ServletOutputStream out;
             String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
                     + "ExcelTemplate/vehicleTemplate.xlsx";
@@ -249,8 +230,8 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/batchImport")
-    public void batchImport(@ModelAttribute MultipartFile uploadFile) throws IOException {
-        EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService)).headRowNumber(3).sheet().doRead();
+    public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response) throws IOException {
+        EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
     }
 
     /**
@@ -258,28 +239,26 @@ public class VehicleInfoController {
      * @Description: 根据日期和类别查询该类别下汽车的调度排行
      * @Date: 2022/7/26
      * @Param cid:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult>
      */
     @GetMapping("/selectByCidAndMonth")
-    public ResponseEntity<JsonResult<List<VehicleSelectByDateResult>>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
-        // todo vehicleInfoService.selectByCidByDate(cid);
+    public JsonResult<List<VehicleSelectByDateResult>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
         List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(cid);
-        return ResponseEntity.ok(JsonResult.success(result));
+        return JsonResult.success(result);
     }
 
     /**
      * @Author: liwencai
      * @Description: 修改公车状态,此接口前端需定时请求
      * @Date: 2022/7/28
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @GetMapping("/updateInfoStatus")
-    public ResponseEntity<JsonResult<Boolean>> updateInfoStatus(){
+    public JsonResult<Boolean> updateInfoStatus(){
         if(vehicleInfoService.updateInfoStatus()){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }else {
-            return ResponseEntity.ok(JsonResult.error("更新公车状态失败"));
+            return JsonResult.error("更新公车状态失败");
         }
-
     }
 }

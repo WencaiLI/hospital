@@ -1,9 +1,11 @@
 package com.thtf.office.dto.converter;
 
 import com.alibaba.excel.converters.Converter;
+import com.alibaba.excel.converters.ReadConverterContext;
+import com.alibaba.excel.converters.WriteConverterContext;
 import com.alibaba.excel.enums.CellDataTypeEnum;
-import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.GlobalConfiguration;
+import com.alibaba.excel.metadata.data.*;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -14,7 +16,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/31 21:29
  * @Description: EasyExcel的LocalDateTime自定义转换器
  */
@@ -31,10 +33,10 @@ public class LocalDateTimeConverter implements Converter<LocalDateTime> {
     }
 
     @Override
-    public LocalDateTime convertToJavaData(CellData cellData, ExcelContentProperty excelContentProperty, GlobalConfiguration globalConfiguration) throws Exception {
+    public LocalDateTime convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
 
+        // Excel是以数字形式传递的日期
         BigDecimal numberValue = cellData.getNumberValue();
-        // Excel是以文本形式传递的日期
         if(null == numberValue){
             System.out.println(cellData);
             DateTimeFormatter DATEFORMATTER1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -59,9 +61,8 @@ public class LocalDateTimeConverter implements Converter<LocalDateTime> {
     }
 
     @Override
-    public CellData<String> convertToExcelData(LocalDateTime value, ExcelContentProperty contentProperty,
+    public WriteCellData<?> convertToExcelData(LocalDateTime value, ExcelContentProperty contentProperty,
                                                GlobalConfiguration globalConfiguration) {
-        return new CellData<>(value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return new WriteCellData<>(value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
-
 }

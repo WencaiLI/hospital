@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/8/1 16:05
  * @Description: 返回前端的类别数据，添加了类别关联汽车总数字段
  */
