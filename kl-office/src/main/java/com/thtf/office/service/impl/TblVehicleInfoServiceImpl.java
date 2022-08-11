@@ -1,23 +1,23 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.util.IdGeneratorSnowflake;
-import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.common.util.SplitListUtil;
-import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
-import com.thtf.office.entity.TblVehicleScheduling;
-import com.thtf.office.mapper.TblVehicleSchedulingMapper;
+import com.thtf.office.dto.converter.VehicleInfoConverter;
 import com.thtf.office.entity.TblVehicleCategory;
-import com.thtf.office.mapper.TblVehicleCategoryMapper;
-import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.entity.TblVehicleScheduling;
+import com.thtf.office.mapper.TblVehicleCategoryMapper;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
+import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.service.TblVehicleInfoService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -145,6 +146,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
                 TblVehicleInfo tblVehicleInfo = vehicleInfoConverter.toVehicleInfo(dto);
                 ArrayList<TblVehicleCategory> ids = categoryInDB.stream().filter(e -> !e.getName().equals(tblVehicleInfo.getCarNumber())).collect(Collectors.toCollection(ArrayList::new));
                 tblVehicleInfo.setVehicleCategoryId(ids.get(0).getId());
+                tblVehicleInfo.setId(idGeneratorSnowflake.snowflakeId());
                 canInsertInfoList.add(tblVehicleInfo);
                 carNumberHasSuccessInsertDB.add(dto.getCarNumber());
             }
@@ -462,6 +464,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
                     try {
                         insert(single);
                     }catch (Exception e){
+                        e.printStackTrace();
                         log.error("添加出错");
                     }
                 }
@@ -519,9 +522,9 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @Author: liwencai
      * @Description: service层结果集封装，需要在service层返回controller层详细信息时使用
      * @Date: 2022/7/31
-     * @Param status:
-     * @Param msg:
-     * @Param result:
+     * @Param status: 状态（“success”,"error"）
+     * @Param errorCause: 错误原因
+     * @Param result: 正确结果
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
     Map<String,Object> getServiceResultMap(String status,String errorCause,Object result){
@@ -539,8 +542,13 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @return: null
      */
     public String getOperatorName(){
+        UserInfo userInfo = null;
         String realName = null;
-        UserInfo userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        try {
+            userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        }catch (Exception e){
+           log.info("远程调用根据token查询用户信息失败失败");
+        }
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }

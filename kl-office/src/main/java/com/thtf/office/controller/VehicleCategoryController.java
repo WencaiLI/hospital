@@ -4,15 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
+import com.thtf.office.entity.TblVehicleCategory;
 import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.service.TblVehicleCategoryService;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
-import com.thtf.office.entity.TblVehicleCategory;
-import com.thtf.office.service.TblVehicleCategoryService;
-import org.springframework.http.ResponseEntity;
+import com.thtf.office.vo.VehicleCategoryResultVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -40,16 +41,15 @@ public class VehicleCategoryController {
      * @Description: 新增公车类别
      * @Date: 2022/7/26
      * @Param vehicleCategoryParamVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    public ResponseEntity<JsonResult<String>> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleCategoryParamVO vehicleCategoryParamVO){
-
+    public JsonResult<String> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleCategoryParamVO vehicleCategoryParamVO){
         Map<String, Object> resultMap = vehicleCategoryService.insert(vehicleCategoryParamVO);
         if(resultMap.get("status").equals("error")){
-            return ResponseEntity.ok(JsonResult.error(resultMap.get("errorCause").toString()));
+            return JsonResult.error(resultMap.get("errorCause").toString());
         }else {
-            return ResponseEntity.ok(JsonResult.success("新增成功"));
+            return JsonResult.success("新增成功");
         }
     }
 
@@ -58,14 +58,14 @@ public class VehicleCategoryController {
      * @Description: 删除公车类别
      * @Date: 2022/7/26
      * @Param cid:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
-    public ResponseEntity<JsonResult<Boolean>> deleteById(@RequestParam(value = "cid") @NotNull Long cid){
+    public JsonResult<Boolean> deleteById(@RequestParam(value = "cid") @NotNull Long cid){
         if(vehicleCategoryService.deleteById(cid)){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }else {
-            return ResponseEntity.ok(JsonResult.error("删除公车类别失败"));
+            return JsonResult.error("删除公车类别失败");
         }
     }
 
@@ -74,14 +74,14 @@ public class VehicleCategoryController {
      * @Description: 更新公车类别
      * @Date: 2022/7/26
      * @Param vehicleCategoryParamVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
-    public ResponseEntity<JsonResult<Boolean>> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleCategoryParamVO vehicleCategoryParamVO){
+    public JsonResult<Boolean> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleCategoryParamVO vehicleCategoryParamVO){
         if(vehicleCategoryService.updateSpec(vehicleCategoryParamVO)){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }
-        return ResponseEntity.ok(JsonResult.error("修改公车类别失败"));
+        return JsonResult.error("修改公车类别失败");
     }
 
     /**
@@ -89,26 +89,26 @@ public class VehicleCategoryController {
      * @Description: 查询公车信息
      * @Date: 2022/7/26
      * @Param vehicleCategoryParamVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.awt.List>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.awt.List>>
      */
     @PostMapping("/select")
-    public ResponseEntity<JsonResult<List>> select(@RequestBody VehicleCategoryParamVO vehicleCategoryParamVO){
-        List vehicleCategoryList =vehicleCategoryService.select(vehicleCategoryParamVO);
-        return ResponseEntity.ok(JsonResult.success(vehicleCategoryList));
+    public JsonResult<List<VehicleCategoryResultVO>> select(@RequestBody VehicleCategoryParamVO vehicleCategoryParamVO){
+        List<VehicleCategoryResultVO> vehicleCategoryList =vehicleCategoryService.select(vehicleCategoryParamVO);
+        return JsonResult.success(vehicleCategoryList);
     }
 
     /**
      * @Author: liwencai
      * @Description: 查询公车类别总数
      * @Date: 2022/7/26
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Long>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Long>>
      */
     @GetMapping("/totalNumber")
-    public ResponseEntity<JsonResult<Integer>> totalNumber(){
+    public JsonResult<Integer> totalNumber(){
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time");
         vehicleCategoryService.count(queryWrapper);
-        return ResponseEntity.ok(JsonResult.success(vehicleCategoryService.count(queryWrapper)));
+        return JsonResult.success(vehicleCategoryService.count(queryWrapper));
     }
 
     /**
@@ -116,13 +116,13 @@ public class VehicleCategoryController {
      * @Description: 查询与公车类别关联的公车数量
      * @Date: 2022/7/26
      * @Param cid:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Integer>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Integer>>
      */
     @GetMapping("/correlationNumber")
-    public ResponseEntity<JsonResult<Integer>> correlationNumber(@RequestParam(value = "cid") @NotNull Long cid){
+    public JsonResult<Integer> correlationNumber(@RequestParam(value = "cid") @NotNull Long cid){
         QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").eq("vehicle_category_id",cid);
-        return ResponseEntity.ok(JsonResult.success(vehicleInfoService.count(queryWrapper)));
+        return JsonResult.success(vehicleInfoService.count(queryWrapper));
     }
 
     /**
@@ -130,26 +130,25 @@ public class VehicleCategoryController {
      * @Description: 移除绑定车辆
      * @Date: 2022/7/26
      * @Param vehicleCategoryChangeBindVO:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.lang.Boolean>>
+     * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/changeBind")
-    public ResponseEntity<JsonResult<Boolean>> changeBind(@RequestBody VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO){
-        // todo 移除绑定功能待做
+    public JsonResult<Boolean> changeBind(@RequestBody VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO){
         if(vehicleCategoryService.changeBind(vehicleCategoryChangeBindVO)){
-            return ResponseEntity.ok(JsonResult.success(true));
+            return JsonResult.success(true);
         }
-        return ResponseEntity.ok(JsonResult.error("绑定修改失败"));
+        return JsonResult.error("绑定修改失败");
     }
 
     /**
      * @Author: liwencai 
      * @Description: 查询所有类别对应的各个公车的数量（以公车状态）
      * @Date: 2022/8/2
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.dto.SelectAllInfoResultDTO> 
+     * @return: org.springframework.http.ResponseEntity<com.thtf.dto.SelectAllInfoResultDTO>
      */
     @GetMapping("/selectInfoNumberByCategory")
-    public ResponseEntity<JsonResult<List<SelectAllInfoResultDTO>>> selectInfoNumberByCategory(){
-        return ResponseEntity.ok(JsonResult.success(vehicleCategoryService.selectInfoNumberByCategory()));
+    public JsonResult<List<SelectAllInfoResultDTO>> selectInfoNumberByCategory(){
+        return JsonResult.success(vehicleCategoryService.selectInfoNumberByCategory());
     }
 
 }

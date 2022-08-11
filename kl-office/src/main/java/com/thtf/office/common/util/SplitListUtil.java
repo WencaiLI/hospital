@@ -6,7 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.List;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/27 12:47
  * @Description: 集合操作工具类
  */

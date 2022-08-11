@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/26 16:00
  * @Description: 新增和修改公车分类使用
  */

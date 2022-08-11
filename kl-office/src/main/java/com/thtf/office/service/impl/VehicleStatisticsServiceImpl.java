@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/27 23:11
  * @Description:
  */

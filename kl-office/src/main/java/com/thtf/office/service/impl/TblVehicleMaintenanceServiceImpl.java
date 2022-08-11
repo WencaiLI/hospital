@@ -11,10 +11,10 @@ import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.mapper.TblVehicleMaintenanceMapper;
 import com.thtf.office.service.TblVehicleMaintenanceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +28,7 @@ import java.util.List;
  * @since 2022-07-26
  */
 @Service
+@Slf4j
 public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMaintenanceMapper, TblVehicleMaintenance> implements TblVehicleMaintenanceService {
 
     @Resource
@@ -115,8 +116,13 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
      * @return: null
      */
     public String getOperatorName(){
+        UserInfo userInfo = null;
         String realName = null;
-        UserInfo userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        try {
+            userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        }catch (Exception e){
+            log.info("远程调用根据token查询用户信息失败失败");
+        }
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }

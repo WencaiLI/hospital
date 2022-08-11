@@ -8,10 +8,7 @@ package com.thtf.office.controller;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
-
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.response.PageResult;
 import com.thtf.common.util.FileUtil;
@@ -23,20 +20,11 @@ import com.thtf.office.entity.TblContractType;
 import com.thtf.office.service.TblContractRemindService;
 import com.thtf.office.service.TblContractService;
 import com.thtf.office.service.TblContractTypeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-
-
-
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 合同管理 controller

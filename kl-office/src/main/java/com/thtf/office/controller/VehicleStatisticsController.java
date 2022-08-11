@@ -1,11 +1,12 @@
 package com.thtf.office.controller;
 
+import com.thtf.common.log.OperateLog;
+import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
-import com.thtf.office.service.*;
+import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -14,13 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/27 22:51
  * @Description: 公车相关信息数据统计
  */
 @RestController
 @RequestMapping("/vehicle/statistics")
 public class VehicleStatisticsController {
+
     @Resource
     VehicleStatisticsService vehicleStatisticsService;
 
@@ -29,11 +31,12 @@ public class VehicleStatisticsController {
      * @Description: 车辆调度状态实时统计
      * @Date: 2022/7/27
      * @Param paramVOp:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @GetMapping("/vehicleStatus")
-    public ResponseEntity<JsonResult<List<VehicleStatisticsResultVO>>> getVehicleStatus(){
-        return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getVehicleStatus(null)));
+    @OperateLog(content = "车辆调度状态实时统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "001",systemName = "kl-office")
+    public JsonResult<List<VehicleStatisticsResultVO>> getVehicleStatus(){
+        return JsonResult.success(vehicleStatisticsService.getVehicleStatus(null));
     }
 
     /**
@@ -41,12 +44,12 @@ public class VehicleStatisticsController {
      * @Description: 各类车辆出车统计
      * @Date: 2022/7/27
      * @Param paramVOp:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/vehicleCategory")
-    public ResponseEntity<JsonResult<List<VehicleStatisticsResultVO>>> getVehicleCategory(@RequestBody VehicleStatisticsParamVO paramVO){
+    public JsonResult<List<VehicleStatisticsResultVO>> getVehicleCategory(@RequestBody VehicleStatisticsParamVO paramVO){
         List<VehicleStatisticsResultVO> result = vehicleStatisticsService.getVehicleCategory(paramVO);
-        return ResponseEntity.ok(JsonResult.success(result));
+        return JsonResult.success(result);
     }
 
     /**
@@ -54,11 +57,11 @@ public class VehicleStatisticsController {
      * @Description: 车辆使用频次行榜
      * @Date: 2022/7/27
      * @Param paramVOp:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/rankingsOfOrg")
-    public ResponseEntity<JsonResult<List<VehicleRankingsResultVO>>> rankingsOfOrg(@RequestBody VehicleStatisticsParamVO paramVO){
-        return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name"))));
+    public JsonResult<List<VehicleRankingsResultVO>> rankingsOfOrg(@RequestBody VehicleStatisticsParamVO paramVO){
+        return JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name")));
     }
 
     /**
@@ -66,11 +69,11 @@ public class VehicleStatisticsController {
      * @Description: 部门用车频次排行榜
      * @Date: 2022/7/27
      * @Param paramVOp:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/rankingsOfVeh")
-    public ResponseEntity<JsonResult<List<VehicleRankingsResultVO>>> rankingsOfVeh(@RequestBody VehicleStatisticsParamVO paramVO){
-        return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number"))));
+    public JsonResult<List<VehicleRankingsResultVO>> rankingsOfVeh(@RequestBody VehicleStatisticsParamVO paramVO){
+        return JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number")));
     }
 
     /**
@@ -81,8 +84,8 @@ public class VehicleStatisticsController {
      * @return: null
      */
     @PostMapping("/rankingsOfDri")
-    public ResponseEntity<JsonResult<List<VehicleRankingsResultVO>>> rankingsOfDri(@RequestBody VehicleStatisticsParamVO paramVO){
-        return ResponseEntity.ok(JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name"))));
+    public JsonResult<List<VehicleRankingsResultVO>> rankingsOfDri(@RequestBody VehicleStatisticsParamVO paramVO){
+        return JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name")));
     }
 
     /**
@@ -90,12 +93,12 @@ public class VehicleStatisticsController {
      * @Description: 车辆维保频次排行榜
      * @Date: 2022/7/27
      * @Param paramVOp:
-     * @return: org.springframework.http.ResponseEntity<com.thtf.office.common.response.JsonResult<java.util.List>>
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/rankingsOfMai")
-    public ResponseEntity<JsonResult<List<VehicleRankingsResultVO>>> rankingsOfMai(@RequestBody VehicleStatisticsParamVO paramVO){
+    public JsonResult<List<VehicleRankingsResultVO>> rankingsOfMai(@RequestBody VehicleStatisticsParamVO paramVO){
         List<VehicleRankingsResultVO> result = vehicleStatisticsService.getMaintenanceRankings(paramVO);
-        return ResponseEntity.ok(JsonResult.success(result));
+        return JsonResult.success(result);
     }
 
     /**

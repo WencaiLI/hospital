@@ -2,16 +2,18 @@ package com.thtf.office.dto;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
-import com.thtf.office.dto.converter.LocalDateTimeConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.thtf.office.dto.converter.ExcelBigDecimalConverter;
+import com.thtf.office.dto.converter.ExcelLocalDateTimeConverter;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/30 21:59
- * @Description: 公车导入Excel的DataTransformObject
+ * @Description: 公车导入Excel的DataTransformObject,数据类型全部为String类型方便做统一的数据验证
  */
 @Data
 public class VehicleInfoExcelImportDTO implements Serializable {
@@ -60,26 +62,6 @@ public class VehicleInfoExcelImportDTO implements Serializable {
     private String color;
 
     /**
-     * 车辆照片名称
-     */
-    private String carImage;
-
-    /**
-     * 车辆照片url
-     */
-    private String carImageUrl;
-
-    /**
-     * 车辆行驶本照片名称
-     */
-    private String drivingBookImage;
-
-    /**
-     * 车辆行驶本照片url
-     */
-    private String drivingBookImageUrl;
-
-    /**
      * 经销商
      */
     @ColumnWidth(20)
@@ -90,22 +72,26 @@ public class VehicleInfoExcelImportDTO implements Serializable {
      * 出厂日期
      */
     @ColumnWidth(20)
-    @ExcelProperty(value = "出厂日期",index = 7,converter = LocalDateTimeConverter.class)
-    private LocalDateTime outDate;
+    @ExcelProperty(value = "出厂日期",index = 7,converter = ExcelLocalDateTimeConverter.class)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String outDate;
 
     /**
      * 购买日期
      */
     @ColumnWidth(20)
-    @ExcelProperty(value = "购买日期",index = 8,converter = LocalDateTimeConverter.class)
-    private LocalDateTime buyDate;
+    @ExcelProperty(value = "购买日期",index = 8,converter = ExcelLocalDateTimeConverter.class)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String buyDate;
 
     /**
      * 购买价格
      */
     @ColumnWidth(20)
-    @ExcelProperty(value = "购买价格",index = 9)
-    private BigDecimal price;
+    @ExcelProperty(value = "购买价格",index = 9,converter = ExcelBigDecimalConverter.class)
+    private String price;
 
     /**
      * 保险说明

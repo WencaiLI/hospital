@@ -17,6 +17,7 @@ import com.thtf.office.service.TblVehicleCategoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.office.vo.VehicleCategoryResultVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
  * @since 2022-07-26
  */
 @Service
+@Slf4j
 public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategoryMapper, TblVehicleCategory> implements TblVehicleCategoryService {
 
     @Resource
@@ -68,7 +70,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").eq("name",vehicleCategoryParamVO.getName());
         // 名称不重复则新增
-        if(0 == vehicleCategoryMapper.selectList(queryWrapper).size()){
+        if(vehicleCategoryMapper.selectList(queryWrapper).size() == 0){
             TblVehicleCategory vehicleCategory = vehicleCategoryConverter.toVehicleCategory(vehicleCategoryParamVO);
             vehicleCategory.setCreateTime(LocalDateTime.now());
             vehicleCategory.setCreateBy(getOperatorName());
@@ -165,9 +167,11 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
      */
     @Override
     public List<SelectAllInfoResultDTO> selectInfoNumberByCategory() {
+        // 查询所有类别
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").groupBy("id").orderByAsc("id");
         List<TblVehicleCategory> categories = vehicleCategoryMapper.selectList(queryWrapper);
+        // 返回值对象
         List<SelectAllInfoResultDTO> resultDTOS = new ArrayList<>();
         for (TblVehicleCategory o : categories) {
             SelectAllInfoResultDTO selectAllInfoResultDTO = new SelectAllInfoResultDTO();
@@ -202,15 +206,17 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
 
     /**
      * @Author: liwencai
-     * @Description: 查询公车类别信息
+     * @Description: 查询公车类别信息（包括该类别的汽车总数）
      * @Date: 2022/7/26
      * @Param vehicleCategoryParamVO:
      * @return: java.awt.List
      */
     @Override
     public List<VehicleCategoryResultVO> select(VehicleCategoryParamVO vehicleCategoryParamVO) {
+        // 查询类别集合
         List<TblVehicleCategory> vehicleCategoryList = vehicleCategoryMapper.select(vehicleCategoryParamVO);
         List<VehicleCategoryResultVO> vehicleCategoryResultVOS = vehicleCategoryConverter.categoryListToOtherList(vehicleCategoryList);
+        // 查询该类别集合分别对应的汽车总数
         for (VehicleCategoryResultVO o : vehicleCategoryResultVOS) {
             QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
             queryWrapper.isNull("delete_time").eq("vehicle_category_id",o.getId());
@@ -245,8 +251,13 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
      * @return: null
      */
     public String getOperatorName(){
+        UserInfo userInfo = null;
         String realName = null;
-        UserInfo userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        try {
+            userInfo = adminAPI.userInfo(HttpUtil.getToken());
+        }catch (Exception e){
+            log.info("远程调用根据token查询用户信息失败失败");
+        }
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }
@@ -257,9 +268,9 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
      * @Author: liwencai
      * @Description: service层结果集封装，需要在service层返回controller层详细信息时使用
      * @Date: 2022/7/31
-     * @Param status:
-     * @Param msg:
-     * @Param result:
+     * @Param status: 状态（“success”,"error"）
+     * @Param errorCause: 错误原因
+     * @Param result: 正确结果
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
     Map<String,Object> getServiceResultMap(String status,String errorCause,Object result){

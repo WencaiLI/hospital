@@ -1,7 +1,7 @@
 package com.thtf.office.common.valid;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/26 21:44
  * @Description: 公车信息、类别、维保信息、调度信息传参参数验证组
  */

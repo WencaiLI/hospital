@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/27 22:55
  * @Description: 公车数据统计传参
  */

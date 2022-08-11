@@ -3,10 +3,9 @@ package com.thtf.office.dto.converter;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/7/26 23:06
  * @Description: 公车维保信息bean映射转换器
  */
