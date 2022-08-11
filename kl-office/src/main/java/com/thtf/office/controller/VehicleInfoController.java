@@ -205,9 +205,7 @@ public class VehicleInfoController {
             ServletOutputStream out;
             String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
                     + "ExcelTemplate/vehicleTemplate.xlsx";
-            System.out.println(filePath);
             String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
-            System.out.println(path);
             FileInputStream in = new FileInputStream(filePath);
             out = response.getOutputStream();
             out.flush();

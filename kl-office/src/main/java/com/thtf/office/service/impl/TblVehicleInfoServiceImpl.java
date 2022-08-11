@@ -151,8 +151,6 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
                 carNumberHasSuccessInsertDB.add(dto.getCarNumber());
             }
         }
-
-        System.out.println("增加前的数据"+canInsertInfoList.toString());
         vehicleInsertBatch(canInsertInfoList);
         Map<String,Object> resultMap = new HashMap<>();
         resultMap.put("carNumberHasExistInDB",carNumberHasExistInDB);
