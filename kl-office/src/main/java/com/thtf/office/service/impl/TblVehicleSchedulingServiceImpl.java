@@ -249,18 +249,13 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             }
             monthData.get(j).setDayNumber(vehicleSelectByDateResult.getDayNumber());
         }
-
         // 每日为数据为null时补0
         monthData.forEach(e->{
             if(e.getDayNumber() == null){
                 e.setDayNumber(0L);
             }
         });
-
-
-
         // 所有司机信息
-
         JsonResult<List<TblUser>> dataJsonResult = adminAPI.searchUserByPosition("司机");
         List<TblUser> driverList = dataJsonResult.getData();
         // 填补所有在职司机日月出车信息
@@ -277,6 +272,12 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         return result;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 创建流水单号
+     * @Date: 2022/8/28
+     * @return: java.lang.String
+     */
     @Override
     public String createSerialNumber() {
         ResponseEntity<JsonResult<List<TblBasicData>>> datas = adminAPI.searchBasicDataByType(30);

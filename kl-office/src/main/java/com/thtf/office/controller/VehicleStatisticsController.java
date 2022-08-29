@@ -7,6 +7,7 @@ import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/vehicle/statistics")
+@Slf4j
 public class VehicleStatisticsController {
 
     @Resource
@@ -99,6 +101,25 @@ public class VehicleStatisticsController {
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfMai(@RequestBody VehicleStatisticsParamVO paramVO){
         List<VehicleRankingsResultVO> result = vehicleStatisticsService.getMaintenanceRankings(paramVO);
         return JsonResult.success(result);
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取出车工作时长
+     * @Date: 2022/8/28
+     * @Param field: 数据库属性字段
+     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
+     */
+    @PostMapping("/rankingsOfWD")
+    public JsonResult<List<VehicleRankingsResultVO>> getWorkingDurationRankings(String field){
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("field",field);
+        try {
+            return JsonResult.success(vehicleStatisticsService.getWorkingDurationRankings(paramMap));
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return JsonResult.error("排行失败");
+        }
     }
 
     /**

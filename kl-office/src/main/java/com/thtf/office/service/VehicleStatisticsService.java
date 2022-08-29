@@ -20,4 +20,6 @@ public interface VehicleStatisticsService {
     List<VehicleRankingsResultVO> getRankings(Map<String, Object> map);
 
     List<VehicleRankingsResultVO> getMaintenanceRankings(VehicleStatisticsParamVO paramVO);
+
+    List<VehicleRankingsResultVO> getWorkingDurationRankings(Map<String, Object> map);
 }

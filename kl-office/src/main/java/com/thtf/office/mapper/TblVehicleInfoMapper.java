@@ -90,4 +90,6 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
      * @return: java.util.List<com.thtf.office.entity.TblVehicleInfo>
      */
     List<TblVehicleInfo> selectByKey(@Param("keywords") String keywords);
+
+    List<VehicleRankingsResultVO> getWorkingDurationRankings(Map<String, Object> map);
 }

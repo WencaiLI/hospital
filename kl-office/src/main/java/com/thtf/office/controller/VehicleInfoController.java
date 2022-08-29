@@ -227,9 +227,13 @@ public class VehicleInfoController {
      * @Date: 2022/7/26
      * @return: void
      */
-    @GetMapping("/batchImport")
+    @PostMapping("/batchImport")
     public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response) throws IOException {
-        EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
+        try {
+            EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
     }
 
     /**
