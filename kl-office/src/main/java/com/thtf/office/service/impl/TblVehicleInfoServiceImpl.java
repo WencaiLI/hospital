@@ -235,20 +235,12 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
 
         for (TblVehicleScheduling tblVehicleScheduling : tblVehicleSchedulingList) {
             if(tblVehicleScheduling.getPurpose() == 0){
-                // 计算调度时长
-                // todo 可能出现问题
-                Long seconds = null;
-                try {
-                    seconds = Math.abs(tblVehicleScheduling.getEndTime().until(tblVehicleScheduling.getStartTime(), ChronoUnit.SECONDS));
-                }catch (Exception e){
-                    log.error(e.getMessage());
-                }
                 // 修改为待命中状态
-                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),seconds));
+                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),tblVehicleScheduling.getWorkingDuration()));
                 // todo 修改状态为已调度状态
                 UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
                 tblVehicleScheduling.setStatus(1);
-                updateWrapper.isNull("delete_time");
+                updateWrapper.isNull("delete_time").eq("id",tblVehicleScheduling.getId());
                 vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
 
             }else if (tblVehicleScheduling.getPurpose() == 1){

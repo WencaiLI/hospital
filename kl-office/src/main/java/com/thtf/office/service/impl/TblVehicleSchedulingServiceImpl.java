@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +110,13 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             map.put("updateBy",getOperatorName());
             vehicleInfoMapper.changeVehicleStatus(map);
             log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
+        }
+        // 计算改调度的秒数
+        try {
+            Long seconds = Math.abs(scheduling.getEndTime().until(scheduling.getStartTime(), ChronoUnit.SECONDS));
+            scheduling.setWorkingDuration(seconds);
+        }catch (Exception e){
+            log.error(e.getMessage());
         }
         if(vehicleSchedulingMapper.insert(scheduling) == 1){
             return getServiceResultMap("success",null,null);
@@ -205,6 +213,13 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         scheduling.setUpdateBy(getOperatorName());
         QueryWrapper<TblVehicleScheduling> queryWrapper_update = new QueryWrapper<>();
         queryWrapper_update.isNull("delete_time").eq("id",paramVO.getId());
+        // 计算改调度的秒数
+        try {
+            Long seconds = Math.abs(scheduling.getEndTime().until(scheduling.getStartTime(), ChronoUnit.SECONDS));
+            scheduling.setWorkingDuration(seconds);
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
         if(vehicleSchedulingMapper.update(scheduling,queryWrapper_update) == 1){
             return getServiceResultMap("success",null,null);
         }else {

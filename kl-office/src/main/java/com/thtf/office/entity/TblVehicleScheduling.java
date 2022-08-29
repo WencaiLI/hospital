@@ -150,4 +150,9 @@ private static final long serialVersionUID = 1L;
      */
     private Integer status;
 
+    /**
+     * 车辆使用时长
+     */
+    private Long workingDuration;
+
 }
