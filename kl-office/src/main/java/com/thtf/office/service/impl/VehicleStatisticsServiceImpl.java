@@ -76,7 +76,7 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
 
     /**
      * @Author: liwencai
-     * @Description: 获取维保
+     * @Description: 获取维保频次排行
      * @Date: 2022/7/28
      * @Param paramVO:
      * @return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
@@ -85,4 +85,17 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     public List<VehicleRankingsResultVO> getMaintenanceRankings(VehicleStatisticsParamVO paramVO) {
         return vehicleMaintenanceMapper.getMaintenanceRankings(paramVO);
     }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取公车使用时长的排行榜
+     * @Date: 2022/8/28
+     * @Param paramVO:
+     * @return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
+     */
+    @Override
+    public List<VehicleRankingsResultVO> getWorkingDurationRankings(Map<String, Object> map){
+        return vehicleInfoMapper.getWorkingDurationRankings(map);
+    }
+
 }

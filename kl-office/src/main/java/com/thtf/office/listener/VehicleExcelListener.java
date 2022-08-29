@@ -3,6 +3,7 @@ package com.thtf.office.listener;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.google.gson.internal.$Gson$Preconditions;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -12,9 +13,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.Instant;
@@ -58,6 +61,11 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
     private final List<VehicleInfoExcelErrorImportDTO> errorList = new ArrayList<>();
 
     /**
+     * 已经入库的车牌号
+     */
+    private final List<String> hadInsertDataCarNumber = new ArrayList<>();
+
+    /**
      * @Author: liwencai
      * @Description: 每一条数据被解析后，都会来调用
      * @Date: 2022/8/1
@@ -66,39 +74,63 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
      * @return: void
      */
     @Override
+    @Transactional
     public void invoke(VehicleInfoExcelImportDTO dto, AnalysisContext analysisContext) {
+
+
         // 出现错误的列的数量
         int errorColumnNum = 0;
         // 出现错误的行号
         int rowNumber = analysisContext.readRowHolder().getRowIndex();
         // 错误提示信息
         StringBuilder stringBuilder = new StringBuilder();
-        // 错误行数据
+        // 格式错误数据
         VehicleInfoExcelErrorImportDTO vehicleInfoExcelErrorImportDTO = Mappers.getMapper(VehicleInfoExcelErrorImportConverter.class).toErrorImport(dto);
+        /* ************数据验证开始************* */
+
+        /* 车牌小写变大写 */
+        if(StringUtils.isNotBlank(dto.getCarNumber())){
+            String upperCase = StringUtils.upperCase(dto.getCarNumber());
+            System.out.println(upperCase);
+            dto.setCarNumber(upperCase);
+        }
+
         if(! RegexVerifyUtil.verify(dto.getCarNumber(),RegexVerifyUtil.carNumberRegex)){
             errorColumnNum ++;
             stringBuilder.append("车牌号格式不正确;");
-            log.info("车牌号格式不正确，例：京AA3333");
+        }else if(hadInsertDataCarNumber.contains(dto.getCarNumber())){
+            errorColumnNum ++;
+            stringBuilder.append("车牌号已经在Excel中存在");
+        } else {
+            // 验证车牌号是否在数据库中存在
+            if(! vehicleInfoService.verifyCarNumberForInsert(dto.getCarNumber())){
+                errorColumnNum ++;
+                stringBuilder.append("车牌号已存在;");
+            }else{
+                hadInsertDataCarNumber.add(dto.getCarNumber());
+            }
         }
+
         if(StringUtils.isBlank(dto.getVehicleCategoryName())){
             errorColumnNum ++;
             stringBuilder.append("车辆类别名称不能为空;");
-            log.info("车辆类别名称不能为空");
+        }else{
+            if(! vehicleInfoService.verifyCategoryForInsert(dto.getVehicleCategoryName())){
+                errorColumnNum ++;
+                stringBuilder.append("车辆类别名称不存在;");
+            }
         }
         if(StringUtils.isBlank(dto.getModel())){
             errorColumnNum ++;
             stringBuilder.append("车辆厂牌型号不能为空;");
-            log.info("车辆厂牌型号不能为空");
         }
         if(StringUtils.isBlank(dto.getEngineNumber())){
             errorColumnNum ++;
             stringBuilder.append("车辆发动机号不能为空;");
-            log.info("车辆发动机号不能为空");
         }
         if(StringUtils.isBlank(dto.getFrameNumber())){
             errorColumnNum ++;
             stringBuilder.append("车辆的车架号不能为空");
-            log.info("车辆的车架号不能为空");
         }
 
         if(StringUtils.isNotBlank(dto.getBuyDate())){
@@ -114,7 +146,7 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
             }else {
                 // 验证日期格式
                 if(!RegexVerifyUtil.verify(RegexVerifyUtil.dateRegex_1,dto.getBuyDate())){
-                    stringBuilder.append("xx购买日期格式不正确，正确示例：2022-01-01;");
+                    stringBuilder.append("购买日期格式不正确;");
                 }
             }
         }
@@ -132,10 +164,11 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
             }else {
                 // 验证日期格式
                 if(!RegexVerifyUtil.verify(RegexVerifyUtil.dateRegex_1,dto.getOutDate())){
-                    stringBuilder.append("xx出厂日期格式不正确，正确示例：2022-01-01;");
+                    stringBuilder.append("出厂日期格式不正确，正确示例：2022-01-01;");
                 }
             }
         }
+        /* ************数据验证结束************* */
         if(errorColumnNum>0){
             vehicleInfoExcelErrorImportDTO.setRowNumber(String.valueOf(rowNumber));
             vehicleInfoExcelErrorImportDTO.setErrorInfo(stringBuilder.toString());
@@ -186,17 +219,27 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
      * @return: void
      */
     public void responseErrorInfo(){
+        System.out.println(response.getContentType());
         response.setCharacterEncoding("utf-8");
-        response.setHeader("Pragma", "No-Cache");
-        response.setHeader("Cache-Control", "No-Cache");
-        response.setDateHeader("Expires", 0);
+//        response.setHeader("Pragma", "No-Cache");
+//        response.setHeader("Cache-Control", "No-Cache");
+//        response.setDateHeader("Expires", 0);
         response.setContentType("application/vnd.ms-excel; charset=UTF-8");
+//        response.setContentType("application/json; charset=UTF-8");
+        response.setHeader("responseType","blob");
+//        response.setContentType("application/octet-stream");
+        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+//        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        System.out.println("response.getContentType())"+response.getContentType());
         ServletOutputStream out;
         try {
-            String filename = "公车导入错误信息导出"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xlsx";
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
+            String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
+            response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
             out = response.getOutputStream();
+            //创建流
+//            ByteArrayOutputStream bos=new ByteArrayOutputStream();
             EasyExcel.write(response.getOutputStream(), VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
+//            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
             out.close();
         } catch (Exception e) {
             e.printStackTrace();

@@ -62,4 +62,9 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
      * @return: java.lang.Object
      */
     List<TblVehicleInfo> selectByKey(String keywords);
+
+    /**/
+    boolean verifyCarNumberForInsert(String carNumber);
+
+    boolean verifyCategoryForInsert(String vehicleCategoryName);
 }

@@ -1,6 +1,7 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.common.feign.AdminAPI;
@@ -30,6 +31,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -89,9 +91,10 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         if (infoList.size() == 1){
             return getServiceResultMap("error","车牌号不能相同",null);
         }
-        /* 设置初始值: 状态设置为待命中，创建日期设置为当前日期 */
+        /* 设置初始值: 状态设置为待命中，创建日期设置为当前日期，使用时长为0 */
         vehicleInfo.setId(this.idGeneratorSnowflake.snowflakeId());
         vehicleInfo.setStatus(0);
+        vehicleInfo.setWorkingDuration(0L);
         vehicleInfo.setCreateTime(LocalDateTime.now());
         vehicleInfo.setCreateBy(getOperatorName());
         if(vehicleInfoMapper.insert(vehicleInfo) == 1){
@@ -102,7 +105,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
 
     /**
      * @Author: liwencai
-     * @Description: 批量导入公车信息
+     * @Description: 批量导入公车信息(公车信息的验证在导入阶段已经完成)
      * @Date: 2022/7/27
      * @Param list:
      * @return: boolean
@@ -110,56 +113,55 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Override
     @Transactional
     public Map<String,Object> insertBatch(List<VehicleInfoExcelImportDTO> list)  {
-        // 1 获取公车类别数据库所有的公车类别名称
-        QueryWrapper<TblVehicleCategory> queryWrapper_category = new QueryWrapper<>();
-        queryWrapper_category.isNull("delete_time");
-        List<TblVehicleCategory> categoryInDB = vehicleCategoryMapper.selectList(queryWrapper_category);
-        ArrayList<String> categoryNameInDB = vehicleCategoryMapper.selectList(queryWrapper_category).stream().map(TblVehicleCategory::getName).collect(Collectors.toCollection(ArrayList::new));
-        // 2 获取数据库中所有的车牌号
-        QueryWrapper<TblVehicleInfo> queryWrapper_info = new QueryWrapper<>();
-        queryWrapper_category.isNull("delete_time").groupBy("car_number");
-        ArrayList<String> carNumberExistInDB = vehicleInfoMapper.selectList(queryWrapper_info).stream().map(TblVehicleInfo::getCarNumber).collect(Collectors.toCollection(ArrayList::new));
-        // 3 获取Excel中的所有的车牌号
-        ArrayList<String> carNumberNeedInsertList = list.stream().map(VehicleInfoExcelImportDTO::getCarNumber).collect(Collectors.toCollection(ArrayList::new));
-        // 4 需要入库的数据
-        List<TblVehicleInfo> canInsertInfoList = new ArrayList<>();
-        /* 5 Service层返回的结果集 */
-        // 5.1 已经存在于数据库中的车牌号（不入库）
-        List<String> carNumberHasExistInDB = new ArrayList<>();
-        // 5.2 已经在Excel存在两次的车牌号（不入库）
-        List<String> carNumberHasExistInExcelTwiceOrMore = new ArrayList<>();
-        // 5.3 成功入库的数据的车牌号
-        List<String> carNumberHasSuccessInsertDB = new ArrayList<>();
-        for (VehicleInfoExcelImportDTO dto : list) {
-            // 已经存在在数据库中的车牌号 5.1
-            if(carNumberExistInDB.contains(dto.getCarNumber())){
-                carNumberHasExistInDB.add(dto.getCarNumber());
-                continue;
-            }
-            // 新增的数据已经在Excel中重复过两次，5.2
-            if(carNumberNeedInsertList.stream().filter(e-> e.equals(dto.getCarNumber())).collect(Collectors.toCollection(ArrayList::new)).size() > 1){
-                carNumberHasExistInExcelTwiceOrMore.add(dto.getCarNumber());
-                continue;
-            }
-            // 需要新增的公车的类别在类别库中存在 5.3
-            if (categoryNameInDB.contains(dto.getVehicleCategoryName())){
-                TblVehicleInfo tblVehicleInfo = vehicleInfoConverter.toVehicleInfo(dto);
-                ArrayList<TblVehicleCategory> ids = categoryInDB.stream().filter(e -> !e.getName().equals(tblVehicleInfo.getCarNumber())).collect(Collectors.toCollection(ArrayList::new));
-                tblVehicleInfo.setVehicleCategoryId(ids.get(0).getId());
-                tblVehicleInfo.setId(idGeneratorSnowflake.snowflakeId());
-                canInsertInfoList.add(tblVehicleInfo);
-                carNumberHasSuccessInsertDB.add(dto.getCarNumber());
-            }
+        for (VehicleInfoExcelImportDTO dto :list) {
+            TblVehicleInfo tblVehicleInfo = vehicleInfoConverter.toVehicleInfo(dto);
+            tblVehicleInfo.setId(idGeneratorSnowflake.snowflakeId());
+            tblVehicleInfo.setCreateTime(LocalDateTime.now());
+            tblVehicleInfo.setCreateBy(getOperatorName());
+            vehicleInfoMapper.insert(tblVehicleInfo);
         }
-        vehicleInsertBatch(canInsertInfoList);
-        Map<String,Object> resultMap = new HashMap<>();
-        resultMap.put("carNumberHasExistInDB",carNumberHasExistInDB);
-        resultMap.put("carNumberHasExistInExcelTwiceOrMore",carNumberHasExistInExcelTwiceOrMore);
-        resultMap.put("carNumberHasSuccessInsertDB",carNumberHasSuccessInsertDB);
-        log.info(resultMap.toString());
-        return resultMap;
+        return null;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 批量导入公车信息
+     * @Date: 2022/7/27
+     * @Param totalList:
+     * @return: void
+     */
+    void vehicleInsertBatch(List<TblVehicleInfo> totalList)  {
+        // 初始化线程池
+        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(10, 20,
+                4, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.AbortPolicy());
+        // 大集合拆分成N个小集合，以保证多线程异步执行, 过大容易回到单线程
+        List<List<TblVehicleInfo>> splitList = SplitListUtil.split(totalList, 10);
+        // 记录单个任务的执行次数
+        CountDownLatch countDownLatch = new CountDownLatch(splitList.size());
+        // 对拆分的集合进行批量处理, 先拆分的集合, 再多线程执行
+        for (List<TblVehicleInfo> singleList : splitList) {
+            // 线程池执行
+            threadPool.execute(new Thread(() -> {
+                for (TblVehicleInfo single : singleList) {
+                    try {
+                        insert(single);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        log.error("添加出错");
+                    }
+                }
+            }));
+            // 任务个数 - 1, 直至为0时唤醒await()
+            countDownLatch.countDown();
+        }
+        try {
+            // 让当前线程处于阻塞状态，直到锁存器计数为零
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            // todo 自定义注解
+//            throw new Exception();
+        }
+    }
     /**
      * @Author: liwencai
      * @Description: 删除公车信息
@@ -214,29 +216,47 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @return: boolean
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateInfoStatus() {
         LocalDateTime now = LocalDateTime.now();
-        // 更新为出车中状态
+        /* 更新为出车中状态 */
         QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").lt("start_time",now).gt("end_time",now).orderByAsc("end_time");
-        List<TblVehicleScheduling> schedulings = vehicleSchedulingMapper.selectList(queryWrapper);
-        if(schedulings.size()>=1){
-            // 修改该公车为出车中状态
-            for (TblVehicleScheduling tblVehicleScheduling : schedulings) {
-                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,getOperatorName()));
+        queryWrapper.isNull("delete_time").eq("status",0).lt("start_time",now).gt("end_time",now).orderByAsc("end_time");
+        List<TblVehicleScheduling> schedulingList = vehicleSchedulingMapper.selectList(queryWrapper);
+
+        for (TblVehicleScheduling tblVehicleScheduling : schedulingList) {
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,getOperatorName(),null));
+        }
+
+        /* 查询应处于待命中的出车中或维修中的车辆 */
+        QueryWrapper<TblVehicleScheduling> queryWrapper_1 = new QueryWrapper<>();
+        queryWrapper_1.isNull("delete_time").eq("status",0).le("end_time",now).and(e->e.eq("purpose",0).or().eq("purpose",1));
+        List<TblVehicleScheduling> tblVehicleSchedulingList = vehicleSchedulingMapper.selectList(queryWrapper_1);
+
+        for (TblVehicleScheduling tblVehicleScheduling : tblVehicleSchedulingList) {
+            if(tblVehicleScheduling.getPurpose() == 0){
+                // 计算调度时长
+                // todo 可能出现问题
+                Long seconds = null;
+                try {
+                    seconds = Math.abs(tblVehicleScheduling.getEndTime().until(tblVehicleScheduling.getStartTime(), ChronoUnit.SECONDS));
+                }catch (Exception e){
+                    log.error(e.getMessage());
+                }
+                // 修改为待命中状态
+                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),seconds));
+                // todo 修改状态为已调度状态
+                UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
+                tblVehicleScheduling.setStatus(1);
+                updateWrapper.isNull("delete_time");
+                vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
+
+            }else if (tblVehicleScheduling.getPurpose() == 1){
+                // 修改为待命中状态
+                vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),null));
+            }else {
+                log.error("报废车车辆的调度状态存在问题！");
             }
-        }
-        // 查询所有处在出车中和待命中的车
-        QueryWrapper<TblVehicleInfo> queryWrapper_1 = new QueryWrapper<>();
-        queryWrapper_1.isNull("delete_time").eq("status",0).or().eq("status",1);
-        List<Long> ids = vehicleInfoMapper.selectList(queryWrapper_1).stream().map(TblVehicleInfo::getId).collect(Collectors.toList());
-        ids.removeAll(schedulings.stream().map(TblVehicleScheduling::getVehicleInfoId).collect(Collectors.toList()));
-        if(ids.size() == 0 ){
-            return false;
-        }
-        for (Long id : ids) {
-            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(id,0,null));
         }
         return true;
     }
@@ -264,6 +284,35 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Override
     public List<TblVehicleInfo> selectByKey(String keywords) {
        return vehicleInfoMapper.selectByKey(keywords);
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 验证车牌是否可入库（数据库中不能存在相同车牌）
+     * @Date: 2022/8/11
+     * @Param carNumber:
+     * @return: boolean
+     */
+    @Override
+    public boolean verifyCarNumberForInsert(String carNumber) {
+        QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("delete_time").eq("car_number",carNumber);
+        List<TblVehicleInfo> infoList = vehicleInfoMapper.selectList(queryWrapper);
+        return infoList.size() == 0;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 验证车类别是否可入库
+     * @Date: 2022/8/11
+     * @Param vehicleCategoryName:
+     * @return: boolean
+     */
+    @Override
+    public boolean verifyCategoryForInsert(String vehicleCategoryName) {
+        QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("delete_time").eq("name",vehicleCategoryName);
+        return vehicleCategoryMapper.selectList(queryWrapper).size() >= 1;
     }
 
     /**
@@ -441,45 +490,6 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         return buffer2.toString();
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 批量导入公车信息
-     * @Date: 2022/7/27
-     * @Param totalList:
-     * @return: void
-     */
-    void vehicleInsertBatch(List<TblVehicleInfo> totalList)  {
-        // 初始化线程池
-        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(10, 20,
-                4, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.AbortPolicy());
-        // 大集合拆分成N个小集合，以保证多线程异步执行, 过大容易回到单线程
-        List<List<TblVehicleInfo>> splitList = SplitListUtil.split(totalList, 10);
-        // 记录单个任务的执行次数
-        CountDownLatch countDownLatch = new CountDownLatch(splitList.size());
-        // 对拆分的集合进行批量处理, 先拆分的集合, 再多线程执行
-        for (List<TblVehicleInfo> singleList : splitList) {
-            // 线程池执行
-            threadPool.execute(new Thread(() -> {
-                for (TblVehicleInfo single : singleList) {
-                    try {
-                        insert(single);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        log.error("添加出错");
-                    }
-                }
-            }));
-            // 任务个数 - 1, 直至为0时唤醒await()
-            countDownLatch.countDown();
-        }
-        try {
-            // 让当前线程处于阻塞状态，直到锁存器计数为零
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            // todo 自定义注解
-//            throw new Exception();
-        }
-    }
 
     /* ********************【复用代码】**********************　*/
 
@@ -492,11 +502,12 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @Param updateBy:
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
-    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,String updateBy){
+    Map<String,Object> getUpdateInfoStatusMap(Long vehicleId,Integer newStatus,String updateBy,Long workingDuration){
         Map<String,Object> map = new HashMap<>();
         map.put("vid", vehicleId);
         map.put("status",newStatus);
         map.put("updateBy",updateBy);
+        map.put("workingDuration",workingDuration);
         return map;
     }
 

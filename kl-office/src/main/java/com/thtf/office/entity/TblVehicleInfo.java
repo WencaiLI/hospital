@@ -126,6 +126,11 @@ public class TblVehicleInfo implements Serializable {
     private Integer status;
 
     /**
+     * 车辆使用时长
+     */
+    private Long workingDuration;
+
+    /**
      * 创建时间
      */
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")

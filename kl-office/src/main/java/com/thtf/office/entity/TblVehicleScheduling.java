@@ -144,4 +144,10 @@ private static final long serialVersionUID = 1L;
      * 关联的使用部门名称
      */
     private String organizationName;
+
+    /**
+     * 调度状态 0 调度尚未结束 1 调度结束
+     */
+    private Integer status;
+
 }
