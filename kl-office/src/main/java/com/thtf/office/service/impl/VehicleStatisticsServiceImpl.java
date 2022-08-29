@@ -1,7 +1,9 @@
 package com.thtf.office.service.impl;
 
+import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.mapper.TblVehicleMaintenanceMapper;
+import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
@@ -25,6 +27,8 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     TblVehicleInfoMapper vehicleInfoMapper;
     @Resource
     TblVehicleMaintenanceMapper vehicleMaintenanceMapper;
+    @Resource
+    TblVehicleSchedulingMapper vehicleSchedulingMapper;
 
     /**
      * @Author: liwencai
@@ -98,4 +102,8 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
         return vehicleInfoMapper.getWorkingDurationRankings(map);
     }
 
+    @Override
+    public List<VehicleRankingsResultVO> rankingsOfSchWD(VehicleStatisticsParamVO paramVO) {
+        return vehicleSchedulingMapper.rankingsOfSchWD(paramVO);
+    }
 }

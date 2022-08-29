@@ -110,6 +110,7 @@ public class VehicleStatisticsController {
      * @Param field: 数据库属性字段
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
      */
+    @Deprecated
     @PostMapping("/rankingsOfWD")
     public JsonResult<List<VehicleRankingsResultVO>> getWorkingDurationRankings(String field){
         Map<String, Object> paramMap = new HashMap<>();
@@ -119,6 +120,15 @@ public class VehicleStatisticsController {
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("排行失败");
+        }
+    }
+
+    @PostMapping("/rankingsOfSchWD")
+    public JsonResult<List<VehicleRankingsResultVO>> rankingsOfSchWD(@RequestBody VehicleStatisticsParamVO paramVO){
+        try {
+            return JsonResult.success(vehicleStatisticsService.rankingsOfSchWD(paramVO));
+        }catch (Exception e){
+            return JsonResult.error(e.getMessage());
         }
     }
 
