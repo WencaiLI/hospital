@@ -3,7 +3,6 @@ package com.thtf.office.listener;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.google.gson.internal.$Gson$Preconditions;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -14,10 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.Instant;
