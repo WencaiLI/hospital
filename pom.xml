@@ -49,10 +49,18 @@
         <dynamic-datasource-spring-boot-starter.version>3.1.1</dynamic-datasource-spring-boot-starter.version>
         <easyexcel.version>3.1.1</easyexcel.version>
         <pinyin4j.version>2.5.0</pinyin4j.version>
+        <pagehelper-spring-boot-starter.version>1.3.0</pagehelper-spring-boot-starter.version>
+        <jjwt.version>0.9.1</jjwt.version>
+        <transmittable-thread-local.version>2.13.2</transmittable-thread-local.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper-spring-boot-starter.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -235,6 +243,18 @@
                 <groupId>com.thtf.springcloud</groupId>
                 <artifactId>ibs-common</artifactId>
                 <version>${ibs.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>transmittable-thread-local</artifactId>
+                <version>${transmittable-thread-local.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
