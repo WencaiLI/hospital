@@ -1,0 +1,74 @@
+image: docker:latest
+
+stages:
+  - package
+  - build
+
+.package:
+  image: maven:3.6.3-jdk-8u242
+  stage: package
+  script:
+    - mvn -Dfile.encoding=UTF-8 -pl :$MODULE_NAME smart-doc:html
+    - mvn -DskipTests -pl :$MODULE_NAME package
+  tags:
+    - hospital-220
+  artifacts:
+    paths:
+      - $ARTIFACTS_PATH
+    expire_in: 5 days
+  only:
+    refs:
+      - develop
+  allow_failure: true
+
+.build:
+  stage: build
+  script:
+    - if [[ "$(docker inspect $CONTAINER_NAME 2> /dev/null)" != "" ]];  then docker rm -f $CONTAINER_NAME || true; fi
+    - if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" != "" ]];  then docker rmi -f $IMAGE_NAME || true; fi
+    - docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+    - docker run -d --name $CONTAINER_NAME -v /home/logs:/logs --net host -e SERVICE_NAME=$CONTAINER_NAME -e OAP_SERVICE=10.10.49.220:11800 $IMAGE_NAME
+  tags:
+    - hospital-220
+  only:
+    refs:
+      - develop
+  allow_failure: true
+  
+kl-elevator-package:
+  variables:
+    MODULE_NAME: kl-elevator
+    ARTIFACTS_PATH: ./modules/kl-elevator/target/*.jar
+  extends: .package
+  only:
+    changes:
+      - kl-elevator/**/*
+
+kl-elevator-build:
+  variables:
+    CONTAINER_NAME: kl-elevator
+    IMAGE_NAME: 10.10.49.220:35000/kl-elevator:1.0
+    DOCKERFILE_PATH: ./modules/kl-elevator/Dockerfile
+  extends: .build
+  only:
+    changes:
+      - kl-elevator/**/*
+
+kl-office-package:
+  variables:
+    MODULE_NAME: kl-office
+    ARTIFACTS_PATH: ./modules/kl-office/target/*.jar
+  extends: .package
+  only:
+    changes:
+      - kl-office/**/*
+
+kl-office-build:
+  variables:
+    CONTAINER_NAME: kl-office
+    IMAGE_NAME: 10.10.49.220:35000/kl-office:1.0
+    DOCKERFILE_PATH: ./modules/kl-office/Dockerfile
+  extends: .build
+  only:
+    changes:
+      - kl-office/**/*
