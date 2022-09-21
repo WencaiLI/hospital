@@ -38,7 +38,7 @@ stages:
 kl-elevator-package:
   variables:
     MODULE_NAME: kl-elevator
-    ARTIFACTS_PATH: ./modules/kl-elevator/target/*.jar
+    ARTIFACTS_PATH: ./kl-elevator/target/*.jar
   extends: .package
   only:
     changes:
@@ -48,7 +48,7 @@ kl-elevator-build:
   variables:
     CONTAINER_NAME: kl-elevator
     IMAGE_NAME: 10.10.49.220:35000/kl-elevator:1.0
-    DOCKERFILE_PATH: ./modules/kl-elevator/Dockerfile
+    DOCKERFILE_PATH: ./kl-elevator/Dockerfile
   extends: .build
   only:
     changes:
@@ -57,7 +57,7 @@ kl-elevator-build:
 kl-office-package:
   variables:
     MODULE_NAME: kl-office
-    ARTIFACTS_PATH: ./modules/kl-office/target/*.jar
+    ARTIFACTS_PATH: ./kl-office/target/*.jar
   extends: .package
   only:
     changes:
@@ -67,7 +67,7 @@ kl-office-build:
   variables:
     CONTAINER_NAME: kl-office
     IMAGE_NAME: 10.10.49.220:35000/kl-office:1.0
-    DOCKERFILE_PATH: ./modules/kl-office/Dockerfile
+    DOCKERFILE_PATH: ./kl-office/Dockerfile
   extends: .build
   only:
     changes:
