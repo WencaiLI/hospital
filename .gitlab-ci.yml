@@ -72,3 +72,22 @@ kl-office-build:
   only:
     changes:
       - kl-office/**/*
+
+kl-environment-package:
+  variables:
+    MODULE_NAME: kl-environment
+    ARTIFACTS_PATH: ./kl-environment/target/*.jar
+  extends: .package
+  only:
+    changes:
+      - kl-environment/**/*
+
+kl-environment-build:
+  variables:
+    CONTAINER_NAME: kl-environment
+    IMAGE_NAME: 10.10.49.220:35000/kl-environment:1.0
+    DOCKERFILE_PATH: ./kl-environment/Dockerfile
+  extends: .build
+  only:
+    changes:
+      - kl-environment/**/*
