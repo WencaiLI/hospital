@@ -2,6 +2,7 @@ package com.thtf.elevator.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.itemserver.TblItem;
@@ -43,10 +44,10 @@ public class ElevatorController {
      * @Param pageSize:
      * @return: com.thtf.common.response.JsonResult
      */
-    @PostMapping(value = "/getAlarmUnhandledToday")
+    @GetMapping(value = "/getAlarmUnhandledToday")
     public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
                                           @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                          @RequestParam(value = "pageSize",required = false)Integer pageSize){
+                                          @RequestParam(value = "pageSize",required = false) Integer pageSize){
         Map<String, Object> map = new HashMap<>();
         map.put("sysCode",sysCode);
         if(null != pageNumber){
@@ -71,7 +72,7 @@ public class ElevatorController {
      * @Param itemType:
      * @return: com.thtf.common.response.JsonResult<com.thtf.elevator.dto.DisplayInfoDTO>
      */
-    @GetMapping("/displayInfo")
+    @PostMapping("/displayInfo")
     JsonResult<List<DisplayInfoDTO>> displayInfo(@RequestParam(value ="sysCode")String sysCode,
                                                 @RequestParam(value ="itemType")String itemType){
         return JsonResult.success(elevatorService.displayInfo(sysCode,itemType));
@@ -96,7 +97,7 @@ public class ElevatorController {
      * @Param param:
      * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
-    @PostMapping(value = "/disposalAlarm")
+    @PutMapping(value = "/disposalAlarm")
     public JsonResult<Boolean> alarmDisposal(@RequestBody TblAlarmRecord param){
         try {
             alarmAPI.handleAlarm(param);
@@ -143,13 +144,11 @@ public class ElevatorController {
      * @Param pageSize:
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>>>
      */
-    @PostMapping(value = "/getAllElevatorPage")
-    public JsonResult< PageInfo<ItemNestedParameterVO>> getAllElevator(@RequestParam("sysCode")String sysCode,
-                                                                             @RequestParam("pageNumber")Integer pageNumber,
-                                                                             @RequestParam("pageSize")Integer pageSize){
-        PageHelper.startPage(pageNumber,pageSize);
-        PageInfo<ItemNestedParameterVO> pageInfo = new PageInfo<>(elevatorService.getAllElevatorPage(sysCode));
-        return JsonResult.success(pageInfo);
+    @PostMapping("/getAllElevatorPage")
+    public JsonResult< PageInfo<ItemNestedParameterVO>> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
+                                                                             @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
+                                                                             @RequestParam(value = "pageSize",required = false)Integer pageSize){
+        return JsonResult.success(elevatorService.getAllElevatorPage(sysCode,pageNumber,pageSize));
     }
 
     /**
@@ -162,12 +161,10 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.elevator.dto.ElevatorAlarmResultDTO>>
      */
     @PostMapping("/getAllAlarmPage")
-    public JsonResult<PageInfo<ItemNestedParameterVO>> getAllAlarmPage(@RequestParam("sysCode")String sysCode,
-                                                                       @RequestParam("pageNumber")Integer pageNumber,
-                                                                       @RequestParam("pageSize")Integer pageSize){
-        PageHelper.startPage(pageNumber,pageSize);
-        PageInfo<ItemNestedParameterVO> pageInfo = new PageInfo<>(elevatorService.getAllAlarmPage(sysCode));
-        return JsonResult.success(pageInfo);
+    public JsonResult<Map<String, Object>> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
+                                                                       @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+                                                                       @RequestParam(value = "pageSize",required = false) Integer pageSize){
+        return JsonResult.success(elevatorService.getAllAlarmPage(sysCode,pageNumber,pageSize));
     }
 
     /**
@@ -178,7 +175,9 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.elevator.dto.KeyValueDTO>>
      */
     @PostMapping("/getItemFaultStatistics")
-    public JsonResult<List<KeyValueDTO>> getItemFaultStatistics(@RequestParam("sysCode")String sysCode){
-        return JsonResult.success(elevatorService.getItemFaultStatistics(sysCode));
+    public JsonResult<List<ItemAlarmNumberInfo>> getItemFaultStatistics(@RequestParam("sysCode")String sysCode,
+                                                                        @RequestParam("startTime")String startTime,
+                                                                        @RequestParam("endTime")String endTime){
+        return JsonResult.success(elevatorService.getItemFaultStatistics(sysCode,startTime,endTime));
     }
 }

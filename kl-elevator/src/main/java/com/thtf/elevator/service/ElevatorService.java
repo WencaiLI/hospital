@@ -1,5 +1,7 @@
 package com.thtf.elevator.service;
 
+import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.elevator.dto.DisplayInfoDTO;
@@ -8,6 +10,7 @@ import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.KeyValueDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: liwencai
@@ -60,7 +63,7 @@ public interface ElevatorService {
      * @Param sysCode:
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
-    List<ItemNestedParameterVO> getAllElevatorPage(String sysCode);
+    PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode, Integer pageNum, Integer pageSize);
 
     /**
      * @Author: liwencai
@@ -69,7 +72,7 @@ public interface ElevatorService {
      * @Param sysCode:
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
-    List<ItemNestedParameterVO> getAllAlarmPage(String sysCode);
+    Map<String, Object> getAllAlarmPage(String sysCode, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai
@@ -78,5 +81,5 @@ public interface ElevatorService {
      * @Param sysCode:
      * @return: java.util.List<com.thtf.elevator.dto.KeyValueDTO>
      */
-    List<KeyValueDTO> getItemFaultStatistics(String sysCode);
+    List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String startTime, String endTime);
 }

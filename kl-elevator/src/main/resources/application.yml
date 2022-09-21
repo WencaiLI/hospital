@@ -5,3 +5,16 @@ spring:
     username: root
     password: root123
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+# 对feign的请求进行拦截和求情方法保留
+feign:
+  httpclient:
+      enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+        requestInterceptors: com.thtf.elevator.common.FeignBasicAuthRequestInterceptor

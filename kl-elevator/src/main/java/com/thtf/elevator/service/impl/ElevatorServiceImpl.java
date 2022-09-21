@@ -1,5 +1,7 @@
 package com.thtf.elevator.service.impl;
 
+import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
@@ -16,10 +18,7 @@ import com.thtf.elevator.service.ElevatorService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +54,7 @@ public class ElevatorServiceImpl implements ElevatorService {
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
-        tblItemType.setParentCode(itemType);
+//        tblItemType.setParentCode(itemType);
         tblItemType.setSysCode(sysCode);
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
         // 根据类别查询所有的信息
@@ -139,8 +138,8 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Author: liwencai
      * @Description: 查找item关联设备信息
      * @Date: 2022/9/5
-     * @Param relationType:
-     * @Param itemCode:
+     * @Param relationType: 关联设备类别
+     * @Param itemCode: 设备类型
      * @return: java.util.List<com.thtf.common.entity.itemserver.TblItem>
      */
     @Override
@@ -149,11 +148,13 @@ public class ElevatorServiceImpl implements ElevatorService {
         TblItem tblItem = itemAPI.searchItemByItemCode(itemCode).getData();
         String relationItemCode = tblItem.getRelationItemCode();
         String[] itemCodeList = relationItemCode.split(",");
-
         // 查询设备集合
         List<TblItemDTO> tblItemDTOS = itemAPI.searchItemByItemCodes(Arrays.asList(itemCodeList)).getData();
         // 筛选设备集
-        tblItemDTOS.removeIf(e->! e.getType().equals(relationItemCode));
+        if(null == tblItemDTOS){
+            return null;
+        }
+        tblItemDTOS.removeIf(e->! e.getTypeCode().equals(relationType));
         return itemConverter.toItemList(tblItemDTOS);
     }
 
@@ -165,19 +166,20 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
     @Override
-    public List<ItemNestedParameterVO> getAllElevatorPage(String sysCode) {
+    public PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode, Integer pageNum, Integer pageSize) {
         // 设备信息
-        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
+        // List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
+        PageInfo<ItemNestedParameterVO> itemInfosPage = itemAPI.searchItemNestedParametersBySyscodePage(sysCode,pageNum,pageSize).getData();
         // 查询报警信息
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmAPI.getAlarmInfoBySysCodeLimitOne(sysCode).getData();
 
         // todo 此处有优化空间
-        for (ItemNestedParameterVO item : itemInfos) {
+        for (ItemNestedParameterVO item : itemInfosPage.getList()) {
             item.setAreaName(adminAPI.searchAreaByCode(item.getAreaCode()).getData().getName());
         }
 
         for (TblAlarmRecordUnhandle alarmRecordUnhandle : recordUnhandles) {
-            itemInfos.forEach(e->{
+            itemInfosPage.getList().forEach(e->{
                 if(e.getCode().equals(alarmRecordUnhandle.getItemCode())){
                     e.setAlarmId(alarmRecordUnhandle.getId());
                     e.setAlarmLevel(alarmRecordUnhandle.getAlarmLevel());
@@ -186,7 +188,7 @@ public class ElevatorServiceImpl implements ElevatorService {
                 }
             });
         }
-        return itemInfos;
+        return itemInfosPage;
     }
 
     /**
@@ -197,14 +199,21 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
     @Override
-    public List<ItemNestedParameterVO> getAllAlarmPage(String sysCode) {
+    public  Map<String, Object> getAllAlarmPage(String sysCode,Integer pageNumber,Integer pageSize) {
+        Map<String, Object> resultMap = new HashMap<>();
+
 
         // 设备信息
-        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
+//        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
+        //
         // 查询报警信息
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmAPI.getAlarmInfoBySysCodeLimitOne(sysCode).getData();
-        List<String> alarmCodeList = recordUnhandles.stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
-        itemInfos.removeIf(e->!alarmCodeList.contains(e.getCode()));
+        PageInfo<TblAlarmRecordUnhandle> alarmPageInfo = alarmAPI.getAlarmInfoBySysCodeLimitOnePage(sysCode, pageNumber, pageSize).getData();
+        resultMap = getMapFromPageInfo(alarmPageInfo);
+        List<String> alarmItemCodeList = recordUnhandles.stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode,alarmItemCodeList).getData();
+
+        itemInfos.removeIf(e->!alarmItemCodeList.contains(e.getCode()));
 
         // todo 此处有优化空间
         for (ItemNestedParameterVO item : itemInfos) {
@@ -221,23 +230,44 @@ public class ElevatorServiceImpl implements ElevatorService {
                 }
             });
         }
-        return itemInfos;
+        resultMap.put("list",itemInfos);
+        return resultMap;
     }
 
     @Override
-    public List<KeyValueDTO> getItemFaultStatistics(String sysCode) {
-        List<KeyValueDTO> result = new ArrayList<>();
-        // 查询所有设备信息
-        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
-        for (ItemNestedParameterVO itemNestedParameterVO : itemInfos) {
-            KeyValueDTO keyValueDTO = new KeyValueDTO();
-            keyValueDTO.setKey(itemNestedParameterVO.getName());
-            TblAlarmRecordUnhandle recordUnhandle = new TblAlarmRecordUnhandle();
-            recordUnhandle.setSystemCode(sysCode);
-            recordUnhandle.setItemCode(itemNestedParameterVO.getCode());
-            keyValueDTO.setValue(alarmAPI.queryAllAlarmCount(recordUnhandle));
-            result.add(keyValueDTO);
-        }
-        return result;
+    public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode,String startTime,String endTime) {
+//        List<KeyValueDTO> result = new ArrayList<>();
+//        // 查询所有设备信息
+//        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
+//        for (ItemNestedParameterVO itemNestedParameterVO : itemInfos) {
+//            KeyValueDTO keyValueDTO = new KeyValueDTO();
+//            keyValueDTO.setKey(itemNestedParameterVO.getName());
+//            TblAlarmRecordUnhandle recordUnhandle = new TblAlarmRecordUnhandle();
+//            recordUnhandle.setSystemCode(sysCode);
+//            recordUnhandle.setItemCode(itemNestedParameterVO.getCode());
+//            keyValueDTO.setValue(alarmAPI.queryAllAlarmCount(recordUnhandle));
+//            result.add(keyValueDTO);
+//        }
+
+        return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, null, startTime, endTime).getData();
+    }
+
+    /* ================= 复用代码区 =================== */
+    Map<String, Object> getMapFromPageInfo(PageInfo pageInfo){
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("size",pageInfo.getSize());
+        resultMap.put("total",pageInfo.getTotal());
+        resultMap.put("endRow",pageInfo.getEndRow());
+        resultMap.put("navigateFirstPage",pageInfo.getNavigateFirstPage());
+        resultMap.put("navigateLastPage",pageInfo.getNavigateLastPage());
+        resultMap.put("navigatepageNums",pageInfo.getNavigatepageNums());
+        resultMap.put("navigatePages",pageInfo.getNavigatePages());
+        resultMap.put("nextPage",pageInfo.getNextPage());
+        resultMap.put("startRow",pageInfo.getStartRow());
+        resultMap.put("prePage",pageInfo.getPrePage());
+        resultMap.put("pages",pageInfo.getPages());
+        resultMap.put("pageNum",pageInfo.getPageNum());
+        resultMap.put("pageSize",pageInfo.getPageSize());
+        return resultMap;
     }
 }
