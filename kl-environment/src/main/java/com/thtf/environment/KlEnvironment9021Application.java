@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KlEnvironmentApplication {
+public class KlEnvironment9021Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(KlEnvironmentApplication.class, args);
+        SpringApplication.run(KlEnvironment9021Application.class, args);
     }
 
 }

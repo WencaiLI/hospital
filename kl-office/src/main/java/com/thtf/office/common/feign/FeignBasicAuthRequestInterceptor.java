@@ -1,4 +1,4 @@
-package com.thtf.environment.common;
+package com.thtf.office.common.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
