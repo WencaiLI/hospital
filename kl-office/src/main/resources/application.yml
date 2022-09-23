@@ -16,6 +16,6 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
         loggerLevel: basic
-        requestInterceptors: com.thtf.environment.common.feign.FeignBasicAuthRequestInterceptor
+        requestInterceptors: com.thtf.office.common.feign.FeignBasicAuthRequestInterceptor
 
 
