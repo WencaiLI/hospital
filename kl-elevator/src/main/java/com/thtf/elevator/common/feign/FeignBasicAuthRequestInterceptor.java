@@ -1,4 +1,4 @@
-package com.thtf.elevator.common;
+package com.thtf.elevator.common.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
