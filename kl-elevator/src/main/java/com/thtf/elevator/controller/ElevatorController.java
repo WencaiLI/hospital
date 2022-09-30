@@ -146,9 +146,10 @@ public class ElevatorController {
      */
     @PostMapping("/getAllElevatorPage")
     public JsonResult< PageInfo<ItemNestedParameterVO>> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
-                                                                             @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
-                                                                             @RequestParam(value = "pageSize",required = false)Integer pageSize){
-        return JsonResult.success(elevatorService.getAllElevatorPage(sysCode,pageNumber,pageSize));
+                                                                           @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                                           @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
+                                                                           @RequestParam(value = "pageSize",required = false)Integer pageSize){
+        return JsonResult.success(elevatorService.getAllElevatorPage(sysCode,itemTypeCode,pageNumber,pageSize));
     }
 
     /**
@@ -162,9 +163,10 @@ public class ElevatorController {
      */
     @PostMapping("/getAllAlarmPage")
     public JsonResult<Map<String, Object>> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
-                                                                       @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                                                       @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.success(elevatorService.getAllAlarmPage(sysCode,pageNumber,pageSize));
+                                                           @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                           @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+                                                           @RequestParam(value = "pageSize",required = false) Integer pageSize){
+        return JsonResult.success(elevatorService.getAllAlarmPage(sysCode,itemTypeCode,pageNumber,pageSize));
     }
 
     /**
