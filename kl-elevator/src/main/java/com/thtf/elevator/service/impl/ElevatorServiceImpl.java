@@ -15,6 +15,7 @@ import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.KeyValueDTO;
 import com.thtf.elevator.dto.convert.ItemConverter;
 import com.thtf.elevator.service.ElevatorService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -166,10 +167,19 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
     @Override
-    public PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode, Integer pageNum, Integer pageSize) {
+    public PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode,String itemTypeCode,Integer pageNum, Integer pageSize) {
         // 设备信息
         // List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
-        PageInfo<ItemNestedParameterVO> itemInfosPage = itemAPI.searchItemNestedParametersBySyscodePage(sysCode,pageNum,pageSize).getData();
+        // PageInfo<ItemNestedParameterVO> itemInfosPage = itemAPI.searchItemNestedParametersBySyscodePage(sysCode,pageNum,pageSize).getData();
+        List<String> itemCodeList = new ArrayList<>();
+        PageInfo<ItemNestedParameterVO> itemInfosPage;
+        if(StringUtils.isNotBlank(itemTypeCode)){
+            itemCodeList.add(itemTypeCode);
+            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,itemCodeList,pageNum,pageSize).getData();
+        }else {
+            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,null,pageNum,pageSize).getData();
+        }
+        // todo PageInfo<ItemNestedParameterVO> itemInfosPage = itemAPI.searchItemNestedParametersByConditionPage();
         // 查询报警信息
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmAPI.getAlarmInfoBySysCodeLimitOne(sysCode).getData();
 
@@ -195,20 +205,25 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Author: liwencai
      * @Description: 查询所有的报警电梯设备
      * @Date: 2022/9/5
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
     @Override
-    public  Map<String, Object> getAllAlarmPage(String sysCode,Integer pageNumber,Integer pageSize) {
+    public  Map<String, Object> getAllAlarmPage(String sysCode,String itemTypeCode,Integer pageNumber,Integer pageSize) {
         Map<String, Object> resultMap = new HashMap<>();
 
 
         // 设备信息
 //        List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
-        //
-        // 查询报警信息
-        List<TblAlarmRecordUnhandle> recordUnhandles = alarmAPI.getAlarmInfoBySysCodeLimitOne(sysCode).getData();
-        PageInfo<TblAlarmRecordUnhandle> alarmPageInfo = alarmAPI.getAlarmInfoBySysCodeLimitOnePage(sysCode, pageNumber, pageSize).getData();
+        List<String> itemTypeCodeList = new ArrayList<>();
+        itemTypeCodeList.add(itemTypeCode);
+        PageInfo<TblAlarmRecordUnhandle> alarmPageInfo;
+        if(StringUtils.isNotBlank(itemTypeCode)){
+            alarmPageInfo = alarmAPI.getAlarmInfoBySysCodeAndItemTypeCodeLimitOnePage(sysCode,itemTypeCodeList, pageNumber, pageSize).getData();
+        }else {
+            alarmPageInfo = alarmAPI.getAlarmInfoBySysCodeAndItemTypeCodeLimitOnePage(sysCode,null, pageNumber, pageSize).getData();
+        }
+        List<TblAlarmRecordUnhandle> recordUnhandles = alarmPageInfo.getList();
         resultMap = getMapFromPageInfo(alarmPageInfo);
         List<String> alarmItemCodeList = recordUnhandles.stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
         List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode,alarmItemCodeList).getData();

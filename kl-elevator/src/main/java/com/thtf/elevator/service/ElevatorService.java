@@ -63,7 +63,7 @@ public interface ElevatorService {
      * @Param sysCode:
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
-    PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode, Integer pageNum, Integer pageSize);
+    PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode,String itemTypeCode, Integer pageNum, Integer pageSize);
 
     /**
      * @Author: liwencai
@@ -72,7 +72,7 @@ public interface ElevatorService {
      * @Param sysCode:
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
-    Map<String, Object> getAllAlarmPage(String sysCode, Integer pageNumber, Integer pageSize);
+    Map<String, Object> getAllAlarmPage(String sysCode,String itemTypeCode, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai
