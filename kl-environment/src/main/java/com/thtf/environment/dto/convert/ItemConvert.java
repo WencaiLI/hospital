@@ -10,7 +10,7 @@ import org.mapstruct.Mappings;
 import java.util.List;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/9/23 11:09
  * @Description:
  */
@@ -19,6 +19,13 @@ public interface ItemConvert {
 
 
 
+    /**
+     * @Author: liwencai
+     * @Description: 将 tblItem 转换为 ItemInfoOfLargeScreenDTO
+     * @Date: 2022/10/7
+     * @Param tblItemList:
+     * @return: com.thtf.environment.dto.ItemInfoOfLargeScreenDTO
+     */
     @Mappings({
             @Mapping(source = "id",target = "itemId"),
             @Mapping(source = "name",target = "itemName"),
@@ -29,11 +36,10 @@ public interface ItemConvert {
 
     /**
      * @Author: liwencai
-     * @Description: 将 tblItemList 转换为 ItemInfoOfLargeScreenDTO
+     * @Description: 将 tblItemList 转换为 ItemInfoOfLargeScreenDTO List
      * @Date: 2022/9/23
      * @Param tblItemList:
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfLargeScreenDTO>
      */
-
     List<ItemInfoOfLargeScreenDTO> toItemInfoOfLSList(List<TblItem> tblItemList);
 }

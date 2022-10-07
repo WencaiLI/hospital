@@ -1,11 +1,5 @@
 package com.thtf.environment.service.impl;
 
-/**
- * @Author: liwencai
- * @Date: 2022/9/23 14:34
- * @Description: 有关redis的相关操作
- */
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,6 +7,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+/**
+ * @Author: liwencai
+ * @Date: 2022/9/23 14:34
+ * @Description: 有关redis的相关操作
+ */
 @Service
 @Slf4j
 public class RedisOperationService {
