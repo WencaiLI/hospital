@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: ${APPLICATION_NAME:kl-broadcast}
+  profiles:
+    active: ${PROFILE:dev}
+  cloud:
+    nacos:
+      config:
+        # data id 扩展名
+        file-extension: ${FILE_EXTENSION:yml}
+        # data id 所属组
+        group: ${GROUP:hospital}
+        shared-configs[0]:
+          data-id: common-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+          group: ${spring.cloud.nacos.config.group}
+
+init:
+  nacos:
+    source-server: ${SOURCE_SERVER:10.10.49.220}
+    data-id: ${DATA_ID:kl-broadcast-dev.yml}
+    group: ${GROUP:hospital}
+    content: "server:\n  port: 9001\n  servlet:\n    context-path: /kl-broadcast  \nspring:\n  datasource:\n    url: jdbc:mysql://${MYSQL_URL:10.10.49.18:3306}/kl_hospital?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true\n    username: root  \n    password: root123\n    driver-class-name: com.mysql.cj.jdbc.Driver  \n  servlet:\n    multipart:\n      max-file-size: 10MB\n      max-request-size: 50MB \n\nmybatis-plus:\n  mapper-locations: classpath:mapper/*.xml\n  configuration:\n    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl\n  type-aliases-package: com.thtf.broadcast.entity\n"
+    common:
+      id: ${COMMON_ID:common-dev.yml}
+      content: "spring:\n  servlet:\n    multipart:\n      max-file-size: 10MB\n      max-request-size: 50MB\n  datasource:\n    druid:\n      initial-size: 5\n      max-active: 30\n      min-idle: 5\n      max-wait: 60000\n      time-between-eviction-runs-millis: 60000\n      min-evictable-idle-time-millis: 300000\n      test-on-borrow: true\n      filters: stat\n      filter:\n        stat:\n          enabled: true\n          db-type: mysql\n          log-slow-sql: true\n          slow-sql-millis: 3000\n      web-stat-filter:\n        enabled: true\n        url-pattern: /*\n        exclusions: \"*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*\"\n        session-stat-enable: true\n        session-stat-max-count: 1000\n      stat-view-servlet:\n        enabled: true\n        url-pattern: /druid/*\n        reset-enable: false\n        login-username: druid\n        login-password: druid\n  redis:\n    host: ${REDIS_URL:10.10.49.227}\n    port: ${REDIS_PORT:6379}\n    database: ${REDIS_DATABASE:0}\n    jedis:\n      pool:\n        max-active: 8\n        max-wait: -1\n        max-idle: 500\n        min-idle: 0\n    timeout: 5000\n\nfeign:\n  hystrix:\n    enabled: true\n\nribbon:\n  MaxAutoRetries: 1\n  MaxAutoRetriesNextServer: 1\n  ReadTimeout: 10000\n  ConnectTimeout: 10000\n\nhystrix:\n  command:\n    default:\n      execution:\n        timeout:\n          enable: true\n        isolation:\n          thread:\n            timeoutInMilliseconds: 42500\n\nmanagement:\n  endpoints:\n    web:\n      exposure:\n        include: \"*\"\n  metrics:\n    tags:\n      application: ${spring.application.name}\n\nlog:\n  level: INFO\n\nminio:\n  endpoint: http://${MINIO_URL:10.10.49.229}\n  port: ${MINIO_PORT:9000}\n  accessKey: ${MINIO_USER:minioadmin}\n  secretKey: ${MINIO_PASS:minioadmin}\n  bucketName: ${MINIO_BUCKET:ibmsbucket}"
+  database:
+    name: kl_hospital
+    schema-script-path: sql/schema.sql

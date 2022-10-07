@@ -11,6 +11,7 @@
     <module>kl-office</module>
     <module>kl-elevator</module>
     <module>kl-environment</module>
+    <module>kl-broadcast</module>
   </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
