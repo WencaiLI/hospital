@@ -55,8 +55,10 @@ public class ElevatorServiceImpl implements ElevatorService {
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
-//        tblItemType.setParentCode(itemType);
+        // tblItemType.setParentCode(itemType);
         tblItemType.setSysCode(sysCode);
+        // 父类为itemType的设备类别
+        tblItemType.setParentCode(itemType);
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
         // 根据类别查询所有的信息
         for (TblItemType item_type: itemTypeList) {
@@ -83,7 +85,7 @@ public class ElevatorServiceImpl implements ElevatorService {
                     parameterValue).getData();
 
             KeyValueDTO runNumberKV = new KeyValueDTO();
-            runNumberKV.setKey("运行数量");
+            runNumberKV.setKey("运行总数");
             runNumberKV.setValue(runNumber);
             kvList.add(runNumberKV);
             displayInfoDTO.setResults(kvList);

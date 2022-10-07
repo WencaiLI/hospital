@@ -1,16 +1,16 @@
 package com.thtf.elevator.controller;
 
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
+import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.itemserver.TblItem;
+import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
-import com.thtf.elevator.dto.KeyValueDTO;
 import com.thtf.elevator.service.ElevatorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +29,31 @@ import java.util.Map;
 @RequestMapping(value ="/elevator")
 @Slf4j
 public class ElevatorController {
-    @Resource
-    AlarmAPI alarmAPI;
+
     @Resource
     ElevatorService elevatorService;
 
+    @Resource
+    AlarmAPI alarmAPI;
+
+    @Resource
+    AdminAPI adminAPI;
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取楼层信息
+     * @Date: 2022/9/22
+     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
+     */
+    @GetMapping("/getFloorInfo")
+    public JsonResult<List<TblBuildingArea>> getFloorInfo(){
+        try {
+            return adminAPI.getFloorInfo();
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return JsonResult.error("服务器错误");
+        }
+    }
 
     /**
      * @Author: liwencai
