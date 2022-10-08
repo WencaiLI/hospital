@@ -12,15 +12,18 @@ import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.FloorInfoDTO;
+import com.thtf.elevator.dto.ItemFaultStatisticsDTO;
 import com.thtf.elevator.service.ElevatorService;
 import com.thtf.elevator.vo.PageInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -195,9 +198,23 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.elevator.dto.KeyValueDTO>>
      */
     @PostMapping("/getItemFaultStatistics")
-    public JsonResult<List<ItemAlarmNumberInfo>> getItemFaultStatistics(@RequestParam("sysCode")String sysCode,
-                                                                        @RequestParam("startTime")String startTime,
-                                                                        @RequestParam("endTime")String endTime){
-        return JsonResult.success(elevatorService.getItemFaultStatistics(sysCode,startTime,endTime));
+    public JsonResult<ItemFaultStatisticsDTO> getItemFaultStatistics(@RequestParam("sysCode")String sysCode,
+                                                                     @RequestParam("startTime")String startTime,
+                                                                     @RequestParam("endTime")String endTime){
+        List<ItemAlarmNumberInfo> itemFaultStatistics = elevatorService.getItemFaultStatistics(sysCode, startTime, endTime);
+
+        ItemFaultStatisticsDTO result = new ItemFaultStatisticsDTO();
+        List<String> itemNameList = new ArrayList<>();
+        List<Integer> monitorAlarmNumberList = new ArrayList<>();
+        List<Integer> malfunctionAlarmNumberList = new ArrayList<>();
+        for (ItemAlarmNumberInfo alarmNumberInfo : itemFaultStatistics) {
+            itemNameList.add(alarmNumberInfo.getItemName());
+            monitorAlarmNumberList.add(alarmNumberInfo.getMonitorAlarmNumber());
+            malfunctionAlarmNumberList.add(alarmNumberInfo.getMalfunctionAlarmNumber());
+        }
+        result.setItemName(itemNameList);
+        result.setMonitorAlarmNumber(monitorAlarmNumberList);
+        result.setMalfunctionAlarmNumber(malfunctionAlarmNumberList);
+        return JsonResult.success(result);
     }
 }
