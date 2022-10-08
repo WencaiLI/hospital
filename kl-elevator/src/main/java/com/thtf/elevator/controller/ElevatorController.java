@@ -13,6 +13,7 @@ import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.FloorInfoDTO;
 import com.thtf.elevator.service.ElevatorService;
+import com.thtf.elevator.vo.PageInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,9 +37,6 @@ public class ElevatorController {
 
     @Resource
     AlarmAPI alarmAPI;
-
-    @Resource
-    AdminAPI adminAPI;
 
     /**
      * @Author: liwencai
@@ -165,10 +163,10 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>>>
      */
     @PostMapping("/getAllElevatorPage")
-    public JsonResult< PageInfo<ItemNestedParameterVO>> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
-                                                                           @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
-                                                                           @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
-                                                                           @RequestParam(value = "pageSize",required = false)Integer pageSize){
+    public JsonResult<PageInfoVO> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
+                                                     @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                     @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
+                                                     @RequestParam(value = "pageSize",required = false)Integer pageSize){
         return JsonResult.success(elevatorService.getAllElevatorPage(sysCode,itemTypeCode,pageNumber,pageSize));
     }
 
@@ -182,7 +180,7 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.elevator.dto.ElevatorAlarmResultDTO>>
      */
     @PostMapping("/getAllAlarmPage")
-    public JsonResult<Map<String, Object>> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
+    public JsonResult<PageInfoVO> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
                                                            @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
                                                            @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                                            @RequestParam(value = "pageSize",required = false) Integer pageSize){

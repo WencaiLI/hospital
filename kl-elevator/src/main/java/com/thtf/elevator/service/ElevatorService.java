@@ -5,6 +5,7 @@ import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.elevator.dto.*;
+import com.thtf.elevator.vo.PageInfoVO;
 
 import java.util.List;
 import java.util.Map;
@@ -56,20 +57,26 @@ public interface ElevatorService {
     /**
      * @Author: liwencai
      * @Description: 所有电梯设备信息
-     * @Date: 2022/9/5
-     * @Param sysCode:
-     * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
+     * @Date: 2022/10/8
+     * @Param: sysCode: 子系统编码
+     * @Param: itemTypeCode: 设备类别编码
+     * @Param: pageNum: 页号
+     * @Param: pageSize: 页大小
+     * @Return: com.thtf.elevator.vo.PageInfoVO
      */
-    PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode,String itemTypeCode, Integer pageNum, Integer pageSize);
+    PageInfoVO getAllElevatorPage(String sysCode, String itemTypeCode, Integer pageNum, Integer pageSize);
 
     /**
      * @Author: liwencai
      * @Description: 所有故障设备信息
-     * @Date: 2022/9/5
-     * @Param sysCode:
-     * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
+     * @Date: 2022/10/8
+     * @Param: sysCode:
+     * @Param: itemTypeCode:
+     * @Param: pageNumber:
+     * @Param: pageSize:
+     * @Return: com.thtf.elevator.vo.PageInfoVO
      */
-    Map<String, Object> getAllAlarmPage(String sysCode,String itemTypeCode, Integer pageNumber, Integer pageSize);
+    PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai

@@ -7,6 +7,7 @@ import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
+import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
@@ -17,7 +18,10 @@ import com.thtf.elevator.dto.FloorInfoDTO;
 import com.thtf.elevator.dto.KeyValueDTO;
 import com.thtf.elevator.dto.convert.FloorConverter;
 import com.thtf.elevator.dto.convert.ItemConverter;
+import com.thtf.elevator.dto.convert.PageInfoConvert;
+import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorService;
+import com.thtf.elevator.vo.PageInfoVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +52,12 @@ public class ElevatorServiceImpl implements ElevatorService {
     @Resource
     FloorConverter floorConverter;
 
+    @Resource
+    PageInfoConvert pageInfoConvert;
+
+    @Resource
+    ParameterConverter parameterConverter;
+
 
     /**
      * @Author: liwencai
@@ -56,7 +66,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
      */
     @Override
-    public List<FloorInfoDTO> getFloorInfo(){
+    public List<FloorInfoDTO> getFloorInfo() throws RuntimeException{
         List<TblBuildingArea> resourceList = adminAPI.getFloorInfo().getData();
         return floorConverter.toFloorList(resourceList);
     }
@@ -117,7 +127,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Author: liwencai
      * @Description: 获取 “故障” 报警数量
      * @Date: 2022/9/5
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @return: java.lang.Integer
      */
     @Override
@@ -132,7 +142,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Author: liwencai
      * @Description:
      * @Date: 2022/9/5
-     * @Param itemCodeList:
+     * @Param itemCodeList: 设备编码集
      * @Param isNeedAreaName: 是否需要区域中文名称
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
@@ -150,7 +160,7 @@ public class ElevatorServiceImpl implements ElevatorService {
                 elevatorInfoResultDTO.setAreaName(adminAPI.searchAreaByCode(itemInfo.getAreaCode()).getData().getName());
             }
             // 查询参数信息
-            elevatorInfoResultDTO.setParameterList(itemAPI.searchParameterByItemCodes(Collections.singletonList(itemCode)).getData());
+            elevatorInfoResultDTO.setParameterList(parameterConverter.toParameterInfo(itemAPI.searchParameterByItemCodes(Collections.singletonList(itemCode)).getData()));
             result.add(elevatorInfoResultDTO);
         }
         return result;
@@ -188,7 +198,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
     @Override
-    public PageInfo<ItemNestedParameterVO> getAllElevatorPage(String sysCode,String itemTypeCode,Integer pageNum, Integer pageSize) {
+    public PageInfoVO getAllElevatorPage(String sysCode,String itemTypeCode,Integer pageNum, Integer pageSize) {
         // 设备信息
         // List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySyscode(sysCode).getData();
         // PageInfo<ItemNestedParameterVO> itemInfosPage = itemAPI.searchItemNestedParametersBySyscodePage(sysCode,pageNum,pageSize).getData();
@@ -200,15 +210,17 @@ public class ElevatorServiceImpl implements ElevatorService {
         }else {
             itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,null,pageNum,pageSize).getData();
         }
+
+
+
+
         // todo PageInfo<ItemNestedParameterVO> itemInfosPage = itemAPI.searchItemNestedParametersByConditionPage();
         // 查询报警信息
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmAPI.getAlarmInfoBySysCodeLimitOne(sysCode).getData();
-
         // todo 此处有优化空间
         for (ItemNestedParameterVO item : itemInfosPage.getList()) {
             item.setAreaName(adminAPI.searchAreaByCode(item.getAreaCode()).getData().getName());
         }
-
         for (TblAlarmRecordUnhandle alarmRecordUnhandle : recordUnhandles) {
             itemInfosPage.getList().forEach(e->{
                 if(e.getCode().equals(alarmRecordUnhandle.getItemCode())){
@@ -219,7 +231,24 @@ public class ElevatorServiceImpl implements ElevatorService {
                 }
             });
         }
-        return itemInfosPage;
+        //  return itemInfosPage;
+
+        // bean 转换
+
+
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemInfosPage);
+
+        List<ElevatorInfoResultDTO> resultDTOList = new ArrayList<>();
+
+        for (ItemNestedParameterVO item : itemInfosPage.getList()) {
+
+            ElevatorInfoResultDTO elevatorInfoResult = itemConverter.toElevatorInfo(item);
+            elevatorInfoResult.setParameterList(parameterConverter.toParameterInfo(item.getParameterList()));
+            resultDTOList.add(elevatorInfoResult);
+        }
+
+        pageInfoVO.setList(resultDTOList);
+        return pageInfoVO;
     }
 
     /**
@@ -230,8 +259,8 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
     @Override
-    public  Map<String, Object> getAllAlarmPage(String sysCode,String itemTypeCode,Integer pageNumber,Integer pageSize) {
-        Map<String, Object> resultMap = new HashMap<>();
+    public PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode,Integer pageNumber,Integer pageSize) {
+        // Map<String, Object> resultMap = new HashMap<>();
 
 
         // 设备信息
@@ -245,7 +274,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             alarmPageInfo = alarmAPI.getAlarmInfoBySysCodeAndItemTypeCodeLimitOnePage(sysCode,null, pageNumber, pageSize).getData();
         }
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmPageInfo.getList();
-        resultMap = getMapFromPageInfo(alarmPageInfo);
+        // resultMap = getMapFromPageInfo(alarmPageInfo);
         List<String> alarmItemCodeList = recordUnhandles.stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
         List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode,alarmItemCodeList).getData();
 
@@ -266,8 +295,27 @@ public class ElevatorServiceImpl implements ElevatorService {
                 }
             });
         }
-        resultMap.put("list",itemInfos);
-        return resultMap;
+        // resultMap.put("list",itemInfos);
+
+
+
+
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(alarmPageInfo);
+
+        List<ElevatorInfoResultDTO> resultDTOList = new ArrayList<>();
+
+        for (ItemNestedParameterVO item : itemInfos) {
+
+            ElevatorInfoResultDTO elevatorInfoResult = itemConverter.toElevatorInfo(item);
+            elevatorInfoResult.setParameterList(parameterConverter.toParameterInfo(item.getParameterList()));
+            resultDTOList.add(elevatorInfoResult);
+        }
+
+        pageInfoVO.setList(resultDTOList);
+        return pageInfoVO;
+
+
+        // return resultMap;
     }
 
     @Override

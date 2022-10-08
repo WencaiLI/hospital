@@ -1,8 +1,12 @@
 package com.thtf.elevator.dto.convert;
 
+import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.itemserver.TblItem;
+import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 import java.util.List;
 
@@ -14,4 +18,15 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ItemConverter {
     List<TblItem> toItemList(List<TblItemDTO> tblItemDTOS);
+
+    @Mappings({
+            @Mapping(source = "id",target = "itemId"),
+            @Mapping(source = "code",target = "itemCode"),
+            @Mapping(source = "name",target = "itemName"),
+            @Mapping(source = "areaName",target = "areaName"),
+            @Mapping(source = "alarmStatus",target = "alarmStatus")
+    })
+    ElevatorInfoResultDTO toElevatorInfo(ItemNestedParameterVO itemNestedParameterVO);
+
+    List<ElevatorInfoResultDTO> toElevatorInfoList(List<ItemNestedParameterVO> itemNestedParameterVOList);
 }
