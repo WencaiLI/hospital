@@ -4,10 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.itemserver.TblItem;
-import com.thtf.elevator.dto.DisplayInfoDTO;
-import com.thtf.elevator.dto.ElevatorAlarmResultDTO;
-import com.thtf.elevator.dto.ElevatorInfoResultDTO;
-import com.thtf.elevator.dto.KeyValueDTO;
+import com.thtf.elevator.dto.*;
 
 import java.util.List;
 import java.util.Map;
@@ -82,4 +79,12 @@ public interface ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.KeyValueDTO>
      */
     List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String startTime, String endTime);
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取楼层信息
+     * @Date: 2022/10/8
+     * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
+     */
+    List<FloorInfoDTO> getFloorInfo();
 }

@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
+import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemType;
@@ -12,7 +13,9 @@ import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
+import com.thtf.elevator.dto.FloorInfoDTO;
 import com.thtf.elevator.dto.KeyValueDTO;
+import com.thtf.elevator.dto.convert.FloorConverter;
 import com.thtf.elevator.dto.convert.ItemConverter;
 import com.thtf.elevator.service.ElevatorService;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +44,22 @@ public class ElevatorServiceImpl implements ElevatorService {
 
     @Resource
     ItemConverter itemConverter;
+
+    @Resource
+    FloorConverter floorConverter;
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取楼层信息
+     * @Date: 2022/10/8
+     * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
+     */
+    @Override
+    public List<FloorInfoDTO> getFloorInfo(){
+        List<TblBuildingArea> resourceList = adminAPI.getFloorInfo().getData();
+        return floorConverter.toFloorList(resourceList);
+    }
 
     /**
      * @Author: liwencai
