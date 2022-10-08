@@ -11,6 +11,7 @@ import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
+import com.thtf.elevator.dto.FloorInfoDTO;
 import com.thtf.elevator.service.ElevatorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -46,11 +47,10 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
      */
     @GetMapping("/getFloorInfo")
-    public JsonResult<List<TblBuildingArea>> getFloorInfo(){
+    public JsonResult<List<FloorInfoDTO>> getFloorInfo(){
         try {
-            return adminAPI.getFloorInfo();
+            return JsonResult.success(elevatorService.getFloorInfo());
         }catch (Exception e){
-            log.error(e.getMessage());
             return JsonResult.error("服务器错误");
         }
     }
