@@ -46,8 +46,8 @@ public class ContractController {
 	@Resource
 	private FileUtil minioFileUtil;
 
-	@Value("${minio.bucketName}")
-	private String bucketName;
+//	@Value("${minio.bucketName}")
+//	private String bucketName;
 	// 合同类别
 
 	/**
