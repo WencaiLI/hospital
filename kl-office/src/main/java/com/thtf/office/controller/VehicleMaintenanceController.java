@@ -82,7 +82,6 @@ public class VehicleMaintenanceController {
      */
     @PostMapping("/select")
     public JsonResult<List<TblVehicleMaintenance>> select(@RequestBody VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
-        List<TblVehicleMaintenance> result = vehicleMaintenanceService.select(vehicleMaintenanceParamVO);
-        return JsonResult.success(result);
+        return JsonResult.querySuccess(vehicleMaintenanceService.select(vehicleMaintenanceParamVO));
     }
 }

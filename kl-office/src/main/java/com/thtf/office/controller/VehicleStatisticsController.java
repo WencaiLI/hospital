@@ -38,7 +38,7 @@ public class VehicleStatisticsController {
     @GetMapping("/vehicleStatus")
     @OperateLog(content = "车辆调度状态实时统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "001",systemName = "kl-office")
     public JsonResult<List<VehicleStatisticsResultVO>> getVehicleStatus(){
-        return JsonResult.success(vehicleStatisticsService.getVehicleStatus(null));
+        return JsonResult.querySuccess(vehicleStatisticsService.getVehicleStatus(null));
     }
 
     /**
@@ -50,8 +50,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/vehicleCategory")
     public JsonResult<List<VehicleStatisticsResultVO>> getVehicleCategory(@RequestBody VehicleStatisticsParamVO paramVO){
-        List<VehicleStatisticsResultVO> result = vehicleStatisticsService.getVehicleCategory(paramVO);
-        return JsonResult.success(result);
+        return JsonResult.querySuccess(vehicleStatisticsService.getVehicleCategory(paramVO));
     }
 
     /**
@@ -63,7 +62,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfOrg")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfOrg(@RequestBody VehicleStatisticsParamVO paramVO){
-        return JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name")));
+        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name")));
     }
 
     /**
@@ -75,7 +74,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfVeh")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfVeh(@RequestBody VehicleStatisticsParamVO paramVO){
-        return JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number")));
+        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number")));
     }
 
     /**
@@ -87,7 +86,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfDri")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfDri(@RequestBody VehicleStatisticsParamVO paramVO){
-        return JsonResult.success(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name")));
+        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name")));
     }
 
     /**
@@ -99,8 +98,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfMai")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfMai(@RequestBody VehicleStatisticsParamVO paramVO){
-        List<VehicleRankingsResultVO> result = vehicleStatisticsService.getMaintenanceRankings(paramVO);
-        return JsonResult.success(result);
+        return JsonResult.querySuccess(vehicleStatisticsService.getMaintenanceRankings(paramVO));
     }
 
     /**
@@ -116,7 +114,7 @@ public class VehicleStatisticsController {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("field",field);
         try {
-            return JsonResult.success(vehicleStatisticsService.getWorkingDurationRankings(paramMap));
+            return JsonResult.querySuccess(vehicleStatisticsService.getWorkingDurationRankings(paramMap));
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("排行失败");
@@ -126,7 +124,7 @@ public class VehicleStatisticsController {
     @PostMapping("/rankingsOfSchWD")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfSchWD(@RequestBody VehicleStatisticsParamVO paramVO){
         try {
-            return JsonResult.success(vehicleStatisticsService.rankingsOfSchWD(paramVO));
+            return JsonResult.querySuccess(vehicleStatisticsService.rankingsOfSchWD(paramVO));
         }catch (Exception e){
             return JsonResult.error(e.getMessage());
         }

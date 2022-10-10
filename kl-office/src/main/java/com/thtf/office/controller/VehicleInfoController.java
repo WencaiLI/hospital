@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.List;
@@ -60,7 +62,8 @@ public class VehicleInfoController {
      */
     @PostMapping("/insert")
     public JsonResult<Boolean> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
-                                                      @ModelAttribute List<MultipartFile> carImageFile, @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
+                                      @ModelAttribute List<MultipartFile> carImageFile,
+                                      @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
         //上传文件后获取文件名字符串和url字符串
         String[] carImageFileNameAndUrl = fileUtil.uploadMultiFile(carImageFile);
@@ -83,7 +86,7 @@ public class VehicleInfoController {
      * @Author: liwencai
      * @Description: 删除公车信息
      * @Date: 2022/7/26
-     * @Param vid:
+     * @Param vid: 公车id
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
@@ -134,7 +137,7 @@ public class VehicleInfoController {
      */
     @PostMapping("/select")
     public JsonResult<List<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
-        return JsonResult.success(vehicleInfoService.select(paramVO));
+        return JsonResult.querySuccess(vehicleInfoService.select(paramVO));
     }
 
     /**
@@ -146,7 +149,7 @@ public class VehicleInfoController {
      */
     @GetMapping("/selectByKey")
     public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
-        return JsonResult.success(vehicleInfoService.selectByKey(keywords));
+        return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
     }
 
     /**
@@ -160,14 +163,7 @@ public class VehicleInfoController {
      */
     @PostMapping("/itemImport")
     public JsonResult<String> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
-        try{
-            String originalFilename = uploadFile.getOriginalFilename();
-            String string = vehicleInfoService.batchImport(uploadFile, originalFilename, type, null);
-            return JsonResult.success(string);
-        } catch (Exception e){
-            log.error(e.getClass().getName() + ":" + e.getMessage());
-            return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
-        }
+        return JsonResult.success(vehicleInfoService.batchImport(uploadFile, uploadFile.getOriginalFilename(), type, null));
     }
 
     /**
@@ -179,7 +175,7 @@ public class VehicleInfoController {
     @GetMapping("/importProgress")
     public JsonResult<BigDecimal> importProgress() {
         try{
-            return JsonResult.success(vehicleInfoService.importProgress());
+            return JsonResult.querySuccess(vehicleInfoService.importProgress());
         } catch (Exception e){
             e.printStackTrace();
             return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
@@ -195,27 +191,42 @@ public class VehicleInfoController {
      */
     @GetMapping("/importTemplateDownload")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response){
+
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Pragma", "No-Cache");
+        response.setHeader("Cache-Control", "No-Cache");
+        response.setDateHeader("Expires", 0);
+        response.setContentType("application/msexcel; charset=UTF-8");
         try {
-            response.setCharacterEncoding("utf-8");
-            response.setHeader("Pragma", "No-Cache");
-            response.setHeader("Cache-Control", "No-Cache");
-            response.setDateHeader("Expires", 0);
-            response.setContentType("application/msexcel; charset=UTF-8");
             response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xlsx", "UTF-8"));
-            ServletOutputStream out;
-            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
-                    + "ExcelTemplate/vehicleTemplate.xlsx";
-            String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
-            FileInputStream in = new FileInputStream(filePath);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+//            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
+//                    + "ExcelTemplate/vehicleTemplate.xlsx";
+//            String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
+//            FileInputStream in = new FileInputStream(filePath);
+//            out = response.getOutputStream();
+//            out.flush();
+//            int aRead;
+//            while ((aRead = in.read()) != -1) {
+//                out.write(aRead);
+//            }
+//            out.flush();
+//            in.close();
+//            out.close();
+
+        InputStream inputStream ;
+        ServletOutputStream out ;
+        try {
             out = response.getOutputStream();
-            out.flush();
+            inputStream = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
             int aRead;
-            while ((aRead = in.read()) != -1) {
+            while ((aRead = inputStream.read()) != -1) {
                 out.write(aRead);
             }
-            out.flush();
-            in.close();
             out.close();
+            inputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -246,7 +257,7 @@ public class VehicleInfoController {
     @GetMapping("/selectByCidAndMonth")
     public JsonResult<List<VehicleSelectByDateResult>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
         List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(cid);
-        return JsonResult.success(result);
+        return JsonResult.querySuccess(result);
     }
 
     /**
@@ -257,10 +268,6 @@ public class VehicleInfoController {
      */
     @GetMapping("/updateInfoStatus")
     public JsonResult<Boolean> updateInfoStatus(){
-        if(vehicleInfoService.updateInfoStatus()){
-            return JsonResult.success(true);
-        }else {
-            return JsonResult.error("更新公车状态失败");
-        }
+        return JsonResult.querySuccess(true);
     }
 }
