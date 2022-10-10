@@ -96,8 +96,7 @@ public class VehicleSchedulingController {
      */
     @PostMapping("/select")
     public JsonResult<List<TblVehicleScheduling>> select(@RequestBody VehicleSchedulingParamVO paramVO){
-        List<TblVehicleScheduling> result = vehicleSchedulingService.select(paramVO);
-        return JsonResult.success(result);
+        return JsonResult.querySuccess(vehicleSchedulingService.select(paramVO));
     }
 
     /**
@@ -108,8 +107,7 @@ public class VehicleSchedulingController {
      */
     @GetMapping("/selectInfoAboutDri")
     public JsonResult<List<VehicleSelectByDateResult>> selectInfoAboutDri() {
-        List<VehicleSelectByDateResult> results = vehicleSchedulingService.selectInfoAboutDri();
-        return JsonResult.success(results);
+        return JsonResult.querySuccess(vehicleSchedulingService.selectInfoAboutDri());
     }
 
     /**
@@ -122,8 +120,7 @@ public class VehicleSchedulingController {
     @GetMapping("/createSerialNumber")
     public JsonResult<String> createSerialNumber() {
         try {
-            String num = vehicleSchedulingService.createSerialNumber();
-            return JsonResult.success(num);
+            return JsonResult.querySuccess(vehicleSchedulingService.createSerialNumber());
         } catch (Exception e) {
             return JsonResult.error("流水号生成失败！");
         }
@@ -140,7 +137,7 @@ public class VehicleSchedulingController {
         try {
             return adminAPI.findOrganizationTree();
         }catch (Exception e) {
-            log.error("远程调用查询所有部门信息失败");
+            log.error(e.getMessage());
             return JsonResult.error("查询失败");
         }
     }
@@ -157,7 +154,7 @@ public class VehicleSchedulingController {
         try {
             return adminAPI.searchUserByOrganization(organizationCode);
         }catch (Exception e){
-            log.error("远程调用通过组织编码查询用户信息失败");
+            log.error(e.getMessage());
             return ResponseEntity.ok(JsonResult.error("查询失败"));
         }
     }

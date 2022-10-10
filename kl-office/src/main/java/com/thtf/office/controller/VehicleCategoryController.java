@@ -33,6 +33,7 @@ public class VehicleCategoryController {
 
     @Resource
     TblVehicleCategoryService vehicleCategoryService;
+
     @Resource
     TblVehicleInfoService vehicleInfoService;
 
@@ -93,8 +94,7 @@ public class VehicleCategoryController {
      */
     @PostMapping("/select")
     public JsonResult<List<VehicleCategoryResultVO>> select(@RequestBody VehicleCategoryParamVO vehicleCategoryParamVO){
-        List<VehicleCategoryResultVO> vehicleCategoryList =vehicleCategoryService.select(vehicleCategoryParamVO);
-        return JsonResult.success(vehicleCategoryList);
+        return JsonResult.querySuccess(vehicleCategoryService.select(vehicleCategoryParamVO));
     }
 
     /**
@@ -107,8 +107,7 @@ public class VehicleCategoryController {
     public JsonResult<Integer> totalNumber(){
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time");
-        vehicleCategoryService.count(queryWrapper);
-        return JsonResult.success(vehicleCategoryService.count(queryWrapper));
+        return JsonResult.querySuccess(vehicleCategoryService.count(queryWrapper));
     }
 
     /**
@@ -122,7 +121,7 @@ public class VehicleCategoryController {
     public JsonResult<Integer> correlationNumber(@RequestParam(value = "cid") @NotNull Long cid){
         QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").eq("vehicle_category_id",cid);
-        return JsonResult.success(vehicleInfoService.count(queryWrapper));
+        return JsonResult.querySuccess(vehicleInfoService.count(queryWrapper));
     }
 
     /**
@@ -148,7 +147,7 @@ public class VehicleCategoryController {
      */
     @GetMapping("/selectInfoNumberByCategory")
     public JsonResult<List<SelectAllInfoResultDTO>> selectInfoNumberByCategory(){
-        return JsonResult.success(vehicleCategoryService.selectInfoNumberByCategory());
+        return JsonResult.querySuccess(vehicleCategoryService.selectInfoNumberByCategory());
     }
 
 }
