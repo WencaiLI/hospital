@@ -1,6 +1,7 @@
 package com.thtf.office.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
@@ -93,8 +94,12 @@ public class VehicleCategoryController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.awt.List>>
      */
     @PostMapping("/select")
-    public JsonResult<List<VehicleCategoryResultVO>> select(@RequestBody VehicleCategoryParamVO vehicleCategoryParamVO){
-        return JsonResult.querySuccess(vehicleCategoryService.select(vehicleCategoryParamVO));
+    public JsonResult select(@RequestBody VehicleCategoryParamVO vehicleCategoryParamVO){
+        if(null != vehicleCategoryParamVO.getPageNumber() && null != vehicleCategoryParamVO.getPageSize()){
+            return JsonResult.querySuccess(PageInfo.of(vehicleCategoryService.select(vehicleCategoryParamVO)));
+        }else {
+            return JsonResult.querySuccess(vehicleCategoryService.select(vehicleCategoryParamVO));
+        }
     }
 
     /**

@@ -119,4 +119,13 @@ public class VehicleSchedulingParamVO {
      * 目的地
      */
     private String destination;
+
+    /**
+     * 关键词
+     */
+    private String keyword;
+
+    private Integer pageNumber;
+
+    private Integer pageSize;
 }

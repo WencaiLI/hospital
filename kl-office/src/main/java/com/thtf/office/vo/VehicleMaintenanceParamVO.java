@@ -59,4 +59,8 @@ public class VehicleMaintenanceParamVO {
      */
     private String description;
 
+    private Integer pageNumber;
+
+    private Integer pageSize;
+
 }

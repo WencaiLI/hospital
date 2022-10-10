@@ -24,4 +24,8 @@ public class VehicleCategoryParamVO implements Serializable {
     private String name; // 公车类别名臣
 
     private String description; // 公车类别描述
+
+    private Integer pageNumber;
+
+    private Integer pageSize;
 }

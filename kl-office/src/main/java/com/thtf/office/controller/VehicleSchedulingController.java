@@ -1,5 +1,7 @@
 package com.thtf.office.controller;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.adminserver.TblOrganizationDTO;
 import com.thtf.common.entity.adminserver.TblUser;
 import com.thtf.common.feign.AdminAPI;
@@ -95,8 +97,11 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleScheduling>>
      */
     @PostMapping("/select")
-    public JsonResult<List<TblVehicleScheduling>> select(@RequestBody VehicleSchedulingParamVO paramVO){
-        return JsonResult.querySuccess(vehicleSchedulingService.select(paramVO));
+    public JsonResult<PageInfo<TblVehicleScheduling>> select(@RequestBody VehicleSchedulingParamVO paramVO){
+        if(null != paramVO.getPageNumber() && null != paramVO.getPageSize()){
+            PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
+        }
+        return JsonResult.querySuccess(PageInfo.of(vehicleSchedulingService.select(paramVO)));
     }
 
     /**
