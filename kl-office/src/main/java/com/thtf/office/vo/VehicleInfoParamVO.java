@@ -73,4 +73,8 @@ public class VehicleInfoParamVO implements Serializable {
     private String description; // 描述
 
     private Integer status; // 车辆状态 0：待命中；1：出车中；2：维修中；3：已淘汰
+
+    private Integer pageNumber;
+
+    private Integer pageSize;
 }

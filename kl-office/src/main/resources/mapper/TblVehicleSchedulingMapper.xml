@@ -8,6 +8,15 @@
             <if test="id != null">
                 and id = #{id}
             </if>
+            <if test="null != keyword">
+                and (
+                car_number like CONCAT('%',#{keyword},'%') or
+                code like CONCAT('%',#{keyword},'%') or
+                user_name like CONCAT('%',#{keyword},'%') or
+                purpose like CONCAT('%',#{keyword},'%') or
+                driver_name like CONCAT('%',#{keyword},'%')
+                )
+            </if>
             <if test="carNumber">
                 and car_number = #{carNumber}
             </if>

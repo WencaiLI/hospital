@@ -1,6 +1,8 @@
 package com.thtf.office.controller;
 
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.entity.TblVehicleMaintenance;
@@ -81,7 +83,10 @@ public class VehicleMaintenanceController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
-    public JsonResult<List<TblVehicleMaintenance>> select(@RequestBody VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
-        return JsonResult.querySuccess(vehicleMaintenanceService.select(vehicleMaintenanceParamVO));
+    public JsonResult<PageInfo<TblVehicleMaintenance>> select(@RequestBody VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
+        if(null != vehicleMaintenanceParamVO.getPageNumber() && null != vehicleMaintenanceParamVO.getPageSize()){
+            PageHelper.startPage(vehicleMaintenanceParamVO.getPageNumber(),vehicleMaintenanceParamVO.getPageSize());
+        }
+        return JsonResult.querySuccess(PageInfo.of(vehicleMaintenanceService.select(vehicleMaintenanceParamVO)));
     }
 }

@@ -1,6 +1,9 @@
 package com.thtf.office.controller;
 
+import cn.hutool.db.Page;
 import com.alibaba.excel.EasyExcel;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
 import com.thtf.office.common.valid.VehicleParamValid;
@@ -136,8 +139,11 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
-    public JsonResult<List<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
-        return JsonResult.querySuccess(vehicleInfoService.select(paramVO));
+    public JsonResult<PageInfo<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
+        if(null != paramVO.getPageNumber()  && null != paramVO.getPageSize()){
+            PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
+        }
+        return JsonResult.querySuccess(PageInfo.of(vehicleInfoService.select(paramVO)));
     }
 
     /**
