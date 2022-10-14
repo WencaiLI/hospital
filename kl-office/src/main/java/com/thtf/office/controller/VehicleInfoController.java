@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -198,26 +200,28 @@ public class VehicleInfoController {
      */
     @GetMapping("/importTemplateDownload")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
-        // FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
-//        response.setCharacterEncoding("utf-8");
-//        response.setHeader("Pragma", "No-Cache");
-//        response.setHeader("Cache-Control", "No-Cache");
-//        response.setDateHeader("Expires", 0);
-//        // response.setContentType("application/msexcel; charset=UTF-8");
-//        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
-//        try {
-//            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
+       //  FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Pragma", "No-Cache");
+        response.setHeader("Cache-Control", "No-Cache");
+        response.setDateHeader("Expires", 0);
+        // response.setContentType("application/msexcel; charset=UTF-8");
+        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
+        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+        try {
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
-        ClassPathResource resource = new ClassPathResource("ExcelTemplate/vehicleTemplate.xls");
-        InputStream inputStream = resource.getInputStream();
-        Workbook workbook = WorkbookFactory.create(inputStream);
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("content-Type", "application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
-        workbook.write(response.getOutputStream());
+//        ClassPathResource resource = new ClassPathResource("ExcelTemplate/vehicleTemplate.xlsx");
+//        InputStream inputStream = resource.getInputStream();
+//        Workbook workbook = WorkbookFactory.create(inputStream);
+//        response.setCharacterEncoding("UTF-8");
+//        response.setHeader("content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("公车信息导入模板.xlsx", "UTF-8"));
+//        workbook.write(response.getOutputStream());
 
 //        try {
 //            ServletOutputStream out;
@@ -260,25 +264,23 @@ public class VehicleInfoController {
 //            e.printStackTrace();
 //        }
 
-
-
-//        FileInputStream fis ;
-//        ServletOutputStream out;
-//        try {
-//            out = response.getOutputStream();
-//            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
-//            File file = new File(resource.toURI());
-//            fis = new FileInputStream(file);
-//            int aRead;
-//            while ((aRead = fis.read()) != -1) {
-//                out.write(aRead);
-//            }
-//            out.close();
-//            fis.close();
-//        } catch (IOException | URISyntaxException e) {
-//            e.printStackTrace();
-//        }
-
+        FileInputStream fis ;
+        ServletOutputStream out;
+        try {
+            out = response.getOutputStream();
+            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
+            File file = new File(resource.toURI());
+            fis = new FileInputStream(file);
+            int aRead;
+            while ((aRead = fis.read()) != -1) {
+                out.write(aRead);
+            }
+            out.close();
+            fis.close();
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+//
 //        InputStream fs ;
 //        ServletOutputStream out;
 //        try {

@@ -21,7 +21,7 @@ public class FileUtils {
      */
     public static JsonResult downloadStaticExcelFile(HttpServletResponse response,String sourcePath,String fileName) {
         // sourcePath = "static/x"
-        InputStream stream = FileUtils.class.getClassLoader().getResourceAsStream(sourcePath + fileName);
+        InputStream stream = FileUtils.class.getClassLoader().getResourceAsStream(sourcePath);
         /*InputStream stream = null;
         try {
             stream = new ClassPathResource("excel/" + fileName).getInputStream();
@@ -32,7 +32,8 @@ public class FileUtils {
             log.error("文件没有找到");
         }
         //response.setHeader("content-type", "application/octet-stream");
-        response.setContentType("application/octet-stream");
+        // response.setContentType("application/octet-stream");
+        response.setHeader("content-Type", "application/vnd.ms-excel");
         try {
             String name = java.net.URLEncoder.encode(fileName, "UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + java.net.URLDecoder.decode(name, "UTF-8"));
