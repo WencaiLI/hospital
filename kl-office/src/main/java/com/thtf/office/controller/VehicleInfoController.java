@@ -15,12 +15,16 @@ import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -195,7 +199,7 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/importTemplateDownload")
-    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response)  {
+    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setCharacterEncoding("utf-8");
         response.setHeader("Pragma", "No-Cache");
@@ -207,10 +211,13 @@ public class VehicleInfoController {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-//        ServletOutputStream out;
+
+
+//        try {
+//            ServletOutputStream out;
 //            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
 //                    + "ExcelTemplate/vehicleTemplate.xlsx";
-//            String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
+//            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
 //            FileInputStream in = new FileInputStream(filePath);
 //            out = response.getOutputStream();
 //            out.flush();
@@ -221,24 +228,139 @@ public class VehicleInfoController {
 //            out.flush();
 //            in.close();
 //            out.close();
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
 
-        FileInputStream fis ;
+
+//        try {
+//            ServletOutputStream out;
+//            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
+//                    + "ExcelTemplate/vehicleTemplate.xlsx";
+//            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
+//            FileInputStream in = new FileInputStream(filePath);
+//            out = response.getOutputStream();
+//            out.flush();
+//            int aRead;
+//            while ((aRead = in.read()) != -1) {
+//                out.write(aRead);
+//            }
+//            out.flush();
+//            in.close();
+//            out.close();
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+
+
+
+//        FileInputStream fis ;
+//        ServletOutputStream out;
+//        try {
+//            out = response.getOutputStream();
+//            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
+//            File file = new File(resource.toURI());
+//            fis = new FileInputStream(file);
+//            int aRead;
+//            while ((aRead = fis.read()) != -1) {
+//                out.write(aRead);
+//            }
+//            out.close();
+//            fis.close();
+//        } catch (IOException | URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+
+        InputStream fs ;
         ServletOutputStream out;
         try {
+            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
             out = response.getOutputStream();
-            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
-            File file = new File(resource.toURI());
-            fis = new FileInputStream(file);
             int aRead;
-            while ((aRead = fis.read()) != -1) {
+            while ((aRead = fs.read()) != -1) {
                 out.write(aRead);
             }
             out.close();
-            fis.close();
-        } catch (IOException | URISyntaxException e) {
+            fs.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+//    /**
+//     * 下载导入模板
+//     *
+//     * @return
+//     */
+//    @RequestMapping(value = "/downImportModelFile", produces = "application/json")
+//    @ResponseBody
+//    public JsonResult<Boolean> downImportModelFile(HttpServletRequest request, HttpServletResponse response) {
+//        Boolean result = downFile(importModel, request, response);
+//        return JsonResult.success();
+//    }
+//    /**
+//     * 下载文件
+//     *      下载中英文件名的文件
+//     * @param filePath 文件路径
+//     * @return
+//     */
+//    public JsonResult<Boolean> downFile(String filePath, HttpServletRequest request, HttpServletResponse response) {
+//        InputStream fis = null;
+//        OutputStream toClient = null;
+//        File file = new File(filePath);
+//        if(!file.exists()){
+//            return JsonResult.error("file path is not exist");
+//        }
+//        try {
+//            // 以流的形式下载文件。
+//            fis = new BufferedInputStream(new FileInputStream(filePath));
+//            byte[] buffer = new byte[fis.available()];
+//            fis.read(buffer);
+//            // 设置Response
+//            setResponse(request,response,file);
+//            toClient = new BufferedOutputStream(response.getOutputStream());
+//            toClient.write(buffer);
+//            return null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return JsonResult.error(e.getMessage());
+//        } finally {
+//            try {
+//                if (null != fis) {
+//                    IOUtils.closeQuietly(fis);
+//                }
+//                if (null != toClient) {
+//                    toClient.flush();
+//                    IOUtils.closeQuietly(toClient);
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+//    /**
+//     * 设置response
+//     * @param request
+//     * @param response
+//     * @param file
+//     */
+//    public void setResponse(HttpServletRequest request,HttpServletResponse response,File file) {
+//        ServletContext sc = request.getSession().getServletContext();
+//        String fileName = file.getName();
+//        String filePath = file.getPath();
+//        // 清空response
+//        response.reset();
+//        // 设置response的Header
+////        response.setHeader("Content-Disposition",
+////                "attachment;filename="+ new String(fileName.getBytes(),"ISO8859-1"));
+//        response.setHeader("Content-Disposition","attachment;filename*=UTF-8''"+ URLEncoder.encode(fileName));
+//        response.addHeader("Content-Length", "" + file.length());
+//        response.setContentType(sc.getMimeType(filePath));
+//    }
+
+
 
     /**
      * @Author: liwencai
