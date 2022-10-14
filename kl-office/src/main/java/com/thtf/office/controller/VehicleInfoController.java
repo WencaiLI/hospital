@@ -205,15 +205,14 @@ public class VehicleInfoController {
         response.setHeader("Pragma", "No-Cache");
         response.setHeader("Cache-Control", "No-Cache");
         response.setDateHeader("Expires", 0);
-        // response.setContentType("application/msexcel; charset=UTF-8");
-        InputStream fs ;
-        ServletOutputStream out;
-
-        response.setContentType("application/vnd.ms-excel");
+        response.setContentType("application/msexcel; charset=UTF-8");
+        //response.setContentType("application/vnd.ms-excel");
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
         // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+        InputStream fs ;
+        ServletOutputStream out;
         try {
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板", "UTF-8")+".xls");
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
