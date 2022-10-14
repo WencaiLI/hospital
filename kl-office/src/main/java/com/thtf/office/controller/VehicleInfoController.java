@@ -208,6 +208,16 @@ public class VehicleInfoController {
         // response.setContentType("application/msexcel; charset=UTF-8");
         InputStream fs ;
         ServletOutputStream out;
+
+        response.setContentType("application/vnd.ms-excel");
+        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+        try {
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         try {
             fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
             out = response.getOutputStream();
@@ -220,15 +230,6 @@ public class VehicleInfoController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
-        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-        // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
-        try {
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
 //        ClassPathResource resource = new ClassPathResource("ExcelTemplate/vehicleTemplate.xlsx");
 //        InputStream inputStream = resource.getInputStream();
 //        Workbook workbook = WorkbookFactory.create(inputStream);
