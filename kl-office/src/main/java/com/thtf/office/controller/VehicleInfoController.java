@@ -213,7 +213,7 @@ public class VehicleInfoController {
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
         // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
         try {
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板", "UTF-8")+".xls");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
