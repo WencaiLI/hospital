@@ -15,7 +15,11 @@ import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -193,41 +197,47 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/importTemplateDownload")
-    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
         // FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
-        response.setCharacterEncoding("utf-8");
-        response.setHeader("Pragma", "No-Cache");
-        response.setHeader("Cache-Control", "No-Cache");
-        response.setDateHeader("Expires", 0);
-        // response.setContentType("application/msexcel; charset=UTF-8");
-        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
-        try {
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        response.setCharacterEncoding("utf-8");
+//        response.setHeader("Pragma", "No-Cache");
+//        response.setHeader("Cache-Control", "No-Cache");
+//        response.setDateHeader("Expires", 0);
+//        // response.setContentType("application/msexcel; charset=UTF-8");
+//        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
+//        try {
+//            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
 
+        ClassPathResource resource = new ClassPathResource("ExcelTemplate/vehicleTemplate.xls");
+        InputStream inputStream = resource.getInputStream();
+        Workbook workbook = WorkbookFactory.create(inputStream);
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("content-Type", "application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
+        workbook.write(response.getOutputStream());
 
-
-        try {
-            ServletOutputStream out;
-            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
-                    + "ExcelTemplate/vehicleTemplate.xls";
-            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
-            FileInputStream in = new FileInputStream(filePath);
-            out = response.getOutputStream();
-            out.flush();
-            int aRead;
-            while ((aRead = in.read()) != -1) {
-                out.write(aRead);
-            }
-            out.flush();
-            in.close();
-            out.close();
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//        try {
+//            ServletOutputStream out;
+//            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
+//                    + "ExcelTemplate/vehicleTemplate.xls";
+//            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
+//            FileInputStream in = new FileInputStream(filePath);
+//            out = response.getOutputStream();
+//            out.flush();
+//            int aRead;
+//            while ((aRead = in.read()) != -1) {
+//                out.write(aRead);
+//            }
+//            out.flush();
+//            in.close();
+//            out.close();
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
 
 
 //        try {
