@@ -206,6 +206,20 @@ public class VehicleInfoController {
         response.setHeader("Cache-Control", "No-Cache");
         response.setDateHeader("Expires", 0);
         // response.setContentType("application/msexcel; charset=UTF-8");
+        InputStream fs ;
+        ServletOutputStream out;
+        try {
+            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
+            out = response.getOutputStream();
+            int aRead;
+            while ((aRead = fs.read()) != -1) {
+                out.write(aRead);
+            }
+            out.close();
+            fs.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         response.setContentType("application/vnd.ms-excel; charset=UTF-8");
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
         // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
@@ -263,38 +277,23 @@ public class VehicleInfoController {
 //        }catch (Exception e){
 //            e.printStackTrace();
 //        }
-
-        FileInputStream fis ;
-        ServletOutputStream out;
-        try {
-            out = response.getOutputStream();
-            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
-            File file = new File(resource.toURI());
-            fis = new FileInputStream(file);
-            int aRead;
-            while ((aRead = fis.read()) != -1) {
-                out.write(aRead);
-            }
-            out.close();
-            fis.close();
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-//
-//        InputStream fs ;
+//        FileInputStream fis ;
 //        ServletOutputStream out;
 //        try {
-//            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
 //            out = response.getOutputStream();
+//            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
+//            File file = new File(resource.toURI());
+//            fis = new FileInputStream(file);
 //            int aRead;
-//            while ((aRead = fs.read()) != -1) {
+//            while ((aRead = fis.read()) != -1) {
 //                out.write(aRead);
 //            }
 //            out.close();
-//            fs.close();
-//        } catch (IOException e) {
+//            fis.close();
+//        } catch (IOException | URISyntaxException e) {
 //            e.printStackTrace();
 //        }
+//
 
     }
 
