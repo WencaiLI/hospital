@@ -25,11 +25,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -196,7 +195,7 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/importTemplateDownload")
-    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response){
+    public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response)  {
 
         response.setCharacterEncoding("utf-8");
         response.setHeader("Pragma", "No-Cache");
@@ -208,6 +207,7 @@ public class VehicleInfoController {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+//        ServletOutputStream out;
 //            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
 //                    + "ExcelTemplate/vehicleTemplate.xlsx";
 //            String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
@@ -222,18 +222,20 @@ public class VehicleInfoController {
 //            in.close();
 //            out.close();
 
-        InputStream inputStream ;
-        ServletOutputStream out ;
+        FileInputStream fis ;
+        ServletOutputStream out;
         try {
             out = response.getOutputStream();
-            inputStream = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
+            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
+            File file = new File(resource.toURI());
+            fis = new FileInputStream(file);
             int aRead;
-            while ((aRead = inputStream.read()) != -1) {
+            while ((aRead = fis.read()) != -1) {
                 out.write(aRead);
             }
             out.close();
-            inputStream.close();
-        } catch (IOException e) {
+            fis.close();
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
     }
