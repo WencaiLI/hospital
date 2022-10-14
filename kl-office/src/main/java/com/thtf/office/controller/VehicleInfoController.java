@@ -205,8 +205,8 @@ public class VehicleInfoController {
         response.setHeader("Pragma", "No-Cache");
         response.setHeader("Cache-Control", "No-Cache");
         response.setDateHeader("Expires", 0);
-        response.setContentType("application/msexcel; charset=UTF-8");
-        //response.setContentType("application/vnd.ms-excel");
+        // response.setContentType("application/msexcel; charset=UTF-8");
+        response.setContentType("application/vnd.ms-excel");
         // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
         // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
         InputStream fs ;
