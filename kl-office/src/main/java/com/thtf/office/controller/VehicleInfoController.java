@@ -1,11 +1,11 @@
 package com.thtf.office.controller;
 
-import cn.hutool.db.Page;
 import com.alibaba.excel.EasyExcel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
+import com.thtf.office.common.util.FileUtils;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
@@ -15,24 +15,18 @@ import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -200,38 +194,40 @@ public class VehicleInfoController {
      */
     @GetMapping("/importTemplateDownload")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+        // FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
         response.setCharacterEncoding("utf-8");
         response.setHeader("Pragma", "No-Cache");
         response.setHeader("Cache-Control", "No-Cache");
         response.setDateHeader("Expires", 0);
-        response.setContentType("application/msexcel; charset=UTF-8");
+        // response.setContentType("application/msexcel; charset=UTF-8");
+        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
         try {
-            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xlsx", "UTF-8"));
+            response.setHeader("Content-disposition","attachment; filename=" + URLEncoder.encode("公车信息导入模板.xls", "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
 
-//        try {
-//            ServletOutputStream out;
-//            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
-//                    + "ExcelTemplate/vehicleTemplate.xlsx";
-//            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
-//            FileInputStream in = new FileInputStream(filePath);
-//            out = response.getOutputStream();
-//            out.flush();
-//            int aRead;
-//            while ((aRead = in.read()) != -1) {
-//                out.write(aRead);
-//            }
-//            out.flush();
-//            in.close();
-//            out.close();
-//
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
+
+        try {
+            ServletOutputStream out;
+            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
+                    + "ExcelTemplate/vehicleTemplate.xls";
+            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
+            FileInputStream in = new FileInputStream(filePath);
+            out = response.getOutputStream();
+            out.flush();
+            int aRead;
+            while ((aRead = in.read()) != -1) {
+                out.write(aRead);
+            }
+            out.flush();
+            in.close();
+            out.close();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
 
 //        try {
@@ -273,20 +269,21 @@ public class VehicleInfoController {
 //            e.printStackTrace();
 //        }
 
-        InputStream fs ;
-        ServletOutputStream out;
-        try {
-            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
-            out = response.getOutputStream();
-            int aRead;
-            while ((aRead = fs.read()) != -1) {
-                out.write(aRead);
-            }
-            out.close();
-            fs.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        InputStream fs ;
+//        ServletOutputStream out;
+//        try {
+//            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
+//            out = response.getOutputStream();
+//            int aRead;
+//            while ((aRead = fs.read()) != -1) {
+//                out.write(aRead);
+//            }
+//            out.close();
+//            fs.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
     }
 
 //    /**
