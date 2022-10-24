@@ -71,8 +71,8 @@
         from (
         select @rowno:=0, ${field} ,count(*) as number,delete_time,end_time
         from tbl_vehicle_scheduling
+        where delete_time is null and NOW() > end_time and end_time BETWEEN #{startTime} and #{endTime}
         group by ${field}
-        HAVING delete_time is null and NOW() > end_time and end_time BETWEEN #{startTime} and #{endTime}
         order by number desc
         ) as rate
     </select>
