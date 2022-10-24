@@ -110,6 +110,21 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             map.put("updateBy",getOperatorName());
             vehicleInfoMapper.changeVehicleStatus(map);
             log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
+            scheduling.setStatus(0);
+        }
+        /* 调度已经结束的调度 */
+        if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isBefore(nowTime)){
+            scheduling.setStatus(1);
+        }
+        /* 尚未开始的调度 修改为待命中状态 todo 逻辑可能存在问题*/
+        if(paramVO.getStartTime().isAfter(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
+            Map<String,Object> map = new HashMap<>();
+            map.put("vid", paramVO.getVehicleInfoId());
+            map.put("status",0);
+            map.put("updateBy",getOperatorName());
+            vehicleInfoMapper.changeVehicleStatus(map);
+            scheduling.setStatus(2);
+            log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
         }
         // 计算改调度的秒数
         try {
