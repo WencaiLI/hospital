@@ -93,5 +93,5 @@ public interface ElevatorService {
      * @Date: 2022/10/8
      * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
      */
-    List<FloorInfoDTO> getFloorInfo();
+    List<FloorInfoDTO> getFloorInfo(String buildingCode);
 }

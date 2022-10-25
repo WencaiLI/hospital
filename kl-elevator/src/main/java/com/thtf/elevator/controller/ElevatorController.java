@@ -48,9 +48,9 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
      */
     @GetMapping("/getFloorInfo")
-    public JsonResult<List<FloorInfoDTO>> getFloorInfo(){
+    public JsonResult<List<FloorInfoDTO>> getFloorInfo(@RequestParam("buildingCode") String buildingCode){
         try {
-            return JsonResult.success(elevatorService.getFloorInfo());
+            return JsonResult.success(elevatorService.getFloorInfo(buildingCode));
         }catch (Exception e){
             return JsonResult.error("服务器错误");
         }
@@ -69,16 +69,9 @@ public class ElevatorController {
     public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
                                           @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                           @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        Map<String, Object> map = new HashMap<>();
-        map.put("sysCode",sysCode);
-        if(null != pageNumber){
-            map.put("pageNumber",pageNumber);
-        }
-        if (null != pageSize){
-            map.put("pageSize",pageSize);
-        }
+
         try {
-            return alarmAPI.alarmUnhandledToday(map);
+            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("服务器错误");

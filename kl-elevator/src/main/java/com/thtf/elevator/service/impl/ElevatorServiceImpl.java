@@ -66,8 +66,8 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
      */
     @Override
-    public List<FloorInfoDTO> getFloorInfo() throws RuntimeException{
-        List<TblBuildingArea> resourceList = adminAPI.getFloorInfo().getData();
+    public List<FloorInfoDTO> getFloorInfo(String buildingCode){
+        List<TblBuildingArea> resourceList = adminAPI.getFloorInfo(buildingCode).getData();
         return floorConverter.toFloorList(resourceList);
     }
 

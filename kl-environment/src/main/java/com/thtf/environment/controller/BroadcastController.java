@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * @Author: liwencai
  * @Date: 2022/10/7 13:43
- * @Description:
+ * @Description: 广播接口
  */
 @RestController
 @RequestMapping("/broadcast")
@@ -45,9 +45,9 @@ public class BroadcastController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
      */
     @GetMapping("/getFloorInfo")
-    public JsonResult<List<TblBuildingArea>> getFloorInfo(){
+    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode){
         try {
-            return adminAPI.getFloorInfo();
+            return adminAPI.getFloorInfo(buildingCode);
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("服务器错误");
@@ -67,16 +67,9 @@ public class BroadcastController {
     public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
                                           @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                           @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        Map<String, Object> map = new HashMap<>();
-        map.put("sysCode",sysCode);
-        if(null != pageNumber){
-            map.put("pageNumber",pageNumber);
-        }
-        if (null != pageSize){
-            map.put("pageSize",pageSize);
-        }
+
         try {
-            return alarmAPI.alarmUnhandledToday(map);
+            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("服务器错误");
