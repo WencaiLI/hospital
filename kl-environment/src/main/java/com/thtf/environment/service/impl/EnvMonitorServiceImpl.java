@@ -1,11 +1,13 @@
 package com.thtf.environment.service.impl;
 
+import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.CodeNameVO;
 import com.thtf.environment.vo.EChartsVO;
 import com.thtf.environment.vo.EnvMonitorDisplayVO;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -16,6 +18,8 @@ import java.util.List;
 @Service
 public class EnvMonitorServiceImpl implements EnvMonitorService {
 
+    @Resource
+    TblHistoryMomentMapper tblHistoryMomentMapper;
     /**
      * @Author: liwencai
      * @Description: 获取前端展示数据

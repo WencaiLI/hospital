@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thtf.environment.mapper.TblHistoryMomentMapper">
+
+    <select id="selectHistoryMomentTables" resultType="java.lang.String">
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'ibs5_environment'
+        AND table_name REGEXP #{tableName}
+    </select>
+    <select id="selectExistentTableName" resultType="java.lang.String">
+        SELECT
+        table_name
+        FROM
+        (
+        SELECT
+        table_name
+        FROM
+        information_schema.`TABLES`
+        WHERE
+        table_schema='ibs5_environment'
+        ) temp
+        <where>
+            <if test="tableNames != null and tableNames.size() > 0">
+                <foreach collection="tableNames" item="tableName" separator="OR">
+                    table_name = #{tableName}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>
