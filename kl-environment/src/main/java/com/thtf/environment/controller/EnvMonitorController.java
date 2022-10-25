@@ -5,12 +5,10 @@ import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.CodeNameVO;
 import com.thtf.environment.vo.EChartsVO;
 import com.thtf.environment.vo.EnvMonitorDisplayVO;
+import com.thtf.environment.vo.ItemParameterInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -67,6 +65,60 @@ public class EnvMonitorController {
                                                              @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
                                                              @RequestParam(value = "areaCode",required = false) String areaCode){
         return JsonResult.querySuccess(envMonitorService.getAlarmUnhandledStatistics(buildingCodes,areaCode,startTime,endTime));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备参数信息
+     * @Date: 2022/10/25
+     * @Param: itemCode:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.ItemParameterInfoVO>
+     */
+    @GetMapping("/parameter")
+    JsonResult<ItemParameterInfoVO> getParameterList(@RequestParam("itemCode") String itemCode){
+        return null;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取小时度历史数据（天）
+     * @Date: 2022/10/25
+     * @Param: parameterTypeCode:
+     * @Param: date:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
+     */
+    @PostMapping("/history_moment_hourly")
+    public JsonResult<EChartsVO> getHourlyHistoryMoment(@RequestParam("parameterTypeCode") String parameterTypeCode,
+                                                       @RequestParam("date") String date){
+        return null;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取日度历史数据（月，星期）
+     * @Date: 2022/10/25
+     * @Param: parameterTypeCode:
+     * @Param: date:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
+     */
+    @PostMapping("/history_moment_daily")
+    public JsonResult<EChartsVO> getDailyHistoryMoment(@RequestParam("parameterTypeCode") String parameterTypeCode,
+                                                       @RequestParam("date") String date){
+        return null;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取月度历史数据（年）
+     * @Date: 2022/10/25
+     * @Param: parameterTypeCode:
+     * @Param: date:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
+     */
+    @PostMapping("history_moment_monthly")
+    public JsonResult<EChartsVO> getMonthlyHistoryMoment(@RequestParam("parameterTypeCode") String parameterTypeCode,
+                                                       @RequestParam("date") String date){
+        return null;
     }
 
 }
