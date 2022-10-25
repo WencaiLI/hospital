@@ -97,9 +97,9 @@ public class InfoPublishController {
      */
     @PostMapping("/getLargeScreenAlarmInfo")
     public JsonResult<PageInfoVO> getLargeScreenAlarmInfo(@RequestParam("sysCode") String sysCode,
-                                                                               @RequestParam(value = "keyword") String keyword,
-                                                                               @RequestParam(value = "pageNumber") Integer pageNumber,
-                                                                               @RequestParam(value = "pageSize") Integer pageSize){
+                                                          @RequestParam(value = "keyword") String keyword,
+                                                          @RequestParam(value = "pageNumber") Integer pageNumber,
+                                                          @RequestParam(value = "pageSize") Integer pageSize){
         return JsonResult.success(infoPublishService.getLargeScreenAlarmInfo(sysCode,keyword,pageNumber,pageSize));
     }
 }

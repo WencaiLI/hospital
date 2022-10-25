@@ -69,6 +69,4 @@ public class EnvMonitorController {
         return JsonResult.querySuccess(envMonitorService.getAlarmUnhandledStatistics(buildingCodes,areaCode,startTime,endTime));
     }
 
-
-
 }
