@@ -13,7 +13,7 @@ import javax.annotation.Resource;
  * @Description: 动环监控接口
  */
 @RestController
-@RequestMapping("/dynamicEnv")
+@RequestMapping("/dynamic_env")
 @Slf4j
 public class DynamicEnvController {
 

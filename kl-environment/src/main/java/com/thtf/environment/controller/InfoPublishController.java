@@ -1,7 +1,5 @@
 package com.thtf.environment.controller;
 
-import com.thtf.common.entity.adminserver.TblBuildingArea;
-import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
@@ -10,10 +8,7 @@ import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +17,7 @@ import java.util.Map;
  * @Description: 信息发布接口
  */
 @RestController
-@RequestMapping("/infoPublish")
+@RequestMapping("/info_publish")
 @Slf4j
 public class InfoPublishController {
     // todo 信息发布需要对接高博医院的信息发布的系统，做对发布信息的统计
@@ -32,8 +27,6 @@ public class InfoPublishController {
     ItemAPI itemAPI;
     @Resource
     AlarmAPI alarmAPI;
-    @Resource
-    AdminAPI adminAPI;
 
     /**
      * @Author: liwencai
@@ -48,30 +41,9 @@ public class InfoPublishController {
     public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
                                           @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                           @RequestParam(value = "pageSize",required = false)Integer pageSize){
-        Map<String, Object> map = new HashMap<>();
-        map.put("sysCode",sysCode);
-        if(null != pageNumber && null != pageSize){
-            map.put("pageNumber",pageNumber);
-            map.put("pageSize",pageSize);
-        }
-        try {
-            return alarmAPI.alarmUnhandledToday(map);
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return JsonResult.error("服务器错误");
-        }
-    }
 
-    /**
-     * @Author: liwencai
-     * @Description: 获取楼层信息
-     * @Date: 2022/9/22
-     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
-     */
-    @GetMapping("/getFloorInfo")
-    public JsonResult<List<TblBuildingArea>> getFloorInfo(){
         try {
-            return adminAPI.getFloorInfo();
+            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("服务器错误");
