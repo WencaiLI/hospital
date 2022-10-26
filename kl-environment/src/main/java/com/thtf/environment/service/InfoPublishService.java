@@ -5,6 +5,7 @@ import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.PageInfoVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: liwencai
@@ -23,7 +24,7 @@ public interface InfoPublishService {
      * @Param pageSize: 页大小
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfLargeScreenDTO>
      */
-    PageInfoVO getLargeScreenInfo(String sysCode, String areaCode, String keyword, Integer pageNumber, Integer pageSize);
+    PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap);
 
     /**
      * @Author: liwencai
