@@ -1,8 +1,12 @@
 package com.thtf.environment.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.vo.CodeNameVO;
 import com.thtf.environment.vo.EChartsVO;
 import com.thtf.environment.vo.EnvMonitorDisplayVO;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 /**
@@ -10,7 +14,7 @@ import java.util.List;
  * @Date: 2022/10/25 14:27
  * @Description:
  */
-public interface EnvMonitorService {
+public interface EnvMonitorService extends IService<TblHistoryMoment> {
 
     /**
      * @Author: liwencai

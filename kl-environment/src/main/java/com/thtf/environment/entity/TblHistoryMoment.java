@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -60,5 +61,5 @@ public class TblHistoryMoment implements Serializable {
     /**
      * 运行类型
      */
-    private Integer run_type;
+    private Integer runType;
 }
