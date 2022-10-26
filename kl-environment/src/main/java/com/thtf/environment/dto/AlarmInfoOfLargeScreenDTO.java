@@ -3,6 +3,7 @@ package com.thtf.environment.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Author: liwencai
@@ -31,6 +32,10 @@ public class AlarmInfoOfLargeScreenDTO {
     private LocalDateTime alarmTime; // 数据报送时间
 
     private Long stayTime; // 滞留时长
+
+    private List<Integer> eye; // 滞留时长
+
+    private List<Integer> center; // 滞留时长
 
     /* 大屏发布内容 */
     private PublishContent publishContent;

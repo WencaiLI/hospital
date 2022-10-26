@@ -2,6 +2,8 @@ package com.thtf.environment.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author: liwencai
  * @Date: 2022/9/22 21:27
@@ -22,16 +24,31 @@ public class ItemInfoOfLargeScreenDTO {
 
     private String runParameterCode; // 运行状态参数编码
 
+    private Object runValue; // 当前运行值
+
     private String onlineParameterCode; // 在线状态参数编码
+
+    private Object onlineValue; // 当前在线状态
 
     private String luminanceParameterCode; // 亮度参数编码
 
+    private Object luminanceValue; // 当前亮度参数
+
     private String volumeParameterCode; // 音量参数编码
+
+    private Object volumeValue; // 当前音量参数
 
     private String capacityParameterCode; // 容量参数编码
 
+    private Object capacityValue; // 当前音量参数
+
     private String storageStatusParameterCode; // 存储状态参数编码
+
+    private Object storageStatusValue; // 当前音量参数
 
     private String alarmStatus; // 报警状态
 
+    private List<Integer> eye; // 相机视角
+
+    private List<Integer> center; // 近距离视角
 }

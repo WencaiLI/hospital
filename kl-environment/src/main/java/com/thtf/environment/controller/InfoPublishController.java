@@ -6,9 +6,12 @@ import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -79,11 +82,36 @@ public class InfoPublishController {
     @PostMapping("/getLargeScreenInfo")
     public JsonResult<PageInfoVO> getLargeScreenInfo(@RequestParam("sysCode") String sysCode,
                                                      @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                     @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                     @RequestParam(value = "onOffStatus",required = false) Integer onOffStatus,
                                                      @RequestParam(value = "keyword",required = false) String keyword,
-                                                     @RequestParam(value = "pageNumber") Integer pageNumber,
-                                                     @RequestParam(value = "pageSize") Integer pageSize){
-        return JsonResult.success(infoPublishService.getLargeScreenInfo(sysCode,areaCode,keyword,pageNumber,pageSize));
+                                                     @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+                                                     @RequestParam(value = "pageSize",required = false) Integer pageSize){
+        Map<String, Object> map = new HashMap<>();
+        map.put("sysCode",sysCode);
+        if (StringUtils.isNotBlank(buildingCodes)){
+            map.put("buildingCodes", buildingCodes);
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                map.put("areaCode",areaCode);
+            }
+        }
+        if(null != onOffStatus){
+            map.put("onOffStatus",onOffStatus);
+        }
+        if(StringUtils.isNotBlank(keyword)){
+            map.put("keyword",keyword);
+        }
+        if(null != pageNumber){
+            map.put("pageNumber",pageNumber);
+        }
+        if(null != pageSize){
+            map.put("pageSize",pageSize);
+        }
+        return JsonResult.success(infoPublishService.getLargeScreenInfo(map));
     }
+
+    // todo 查询终端发布内容
 
     /**
      * @Author: liwencai

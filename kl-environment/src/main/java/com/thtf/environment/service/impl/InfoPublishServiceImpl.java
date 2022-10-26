@@ -2,12 +2,14 @@ package com.thtf.environment.service.impl;
 
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
+import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.PageInfoVO;
@@ -23,7 +25,9 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -46,76 +50,87 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Resource
     PageInfoConvert pageInfoConvert;
     @Resource
-    ItemConvert itemConvert;
-    @Resource
     AlarmConvert alarmConvert;
     @Resource
     RedisOperationService redisOperationService;
 
-
-
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取大屏信息
      * @Date: 2022/9/23
-     * @Param sysCode:
-     * @Param areaCode:
-     * @Param keyword:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param sysCode: 子系统编码
+     * @Param areaCode: 区域编码
+     * @Param keyword: 关键词
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfLargeScreenDTO>
      */
     @Override
-    public PageInfoVO getLargeScreenInfo(String sysCode, String areaCode, String keyword, Integer pageNumber, Integer pageSize) {
+    public PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap) {
+        PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
+                (String) paramMap.get("sysCode"), null,null,(String) paramMap.get("areaCode"),
+                "OnOffStatus", String.valueOf(1), (String) paramMap.get("keyword"),
+                (Integer) paramMap.get("pageNumber"), (Integer) paramMap.get("pageSize")
+        ).getData();
 
-        /* 获取区域编码 */
-        List<String> areaCodeList = new ArrayList<>();
-
-        if(null != areaCode){
-            String[] areaCodes = areaCode.split(",");
-            for (String areaCodeItem : areaCodes) {
-                try {
-                    areaCodeList.addAll(adminAPI.getAllChildBuildingAreaCodeList(areaCodeItem).getData());
-                }catch (Exception e){
-                    log.error(e.getMessage());
-                }
-            }
-        }else {
-            areaCodeList = null;
-        }
-
-        PageInfo<TblItem> itemPageInfo = itemAPI.searchItemBySysCodeAndTypeCodeAndAreaCodeListAndKeywordPage(sysCode, BIG_SCREEN_TYPE_CODE, keyword, areaCodeList, pageNumber, pageSize).getData();
         PageInfoVO pageInfoVO;
-        if(itemPageInfo.getList().size()==0){
-            return pageInfoConvert.toPageInfoVO(itemPageInfo);
-        }
         pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
-        List<ItemInfoOfLargeScreenDTO> itemInfoOfLargeScreenDTOS = itemConvert.toItemInfoOfLSList(itemPageInfo.getList());
-        // 获取设备和参数信息
-        List<ItemNestedParameterVO> itemNestedParameterVOS = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode, itemInfoOfLargeScreenDTOS.stream().map(ItemInfoOfLargeScreenDTO::getItemCode).collect(Collectors.toList())).getData();
-        for (ItemInfoOfLargeScreenDTO largeScreen : itemInfoOfLargeScreenDTOS) {
-            try {
-                largeScreen.setAreaName(this.getAreaNameByAreaCode(largeScreen.getAreaCode()));
-                for (ItemNestedParameterVO o : itemNestedParameterVOS) {
-                    if(o.getCode().equals(largeScreen.getItemCode())){
-                        for (TblItemParameter p : o.getParameterList()) {
-                            if(p.getParameterType().equals("OnOffStatus")){
-                                largeScreen.setRunParameterCode(p.getCode());
-                            }
-                            if (p.getParameterType().equals("OnlineStatus")){
-                                largeScreen.setOnlineParameterCode(p.getCode());
-                            }
-                            // todo 补全其他参数
-                        }
-                    }
-                }
-            }catch (Exception e){
-                log.error(e.getMessage());
+        List<ItemNestedParameterVO> list = itemPageInfo.getList();
+
+        // 获取设备报警信息
+        List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
+
+        List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
+
+        for (ItemNestedParameterVO itemNestedParameterVO : list) {
+            ItemInfoOfLargeScreenDTO inner_result = new ItemInfoOfLargeScreenDTO();
+            inner_result.setItemId(itemNestedParameterVO.getId());
+            inner_result.setItemCode(itemNestedParameterVO.getCode());
+            inner_result.setItemName(itemNestedParameterVO.getName());
+
+            if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLongitude())){
+                inner_result.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
 
-        }
+            if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
+                inner_result.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
 
-        pageInfoVO.setList(itemInfoOfLargeScreenDTOS);
+            allAlarmRecordUnhandled.forEach(e->{
+                if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
+                    inner_result.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
+                }
+            });
+
+            for (TblItemParameter p : itemNestedParameterVO.getParameterList()) {
+                if (p.getParameterType().equals("OnOffStatus")) {
+                    inner_result.setRunParameterCode(p.getCode());
+                    inner_result.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                }
+                if (p.getParameterType().equals("OnlineStatus")) {
+                    inner_result.setOnlineParameterCode(p.getCode());
+                    inner_result.setOnlineValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                }
+                if (p.getParameterType().equals("Capacity")) {
+                    inner_result.setCapacityParameterCode(p.getCode());
+                    inner_result.setCapacityValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                }
+                if (p.getParameterType().equals("Luminance")) {
+                    inner_result.setLuminanceParameterCode(p.getCode());
+                    inner_result.setLuminanceValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                }
+                if (p.getParameterType().equals("Volume")) {
+                    inner_result.setVolumeParameterCode(p.getCode());
+                    inner_result.setVolumeValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                }
+                if (p.getParameterType().equals("StorageStatus")) {
+                    inner_result.setStorageStatusParameterCode(p.getCode());
+                    inner_result.setStorageStatusValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                }
+            }
+            resultList.add(inner_result);
+        }
+        pageInfoVO.setList(resultList);
         return pageInfoVO;
     }
 
@@ -134,8 +149,22 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         PageInfo<TblAlarmRecordUnhandle> data = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
         List<AlarmInfoOfLargeScreenDTO> alarmInfoOfLargeScreenDTOS = alarmConvert.toAlarmInfoOfLargeScreenDTOList(data.getList());
+        List<TblItem> itemList = itemAPI.searchItemByItemCodeList(data.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList())).getData();
+
+
 
         for (AlarmInfoOfLargeScreenDTO largeScreen : alarmInfoOfLargeScreenDTOS) {
+
+            // 匹配eye和center确定视角
+            itemList.forEach(e->{
+                if(e.getCode().equals(largeScreen.getItemCode())){
+                    if(null != e.getViewLongitude()){
+                        largeScreen.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                        largeScreen.setCenter(Arrays.stream(e.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                }
+            });
+
             largeScreen.setAreaName(this.getAreaNameByAreaCode(largeScreen.getAreaCode()));
             largeScreen.setStayTime(timeGap(LocalDateTime.now(), largeScreen.getAlarmTime(), ChronoUnit.SECONDS));
             // todo 对接高博医院自身的信息发布系统后再写 largeScreen.setPublishContent();
