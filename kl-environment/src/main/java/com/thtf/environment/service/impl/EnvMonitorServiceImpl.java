@@ -1,5 +1,7 @@
 package com.thtf.environment.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.CodeNameVO;
@@ -7,7 +9,6 @@ import com.thtf.environment.vo.EChartsVO;
 import com.thtf.environment.vo.EnvMonitorDisplayVO;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -16,10 +17,14 @@ import java.util.List;
  * @Description:
  */
 @Service
-public class EnvMonitorServiceImpl implements EnvMonitorService {
+public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, TblHistoryMoment> implements EnvMonitorService {
 
-    @Resource
-    TblHistoryMomentMapper tblHistoryMomentMapper;
+//    @Resource
+//    TblHistoryMomentMapper tblHistoryMomentMapper;
+//
+//    @Resource
+//    ItemAPI itemAPI;
+
     /**
      * @Author: liwencai
      * @Description: 获取前端展示数据
@@ -29,6 +34,7 @@ public class EnvMonitorServiceImpl implements EnvMonitorService {
      */
     @Override
     public EnvMonitorDisplayVO getDisplayInfo(String sysCode) {
+        // itemAPI.getItemOnlineAndTotalItemNumberBySysCode(sysCode);
         return null;
     }
 

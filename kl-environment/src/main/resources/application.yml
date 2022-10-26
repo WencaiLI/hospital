@@ -1,12 +1,3 @@
-# 数据库配置
-#spring:
-#  # 配置数据源
-#  datasource:
-#    url: jdbc:mysql://10.10.49.18:3306/kl_hospital?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
-#    username: root
-#    password: root123
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-
 spring:
   # 配置数据源
   shardingsphere:
@@ -16,6 +7,7 @@ spring:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://10.10.49.18:3306/ibs5_environment?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&useSSL=true
+        #        url: jdbc:mysql://localhost:3306/ews?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&useSSL=true
         username: root
         password: root123
     sharding:
@@ -24,11 +16,11 @@ spring:
           actualDataNodes: ds0.tbl_history_moment
           tableStrategy:
             hint:
-              algorithmClassName: com.thtf.environment.commons.config.HintShardingTableAlgorithm
+              algorithmClassName: com.thtf.environment.common.config.HintShardingTableAlgorithm
     props:
       sql:
         show: true
-# 对feign的请求进行拦截和求情方法保留
+
 feign:
   httpclient:
     enabled: true
@@ -41,3 +33,13 @@ feign:
         requestInterceptors: com.thtf.environment.common.feign.FeignBasicAuthRequestInterceptor
 
 
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.thtf.environment.entity
+
+management:
+  health:
+    db:
+      enabled: false
