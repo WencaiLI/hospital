@@ -1,14 +1,19 @@
 package com.thtf.environment.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.common.feign.ItemAPI;
+import com.thtf.environment.dto.convert.ItemTypeConvert;
 import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.CodeNameVO;
 import com.thtf.environment.vo.EChartsVO;
-import com.thtf.environment.vo.EnvMonitorDisplayVO;
+import org.apache.shardingsphere.api.hint.HintManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -19,11 +24,16 @@ import java.util.List;
 @Service
 public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, TblHistoryMoment> implements EnvMonitorService {
 
-//    @Resource
-//    TblHistoryMomentMapper tblHistoryMomentMapper;
-//
-//    @Resource
-//    ItemAPI itemAPI;
+    @Autowired
+    TblHistoryMomentMapper tblHistoryMomentMapper;
+
+    @Resource
+    ItemAPI itemAPI;
+
+    @Resource
+    ItemTypeConvert itemTypeConvert;
+
+    private final static String TBL_HISTORY_MOMENT = "tbl_history_moment";
 
     /**
      * @Author: liwencai
@@ -33,11 +43,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @Return: com.thtf.environment.vo.EnvMonitorDisplayVO
      */
     @Override
-    public EnvMonitorDisplayVO getDisplayInfo(String sysCode) {
-        // itemAPI.getItemOnlineAndTotalItemNumberBySysCode(sysCode);
-        return null;
+    public ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode, String areaCode,String buildingCodes) {
+        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes).getData();
     }
-
 
     /**
      * @Author: liwencai
@@ -51,6 +59,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EChartsVO getAlarmUnhandledStatistics(String buildingCodes, String areaCode, String startTime, String endTime) {
+        try (HintManager hintManager = HintManager.getInstance()) {
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT, startTime);
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT, endTime);
+        }
         return null;
     }
 
@@ -63,6 +75,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public List<CodeNameVO> getItemTypeList(String sysCode) {
-        return null;
+        return itemTypeConvert.toCodeNameVO(itemAPI.getItemTypesBySysId(sysCode).getBody().getData());
     }
 }

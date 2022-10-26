@@ -83,52 +83,56 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
 
         for (ItemNestedParameterVO itemNestedParameterVO : list) {
-            ItemInfoOfLargeScreenDTO inner_result = new ItemInfoOfLargeScreenDTO();
-            inner_result.setItemId(itemNestedParameterVO.getId());
-            inner_result.setItemCode(itemNestedParameterVO.getCode());
-            inner_result.setItemName(itemNestedParameterVO.getName());
+
+            ItemInfoOfLargeScreenDTO innerResult = new ItemInfoOfLargeScreenDTO();
+            innerResult.setItemId(itemNestedParameterVO.getId());
+            innerResult.setItemCode(itemNestedParameterVO.getCode());
+            innerResult.setItemName(itemNestedParameterVO.getName());
+            innerResult.setAreaCode(itemNestedParameterVO.getAreaCode());
+            innerResult.setAreaName(itemNestedParameterVO.getAreaName());
+            innerResult.setBuildingCode(itemNestedParameterVO.getBuildingCode());
 
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLongitude())){
-                inner_result.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                innerResult.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
 
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
-                inner_result.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
 
             allAlarmRecordUnhandled.forEach(e->{
                 if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
-                    inner_result.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
+                    innerResult.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
                 }
             });
 
             for (TblItemParameter p : itemNestedParameterVO.getParameterList()) {
-                if (p.getParameterType().equals("OnOffStatus")) {
-                    inner_result.setRunParameterCode(p.getCode());
-                    inner_result.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("OnOffStatus".equals(p.getParameterType())) {
+                    innerResult.setRunParameterCode(p.getCode());
+                    innerResult.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("OnlineStatus")) {
-                    inner_result.setOnlineParameterCode(p.getCode());
-                    inner_result.setOnlineValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("OnlineStatus".equals(p.getParameterType())) {
+                    innerResult.setOnlineParameterCode(p.getCode());
+                    innerResult.setOnlineValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("Capacity")) {
-                    inner_result.setCapacityParameterCode(p.getCode());
-                    inner_result.setCapacityValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("Capacity".equals(p.getParameterType())) {
+                    innerResult.setCapacityParameterCode(p.getCode());
+                    innerResult.setCapacityValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("Luminance")) {
-                    inner_result.setLuminanceParameterCode(p.getCode());
-                    inner_result.setLuminanceValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("Luminance".equals(p.getParameterType())) {
+                    innerResult.setLuminanceParameterCode(p.getCode());
+                    innerResult.setLuminanceValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("Volume")) {
-                    inner_result.setVolumeParameterCode(p.getCode());
-                    inner_result.setVolumeValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("Volume".equals(p.getParameterType())) {
+                    innerResult.setVolumeParameterCode(p.getCode());
+                    innerResult.setVolumeValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("StorageStatus")) {
-                    inner_result.setStorageStatusParameterCode(p.getCode());
-                    inner_result.setStorageStatusValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("StorageStatus".equals(p.getParameterType())) {
+                    innerResult.setStorageStatusParameterCode(p.getCode());
+                    innerResult.setStorageStatusValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
             }
-            resultList.add(inner_result);
+            resultList.add(innerResult);
         }
         pageInfoVO.setList(resultList);
         return pageInfoVO;

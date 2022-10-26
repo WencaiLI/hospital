@@ -1,6 +1,7 @@
 package com.thtf.environment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.vo.CodeNameVO;
 import com.thtf.environment.vo.EChartsVO;
@@ -23,7 +24,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param: sysCode: 子系统编码
      * @Return: com.thtf.environment.vo.EnvMonitorDisplayVO
      */
-    EnvMonitorDisplayVO getDisplayInfo(String sysCode);
+    ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode,String areaCode,String buildingCodes);
 
     /**
      * @Author: liwencai

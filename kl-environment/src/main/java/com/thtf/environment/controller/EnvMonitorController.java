@@ -1,5 +1,6 @@
 package com.thtf.environment.controller;
 
+import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.CodeNameVO;
@@ -33,15 +34,17 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EnvMonitorDisplayVO>
      */
     @PostMapping("/display_info")
-    public JsonResult<EnvMonitorDisplayVO> display_info(@RequestParam("sysCode") String sysCode){
-        return JsonResult.querySuccess(envMonitorService.getDisplayInfo(sysCode));
+    public JsonResult<ItemTotalAndOnlineAndAlarmNumDTO> getDisplayInfo(@RequestParam("sysCode") String sysCode,
+                                                                       @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                                       @RequestParam(value = "buildingCodes",required = false) String buildingCodes){
+        return JsonResult.querySuccess(envMonitorService.getDisplayInfo(sysCode,areaCode,buildingCodes));
     }
 
     /**
      * @Author: liwencai
      * @Description: 获取设备类别编码和名称
      * @Date: 2022/10/25
-     * @Param: sysCode:
+     * @Param: sysCode: 子系统编码
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.vo.CodeNameVO>>
      */
     @PostMapping("/item_type")

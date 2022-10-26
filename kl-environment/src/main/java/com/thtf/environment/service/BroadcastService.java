@@ -51,9 +51,9 @@ public interface BroadcastService {
      * @Description:
      * @Date: 2022/10/7
      * @Param keyword: 
-     * @Param sysCode: 
-     * @Param pageNumber: 
-     * @Param pageSize: 
+ * @Param sysCode:
+ * @Param pageNumber:
+ * @Param pageSize:
      * @return: com.thtf.environment.dto.PageInfoVO 
      */
     PageInfoVO getAlarmInfo(String keyword, String sysCode, Integer pageNumber, Integer pageSize);
