@@ -9,22 +9,24 @@ import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
+import com.thtf.environment.common.enums.EnvMonitorItemLiveParameterEnum;
 import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.environment.dto.TimeValueDTO;
+import com.thtf.environment.dto.convert.ItemParameterConvert;
 import com.thtf.environment.dto.convert.ItemTypeConvert;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import com.thtf.environment.service.EnvMonitorService;
-import com.thtf.environment.vo.CodeNameVO;
-import com.thtf.environment.vo.EChartsVO;
-import com.thtf.environment.vo.EnvMonitorItemParamVO;
-import com.thtf.environment.vo.EnvMonitorItemResultVO;
+import com.thtf.environment.vo.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shardingsphere.api.hint.HintManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -52,6 +54,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     @Resource
     PageInfoConvert pageInfoConvert;
+
+    @Resource
+    ItemParameterConvert itemParameterConvert;
 
     private final static String TBL_HISTORY_MOMENT = "tbl_history_moment";
 
@@ -204,6 +209,143 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 查询设备参数
+     * @Date: 2022/10/27
+     * @Param: itemCode: 设备编码
+     * @Return: java.util.List<com.thtf.environment.vo.ItemParameterInfoVO>
+     */
+    @Override
+    public List<ItemParameterInfoVO> listParameter(String itemCode) {
+        return itemParameterConvert.toItemParameterInfoVO(itemAPI.searchParameterByItemCodes(Collections.singletonList(itemCode)).getData());
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/10/27
+     * @Param: itemCode:
+     * @Param: itemTypeCode:
+     * @Param: parameterCode:
+     * @Param: date:
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    @Override
+    public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
+        List<TimeValueDTO> hourlyHistoryMoment;
+        try (HintManager hintManager = HintManager.getInstance()) {
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
+            if(StringUtils.isBlank(parameterCode)){
+                itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode);
+                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
+            }
+            hourlyHistoryMoment = tblHistoryMomentMapper.getHourlyHistoryMoment(parameterCode, date);
+        }
+        List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+        for (int i = 0; i < 24; i++) {
+            if(!collect.contains(i)){
+                TimeValueDTO timeValueDTO = new TimeValueDTO();
+                timeValueDTO.setTime(String.format("%02d", i));
+                timeValueDTO.setValue(0);
+                hourlyHistoryMoment.add(timeValueDTO);
+            }
+        }
+        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+        EChartsVO result = new EChartsVO();
+        result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
+        result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
+        return result;
+    }
+
+    @Override
+    public EChartsVO getDailyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date) {
+        List<TimeValueDTO> hourlyHistoryMoment;
+        try (HintManager hintManager = HintManager.getInstance()) {
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
+            if(StringUtils.isBlank(parameterCode)){
+                itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode);
+                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
+            }
+            hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, date);
+        }
+        List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date dateTo = null;
+        try {
+            dateTo = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        int month = getMonth(dateTo);
+        int year = getYear(dateTo);
+        int daysOfMonth = getDaysOfMonth(dateTo);
+        for (int i = 1; i <= daysOfMonth; i++) {
+            if(!collect.contains(i)){
+                TimeValueDTO timeValueDTO = new TimeValueDTO();
+                timeValueDTO.setTime(year+"-"+month+"-"+String.format("%02d", i));
+                timeValueDTO.setValue(0);
+                hourlyHistoryMoment.add(timeValueDTO);
+            }
+        }
+        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+        EChartsVO result = new EChartsVO();
+        result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
+        result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
+        return result;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/10/27
+     * @Param: itemCode:
+     * @Param: itemTypeCode:
+     * @Param: parameterCode:
+     * @Param: date:
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    @Override
+    public EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date) {
+        List<TimeValueDTO> hourlyHistoryMoment;
+        try (HintManager hintManager = HintManager.getInstance()) {
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
+            if(StringUtils.isBlank(parameterCode)){
+                itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode);
+                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
+            }
+            hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, date);
+        }
+        List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date dateTo = null;
+        try {
+            dateTo = simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        int month = getMonth(dateTo);
+        int year = getYear(dateTo);
+        int daysOfMonth = getDaysOfMonth(dateTo);
+        for (int i = 1; i <= daysOfMonth; i++) {
+            if(!collect.contains(i)){
+                TimeValueDTO timeValueDTO = new TimeValueDTO();
+                timeValueDTO.setTime(year+"-"+String.format("%02d", i));
+                timeValueDTO.setValue(0);
+                hourlyHistoryMoment.add(timeValueDTO);
+            }
+        }
+        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+        EChartsVO result = new EChartsVO();
+        result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
+        result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
+        return result;
+    }
+
     /* =============================== 复用代码区 ==================================== */
 
     private Map<String,String> getTodayStartTimeAndEndTimeString() {
@@ -213,5 +355,23 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         result.put("startTime",LocalDateTime.of(now.getYear(),now.getMonth(),now.getDayOfMonth(),0,0,0).format(dtf));
         result.put("endTime",LocalDateTime.of(now.getYear(),now.getMonth(),now.getDayOfMonth(),23,59,59).format(dtf));
         return result;
+    }
+
+    public static int getDaysOfMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    public static int getMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.getActualMaximum(Calendar.MONTH);
+    }
+
+    public static int getYear(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.getActualMaximum(Calendar.YEAR);
     }
 }

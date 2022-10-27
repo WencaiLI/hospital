@@ -6,9 +6,12 @@ import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -90,8 +93,8 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.ItemParameterInfoVO>
      */
     @GetMapping("/parameter")
-    JsonResult<ItemParameterInfoVO> getParameterList(@RequestParam("itemCode") String itemCode){
-        return null;
+    JsonResult<List<ItemParameterInfoVO>> listParameter(@RequestParam("itemCode") String itemCode){
+        return JsonResult.querySuccess(envMonitorService.listParameter(itemCode));
     }
 
     /**
@@ -99,13 +102,20 @@ public class EnvMonitorController {
      * @Description: 获取小时度历史数据（天）
      * @Date: 2022/10/25
      * @Param: parameterTypeCode:
-     * @Param: date:
+     * @Param: date: yyyy-MM-dd 格式
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_hourly")
-    public JsonResult<EChartsVO> getHourlyHistoryMoment(@RequestParam("parameterTypeCode") String parameterTypeCode,
-                                                       @RequestParam("date") String date){
-        return null;
+    public JsonResult<EChartsVO> getHourlyHistoryMoment(@RequestParam("parameterCode") String parameterCode,
+                                                        @RequestParam("itemCode") String itemCode,
+                                                        @RequestParam("itemTypeCode") String itemTypeCode,
+                                                        @RequestParam("date") String date){
+        if(StringUtils.isNotBlank(date)){
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            date =  now.format(dtf);
+        }
+        return JsonResult.querySuccess(envMonitorService.getHourlyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
 
     /**
@@ -117,9 +127,11 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_daily")
-    public JsonResult<EChartsVO> getDailyHistoryMoment(@RequestParam("parameterTypeCode") String parameterTypeCode,
+    public JsonResult<EChartsVO> getDailyHistoryMoment(@RequestParam("parameterCode") String parameterCode,
+                                                       @RequestParam("itemCode") String itemCode,
+                                                       @RequestParam("itemTypeCode") String itemTypeCode,
                                                        @RequestParam("date") String date){
-        return null;
+        return JsonResult.querySuccess(envMonitorService.getDailyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
 
     /**
@@ -131,9 +143,11 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("history_moment_monthly")
-    public JsonResult<EChartsVO> getMonthlyHistoryMoment(@RequestParam("parameterTypeCode") String parameterTypeCode,
-                                                       @RequestParam("date") String date){
-        return null;
+    public JsonResult<EChartsVO> getMonthlyHistoryMoment(@RequestParam("parameterCode") String parameterCode,
+                                                         @RequestParam("itemCode") String itemCode,
+                                                         @RequestParam("itemTypeCode") String itemTypeCode,
+                                                         @RequestParam("date") String date){
+        return JsonResult.querySuccess(envMonitorService.getMonthlyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
 
 }

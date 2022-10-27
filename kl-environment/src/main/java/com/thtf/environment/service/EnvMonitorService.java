@@ -5,7 +5,6 @@ import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.vo.*;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -54,4 +53,48 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Return: java.util.List<com.thtf.environment.vo.EnvMonitorItemResultVO>
      */
     PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/10/27
+     * @Param: itemCode:
+     * @Return: java.util.List<com.thtf.environment.vo.ItemParameterInfoVO>
+     */
+    List<ItemParameterInfoVO> listParameter(String itemCode);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: itemCode: 
+     * @Param: parameterCode: 
+     * @Param: date: 
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: itemCode: 
+     * @Param: itemTypeCode: 
+     * @Param: parameterCode: 
+     * @Param: date: 
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    EChartsVO getDailyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: itemCode: 
+     * @Param: itemTypeCode: 
+     * @Param: parameterCode: 
+     * @Param: date: 
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);
 }
