@@ -23,11 +23,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -83,52 +81,56 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
 
         for (ItemNestedParameterVO itemNestedParameterVO : list) {
-            ItemInfoOfLargeScreenDTO inner_result = new ItemInfoOfLargeScreenDTO();
-            inner_result.setItemId(itemNestedParameterVO.getId());
-            inner_result.setItemCode(itemNestedParameterVO.getCode());
-            inner_result.setItemName(itemNestedParameterVO.getName());
+
+            ItemInfoOfLargeScreenDTO innerResult = new ItemInfoOfLargeScreenDTO();
+            innerResult.setItemId(itemNestedParameterVO.getId());
+            innerResult.setItemCode(itemNestedParameterVO.getCode());
+            innerResult.setItemName(itemNestedParameterVO.getName());
+            innerResult.setAreaCode(itemNestedParameterVO.getAreaCode());
+            innerResult.setAreaName(itemNestedParameterVO.getAreaName());
+            innerResult.setBuildingCode(itemNestedParameterVO.getBuildingCode());
 
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLongitude())){
-                inner_result.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                innerResult.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
 
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
-                inner_result.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
 
             allAlarmRecordUnhandled.forEach(e->{
                 if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
-                    inner_result.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
+                    innerResult.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
                 }
             });
 
             for (TblItemParameter p : itemNestedParameterVO.getParameterList()) {
-                if (p.getParameterType().equals("OnOffStatus")) {
-                    inner_result.setRunParameterCode(p.getCode());
-                    inner_result.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("OnOffStatus".equals(p.getParameterType())) {
+                    innerResult.setRunParameterCode(p.getCode());
+                    innerResult.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("OnlineStatus")) {
-                    inner_result.setOnlineParameterCode(p.getCode());
-                    inner_result.setOnlineValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("OnlineStatus".equals(p.getParameterType())) {
+                    innerResult.setOnlineParameterCode(p.getCode());
+                    innerResult.setOnlineValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("Capacity")) {
-                    inner_result.setCapacityParameterCode(p.getCode());
-                    inner_result.setCapacityValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("Capacity".equals(p.getParameterType())) {
+                    innerResult.setCapacityParameterCode(p.getCode());
+                    innerResult.setCapacityValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("Luminance")) {
-                    inner_result.setLuminanceParameterCode(p.getCode());
-                    inner_result.setLuminanceValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("Luminance".equals(p.getParameterType())) {
+                    innerResult.setLuminanceParameterCode(p.getCode());
+                    innerResult.setLuminanceValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("Volume")) {
-                    inner_result.setVolumeParameterCode(p.getCode());
-                    inner_result.setVolumeValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("Volume".equals(p.getParameterType())) {
+                    innerResult.setVolumeParameterCode(p.getCode());
+                    innerResult.setVolumeValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
-                if (p.getParameterType().equals("StorageStatus")) {
-                    inner_result.setStorageStatusParameterCode(p.getCode());
-                    inner_result.setStorageStatusValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
+                if ("StorageStatus".equals(p.getParameterType())) {
+                    innerResult.setStorageStatusParameterCode(p.getCode());
+                    innerResult.setStorageStatusValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
             }
-            resultList.add(inner_result);
+            resultList.add(innerResult);
         }
         pageInfoVO.setList(resultList);
         return pageInfoVO;
@@ -166,7 +168,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             });
 
             largeScreen.setAreaName(this.getAreaNameByAreaCode(largeScreen.getAreaCode()));
-            largeScreen.setStayTime(timeGap(LocalDateTime.now(), largeScreen.getAlarmTime(), ChronoUnit.SECONDS));
+            largeScreen.setStayTime(getTimeGap(largeScreen.getAlarmTime(),LocalDateTime.now()));
             // todo 对接高博医院自身的信息发布系统后再写 largeScreen.setPublishContent();
         }
         pageInfoVO.setList(alarmInfoOfLargeScreenDTOS);
@@ -225,5 +227,26 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             log.error(e.getMessage());
             return null;
         }
+    }
+
+    public String getTimeGap(LocalDateTime startTime,LocalDateTime endTime){
+        Date nowDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
+        Date alarmTimeStartTime = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
+        long nd = 1000 * 24 * 60 * 60;
+        long nh = 1000 * 60 * 60;
+        long nm = 1000 * 60;
+        long ns = 1000;
+        // 获得两个时间的毫秒时间差异
+        long diff = nowDate.getTime() - alarmTimeStartTime.getTime();
+        // 计算差多少天
+        long day = diff / nd;
+        // 计算差多少小时
+        long hour = diff % nd / nh;
+        // 计算差多少分钟
+        long min = diff % nd % nh / nm;
+        // 计算差多少秒
+        long sec = diff % nd % nh % nm /ns;
+        // 输出结果
+        return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
     }
 }

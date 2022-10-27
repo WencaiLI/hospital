@@ -20,6 +20,8 @@ public class ItemInfoOfLargeScreenDTO {
 
     private String areaCode; // 所在区域编码
 
+    private String buildingCode; // 所在区域编码
+
     private String areaName; // 所在区域名称
 
     private String runParameterCode; // 运行状态参数编码
@@ -51,4 +53,5 @@ public class ItemInfoOfLargeScreenDTO {
     private List<Integer> eye; // 相机视角
 
     private List<Integer> center; // 近距离视角
+
 }

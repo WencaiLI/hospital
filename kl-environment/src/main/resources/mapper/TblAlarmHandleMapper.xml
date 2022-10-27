@@ -28,4 +28,22 @@
             </if>
         </where>
     </select>
+    <select id="getHourlyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
+        select HOUR(alarm_time) as time,count(*)
+        from tbl_history_moment
+        where alarm_time BETWEEN CONCAT(#{date},' 00:00:00') AND CONCAT(#{date},' 23:59:59') and code = #{parameterCode}
+        group by HOUR(alarm_time)
+    </select>
+    <select id="getDailyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
+        select DAY(alarm_time) as time,count(*)
+        from tbl_history_moment
+        where alarm_time BETWEEN CONCAT(#{date},' 00:00:00') AND CONCAT(#{date},' 23:59:59') and code = #{parameterCode}
+        group by DAY(alarm_time)
+    </select>
+    <select id="getMonthlyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
+        select MONTH (alarm_time) as time,count(*)
+        from tbl_history_moment
+        where alarm_time BETWEEN CONCAT(#{date},' 00:00:00') AND CONCAT(#{date},' 23:59:59') and code = #{parameterCode}
+        group by MONTH (alarm_time)
+    </select>
 </mapper>

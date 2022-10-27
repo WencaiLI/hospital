@@ -1,6 +1,8 @@
 package com.thtf.environment.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,9 +31,11 @@ public class AlarmInfoOfLargeScreenDTO {
 
     private Integer alarmCategory; // 报警类别
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime alarmTime; // 数据报送时间
 
-    private Long stayTime; // 滞留时长
+    private String stayTime; // 滞留时长
 
     private List<Integer> eye; // 滞留时长
 

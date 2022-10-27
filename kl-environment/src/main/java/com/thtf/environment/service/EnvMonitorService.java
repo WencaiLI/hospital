@@ -1,11 +1,10 @@
 package com.thtf.environment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.entity.TblHistoryMoment;
-import com.thtf.environment.vo.CodeNameVO;
-import com.thtf.environment.vo.EChartsVO;
-import com.thtf.environment.vo.EnvMonitorDisplayVO;
-import org.springframework.stereotype.Repository;
+import com.thtf.environment.vo.*;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param: sysCode: 子系统编码
      * @Return: com.thtf.environment.vo.EnvMonitorDisplayVO
      */
-    EnvMonitorDisplayVO getDisplayInfo(String sysCode);
+    ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode,String areaCode,String buildingCodes);
 
     /**
      * @Author: liwencai
@@ -35,7 +34,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param: areaCode: 区域编码
      * @Return: com.thtf.environment.vo.EChartsVO
      */
-    EChartsVO getAlarmUnhandledStatistics(String buildingCodes, String areaCode, String startTime, String endTime);
+    EChartsVO getAlarmUnhandledStatistics(String sysCode,String buildingCodes, String areaCode, Boolean isHandled,String startTime, String endTime);
 
     /**
      * @Author: liwencai
@@ -45,4 +44,57 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Return: java.util.List<com.thtf.environment.vo.CodeNameVO>
      */
     List<CodeNameVO> getItemTypeList(String sysCode);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: paramVO: 
+     * @Return: java.util.List<com.thtf.environment.vo.EnvMonitorItemResultVO>
+     */
+    PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/10/27
+     * @Param: itemCode:
+     * @Return: java.util.List<com.thtf.environment.vo.ItemParameterInfoVO>
+     */
+    List<ItemParameterInfoVO> listParameter(String itemCode);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: itemCode: 
+     * @Param: parameterCode: 
+     * @Param: date: 
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: itemCode: 
+     * @Param: itemTypeCode: 
+     * @Param: parameterCode: 
+     * @Param: date: 
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    EChartsVO getDailyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: itemCode: 
+ * @Param: itemTypeCode:
+ * @Param: parameterCode:
+ * @Param: date:
+     * @Return: com.thtf.environment.vo.EChartsVO
+     */
+    EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);
 }
