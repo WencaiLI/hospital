@@ -91,9 +91,9 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Description: 
      * @Date: 2022/10/27
      * @Param: itemCode: 
-     * @Param: itemTypeCode: 
-     * @Param: parameterCode: 
-     * @Param: date: 
+ * @Param: itemTypeCode:
+ * @Param: parameterCode:
+ * @Param: date:
      * @Return: com.thtf.environment.vo.EChartsVO
      */
     EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);

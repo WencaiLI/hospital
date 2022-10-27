@@ -23,11 +23,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -170,7 +168,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             });
 
             largeScreen.setAreaName(this.getAreaNameByAreaCode(largeScreen.getAreaCode()));
-            largeScreen.setStayTime(timeGap(LocalDateTime.now(), largeScreen.getAlarmTime(), ChronoUnit.SECONDS));
+            largeScreen.setStayTime(getTimeGap(largeScreen.getAlarmTime(),LocalDateTime.now()));
             // todo 对接高博医院自身的信息发布系统后再写 largeScreen.setPublishContent();
         }
         pageInfoVO.setList(alarmInfoOfLargeScreenDTOS);
@@ -229,5 +227,26 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             log.error(e.getMessage());
             return null;
         }
+    }
+
+    public String getTimeGap(LocalDateTime startTime,LocalDateTime endTime){
+        Date nowDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
+        Date alarmTimeStartTime = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
+        long nd = 1000 * 24 * 60 * 60;
+        long nh = 1000 * 60 * 60;
+        long nm = 1000 * 60;
+        long ns = 1000;
+        // 获得两个时间的毫秒时间差异
+        long diff = nowDate.getTime() - alarmTimeStartTime.getTime();
+        // 计算差多少天
+        long day = diff / nd;
+        // 计算差多少小时
+        long hour = diff % nd / nh;
+        // 计算差多少分钟
+        long min = diff % nd % nh / nm;
+        // 计算差多少秒
+        long sec = diff % nd % nh % nm /ns;
+        // 输出结果
+        return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
     }
 }
