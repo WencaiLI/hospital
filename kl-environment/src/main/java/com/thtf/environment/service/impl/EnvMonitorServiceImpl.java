@@ -237,7 +237,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
             if(StringUtils.isBlank(parameterCode)){
-                itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode);
                 parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
             }
             hourlyHistoryMoment = tblHistoryMomentMapper.getHourlyHistoryMoment(parameterCode, date);
@@ -264,7 +263,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
             if(StringUtils.isBlank(parameterCode)){
-                itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode);
                 parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
             }
             hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, date);
@@ -313,7 +311,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
             if(StringUtils.isBlank(parameterCode)){
-                itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode);
                 parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
             }
             hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, date);
