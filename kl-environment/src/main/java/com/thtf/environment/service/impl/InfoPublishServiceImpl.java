@@ -229,6 +229,14 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         }
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取时间差
+     * @Date: 2022/10/27
+     * @Param: startTime:
+     * @Param: endTime:
+     * @Return: java.lang.String
+     */
     public String getTimeGap(LocalDateTime startTime,LocalDateTime endTime){
         Date nowDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
         Date alarmTimeStartTime = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
