@@ -2,11 +2,9 @@ package com.thtf.environment.controller;
 
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.response.JsonResult;
+import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.EnvMonitorService;
-import com.thtf.environment.vo.CodeNameVO;
-import com.thtf.environment.vo.EChartsVO;
-import com.thtf.environment.vo.EnvMonitorDisplayVO;
-import com.thtf.environment.vo.ItemParameterInfoVO;
+import com.thtf.environment.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -63,11 +61,25 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/alarm_unhandled_statistics")
-    public JsonResult<EChartsVO> getAlarmUnhandledStatistics(@RequestParam("startTime") String startTime,
-                                                             @RequestParam("endTime") String endTime,
+    public JsonResult<EChartsVO> getAlarmUnhandledStatistics(@RequestParam(value = "sysCode") String sysCode,
                                                              @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                             @RequestParam(value = "areaCode",required = false) String areaCode){
-        return JsonResult.querySuccess(envMonitorService.getAlarmUnhandledStatistics(buildingCodes,areaCode,startTime,endTime));
+                                                             @RequestParam(value = "isHandled",required = false) Boolean isHandled,
+                                                             @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                             @RequestParam(value = "startTime",required = false) String startTime,
+                                                             @RequestParam(value = "endTime",required = false) String endTime){
+        return JsonResult.querySuccess(envMonitorService.getAlarmUnhandledStatistics(sysCode,buildingCodes,areaCode,isHandled,startTime,endTime));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备列表信息
+     * @Date: 2022/10/27
+     * @Param: paramVO:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EnvMonitorItemResultVO>
+     */
+    @PostMapping("/item_info")
+    public JsonResult<PageInfoVO> listItemInfo(@RequestBody EnvMonitorItemParamVO paramVO){
+        return JsonResult.querySuccess(envMonitorService.listItemInfo(paramVO));
     }
 
     /**

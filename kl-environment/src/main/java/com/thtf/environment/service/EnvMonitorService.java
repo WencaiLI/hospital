@@ -2,10 +2,9 @@ package com.thtf.environment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.entity.TblHistoryMoment;
-import com.thtf.environment.vo.CodeNameVO;
-import com.thtf.environment.vo.EChartsVO;
-import com.thtf.environment.vo.EnvMonitorDisplayVO;
+import com.thtf.environment.vo.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,7 +35,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param: areaCode: 区域编码
      * @Return: com.thtf.environment.vo.EChartsVO
      */
-    EChartsVO getAlarmUnhandledStatistics(String buildingCodes, String areaCode, String startTime, String endTime);
+    EChartsVO getAlarmUnhandledStatistics(String sysCode,String buildingCodes, String areaCode, Boolean isHandled,String startTime, String endTime);
 
     /**
      * @Author: liwencai
@@ -46,4 +45,13 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Return: java.util.List<com.thtf.environment.vo.CodeNameVO>
      */
     List<CodeNameVO> getItemTypeList(String sysCode);
+
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/10/27
+     * @Param: paramVO: 
+     * @Return: java.util.List<com.thtf.environment.vo.EnvMonitorItemResultVO>
+     */
+    PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO);
 }
