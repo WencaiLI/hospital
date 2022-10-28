@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
+import com.thtf.common.entity.itemserver.TblGroup;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AlarmAPI;
@@ -19,6 +20,7 @@ import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.api.hint.HintManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,11 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     ItemParameterConvert itemParameterConvert;
 
     private final static String TBL_HISTORY_MOMENT = "tbl_history_moment";
+
+    private final static String DAY_START_SUFFIX = " 00:00:00";
+    private final static String DAY_END_SUFFIX = " 23:59:59";
+    private final static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+
 
     /**
      * @Author: liwencai
@@ -145,10 +152,20 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO) {
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
         List<String> itemCodeList;
-        if(null != paramVO.getAlarmCategory()){
+        List<String> groupIdStringList;
+        if(null == paramVO.getAlarmCategory()){
             PageInfo<TblItem> pageInfo = itemAPI.searchItemBySysCodeAndTypeCodeAndAreaCodeListAndKeywordPage(paramVO.getSysCode(), paramVO.getItemTypeCode(), paramVO.getKeyword(), null, paramVO.getPageNumber(), paramVO.getPageSize()).getData();
+            // 设备类别编码集
             itemCodeList = pageInfo.getList().stream().map(TblItem::getCode).collect(Collectors.toList());
+            // 查询设备参数集
             List<TblItemParameter> itemParameterList = itemAPI.searchParameterByItemCodes(itemCodeList).getData();
+            // 分组id集
+            groupIdStringList = pageInfo.getList().stream().filter(e->null != e.getGroupId()).map(TblItem::getGroupId).map(String::valueOf).collect(Collectors.toList());
+            List<TblGroup> groupList = null;
+            if(groupIdStringList.size()>0){
+               groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
+            }
+            // 分组信息集
             PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
             for (TblItem item : pageInfo.getList()) {
                 EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
@@ -156,12 +173,24 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 envMonitorItemResultVO.setItemName(item.getName());
                 envMonitorItemResultVO.setAreaCode(item.getAreaCode());
                 envMonitorItemResultVO.setAreaName(item.getAreaName());
-                envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
-                envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                // 匹配分组信息
+                if(null != groupList){
+                    groupList.forEach(e->{
+                        if(e.getId().equals(item.getGroupId())){
+                            envMonitorItemResultVO.setGroupId(e.getId());
+                            envMonitorItemResultVO.setGroupName(e.getName());
+                        }
+                    });
+                }
 
+                if(StringUtils.isNotBlank(item.getViewLongitude())){
+                    envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                }
+                if(StringUtils.isNotBlank(item.getViewLatitude())){
+                    envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                }
                 // 匹配参数
                 List<TblItemParameter> inner = new ArrayList<>();
-
                 itemParameterList.forEach(parameter->{
                     if(parameter.getItemCode().equals(item.getCode())){
                         inner.add(parameter);
@@ -180,17 +209,37 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             itemCodeList = pageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
             List<TblItem> itemList = itemAPI.searchItemByItemCodeList(itemCodeList).getData();
             PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+            // 分组id集
+            groupIdStringList = itemList.stream().filter(e->null != e.getGroupId()).map(TblItem::getGroupId).map(String::valueOf).collect(Collectors.toList());
+            List<TblGroup> groupList = null;
+            if(groupIdStringList.size()>0){
+                groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
+            }
             for (TblAlarmRecordUnhandle alarmRecord: pageInfo.getList()) {
                 EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
                 // 匹配设备信息
+                List<TblGroup> finalGroupList = groupList;
                 itemList.forEach(item->{
                     if(item.getCode().equals(alarmRecord.getItemCode())){
                         envMonitorItemResultVO.setItemCode(item.getCode());
                         envMonitorItemResultVO.setItemName(item.getName());
                         envMonitorItemResultVO.setAreaCode(item.getAreaCode());
                         envMonitorItemResultVO.setAreaName(item.getAreaName());
-                        envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
-                        envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                        if(StringUtils.isNotBlank(item.getViewLongitude())){
+                            envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                        }
+                        if(StringUtils.isNotBlank(item.getViewLatitude())){
+                            envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                        }
+                        // 匹配分组信息
+                        if(null != finalGroupList){
+                            finalGroupList.forEach(e->{
+                                if(e.getId().equals(item.getGroupId())){
+                                    envMonitorItemResultVO.setGroupId(e.getId());
+                                    envMonitorItemResultVO.setGroupName(e.getName());
+                                }
+                            });
+                        }
                     }
                 });
                 // 匹配参数
@@ -235,11 +284,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
         List<TimeValueDTO> hourlyHistoryMoment;
         try (HintManager hintManager = HintManager.getInstance()) {
-            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
-                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
+                String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
+                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
             }
-            hourlyHistoryMoment = tblHistoryMomentMapper.getHourlyHistoryMoment(parameterCode, date);
+            hourlyHistoryMoment = tblHistoryMomentMapper.getHourlyHistoryMoment(parameterCode,date+DAY_START_SUFFIX,date+DAY_END_SUFFIX);
         }
         List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
         for (int i = 0; i < 24; i++) {
@@ -259,41 +309,96 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     @Override
     public EChartsVO getDailyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date) {
+        Date newDate = YYMMDDStringToDate(date);
+        if(null == date){
+            log.error("时间格式错误");
+            return null;
+        }
         List<TimeValueDTO> hourlyHistoryMoment;
         try (HintManager hintManager = HintManager.getInstance()) {
-            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_END_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
-                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
+               parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
             }
-            hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, date);
+            hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, getMonthStartAndEndTimeDayString(newDate).get("startTime"),getMonthStartAndEndTimeDayString(newDate).get("endTime"));
         }
         List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        Date dateTo = null;
-        try {
-            dateTo = simpleDateFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        int month = getMonth(dateTo);
-        int year = getYear(dateTo);
-        int daysOfMonth = getDaysOfMonth(dateTo);
+        // 填充数据
+        int year = getYear(newDate);
+        int month = getMonth(newDate);
+        int daysOfMonth = getDaysOfMonth(newDate);
+        String timePrefix = year+"-"+month+"-";
         for (int i = 1; i <= daysOfMonth; i++) {
             if(!collect.contains(i)){
                 TimeValueDTO timeValueDTO = new TimeValueDTO();
-                timeValueDTO.setTime(year+"-"+month+"-"+String.format("%02d", i));
+                timeValueDTO.setTime(timePrefix+String.format("%02d", i));
                 timeValueDTO.setValue(0);
                 hourlyHistoryMoment.add(timeValueDTO);
             }
         }
+        // 排序
         hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
         EChartsVO result = new EChartsVO();
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
         result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
         return result;
     }
+
+    public Date YYMMDDStringToDate(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            return simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    Map<String, String> getMonthStartAndEndTimeDayString(Date date){
+        Map<String, String> map = new HashMap<>();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int endDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH); // 获取每月起始日
+        int startDay = calendar.getActualMinimum(Calendar.DAY_OF_MONTH); // 获取每月最终日
+        int year = calendar.get(Calendar.YEAR); // 获取年份
+        int month = calendar.get(Calendar.MONTH);// 获取月份
+        month++;
+        map.put("startTime", dtf.format(LocalDateTime.of(year,month,startDay,0,0,0)));
+        map.put("endTime",dtf.format(LocalDateTime.of(year,month,endDay,0,0,0)));
+        return map;
+    }
+
+
+    Map<String, String> getYearStartAndEndTimeMonthString(Date date){
+        Map<String, String> map = new HashMap<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int currentYear = calendar.get(Calendar.YEAR);
+        map.put("startTime",dateFormat.format(getFirstOfYear(currentYear)));
+        map.put("endTime",dateFormat.format(getLastOfYear(currentYear)));
+        return map;
+    }
+
+
+    public static Date getFirstOfYear(int year){
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(Calendar.YEAR, year);
+        return calendar.getTime();
+    }
+
+
+    public static Date getLastOfYear(int year){
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(Calendar.YEAR, year);
+        calendar.roll(Calendar.DAY_OF_YEAR, -1);
+        return calendar.getTime();
+    }
+
 
     /**
      * @Author: liwencai
@@ -307,28 +412,24 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date) {
+        Date newDate = YYMMDDStringToDate(date);
+        if(null == date){
+            log.error("时间格式错误");
+            return null;
+        }
         List<TimeValueDTO> hourlyHistoryMoment;
         try (HintManager hintManager = HintManager.getInstance()) {
-            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date);
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
-                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getParameterType(itemTypeCode),itemCode).getData();
+                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
             }
-            hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, date);
+            hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, getYearStartAndEndTimeMonthString(newDate).get("startTime"),getYearStartAndEndTimeMonthString(newDate).get("endTime"));
         }
         List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        Date dateTo = null;
-        try {
-            dateTo = simpleDateFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        int month = getMonth(dateTo);
-        int year = getYear(dateTo);
-        int daysOfMonth = getDaysOfMonth(dateTo);
-        for (int i = 1; i <= daysOfMonth; i++) {
+        int year = getYear(newDate);
+        for (int i = 1; i <= 12; i++) {
             if(!collect.contains(i)){
                 TimeValueDTO timeValueDTO = new TimeValueDTO();
                 timeValueDTO.setTime(year+"-"+String.format("%02d", i));
@@ -346,7 +447,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     /* =============================== 复用代码区 ==================================== */
 
     private Map<String,String> getTodayStartTimeAndEndTimeString() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
         Map<String,String> result = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
         result.put("startTime",LocalDateTime.of(now.getYear(),now.getMonth(),now.getDayOfMonth(),0,0,0).format(dtf));
@@ -363,12 +464,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public static int getMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        return calendar.getActualMaximum(Calendar.MONTH);
+        return calendar.get(Calendar.MONTH);
     }
 
     public static int getYear(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        return calendar.getActualMaximum(Calendar.YEAR);
+        return calendar.get(Calendar.YEAR);
     }
 }

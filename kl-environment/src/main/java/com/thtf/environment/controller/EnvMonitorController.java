@@ -87,15 +87,29 @@ public class EnvMonitorController {
 
     /**
      * @Author: liwencai
-     * @Description: 获取设备参数信息
-     * @Date: 2022/10/25
-     * @Param: itemCode:
-     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.ItemParameterInfoVO>
+     * @Description: 获取分组设备信息
+     * @Date: 2022/10/28
+     * @Param: sysCode:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.dto.PageInfoVO>
      */
-    @GetMapping("/parameter")
-    JsonResult<List<ItemParameterInfoVO>> listParameter(@RequestParam("itemCode") String itemCode){
-        return JsonResult.querySuccess(envMonitorService.listParameter(itemCode));
+    @PostMapping("/grouped_item_info")
+    public JsonResult<PageInfoVO> listGroupedItemAlarmInfo(@RequestParam("/sysCode")String sysCode){
+
+        // todo
+        return JsonResult.querySuccess(null);
     }
+
+//    /**
+//     * @Author: liwencai
+//     * @Description: 获取设备参数信息
+//     * @Date: 2022/10/25
+//     * @Param: itemCode:
+//     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.ItemParameterInfoVO>
+//     */
+//    @GetMapping("/parameter")
+//    JsonResult<List<ItemParameterInfoVO>> listParameter(@RequestParam("itemCode") String itemCode){
+//        return JsonResult.querySuccess(envMonitorService.listParameter(itemCode));
+//    }
 
     /**
      * @Author: liwencai

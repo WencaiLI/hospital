@@ -4,8 +4,10 @@ package com.thtf.environment.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.thtf.environment.dto.TimeValueDTO;
 import com.thtf.environment.entity.TblHistoryMoment;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -18,11 +20,11 @@ public interface TblHistoryMomentMapper extends BaseMapper<TblHistoryMoment> {
 
     List<String> selectHistoryMomentTables(String s);
 
-    List<String> selectExistentTableName(List<String> result);
+    List<String> selectExistentTableName(@Param("tableNames") List<String> result);
 
-    List<TimeValueDTO> getHourlyHistoryMoment(@Param("parameterCode") String parameterCode,@Param("date") String date);
+    List<TimeValueDTO> getHourlyHistoryMoment(@Param("parameterCode") String parameterCode, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
-    List<TimeValueDTO> getDailyHistoryMoment(String parameterCode, String date);
+    List<TimeValueDTO> getDailyHistoryMoment(@Param("parameterCode") String parameterCode, @Param("startTime") String startTime, @Param("endTime")String endTime);
 
-    List<TimeValueDTO> getMonthlyHistoryMoment(String parameterCode, String date);
+    List<TimeValueDTO> getMonthlyHistoryMoment(@Param("parameterCode") String parameterCode, @Param("startTime") String startTime, @Param("endTime")String endTime);
 }
