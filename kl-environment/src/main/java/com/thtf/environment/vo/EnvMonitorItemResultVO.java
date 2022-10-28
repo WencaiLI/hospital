@@ -1,5 +1,7 @@
 package com.thtf.environment.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.environment.dto.VideoInfoDTO;
 import lombok.Data;
@@ -18,6 +20,9 @@ public class EnvMonitorItemResultVO {
     private String itemName; // 设备名称
     private String areaCode; // 区域编码
     private String areaName; // 区域名称
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long groupId; // 所在分组id
+    private String groupName; // 所在分组名称
 //    private String onlineParameterCode; // 在线状态参数编码
 //    private String onlineStatus; // 在线状态
 //    private String alarmParameterCode; // 在线状态参数编码

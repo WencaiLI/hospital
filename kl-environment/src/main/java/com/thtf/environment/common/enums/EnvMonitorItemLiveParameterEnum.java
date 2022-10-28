@@ -1,45 +1,32 @@
 package com.thtf.environment.common.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+
 /**
  * @Author: liwencai
  * @Date: 2022/10/27 15:29
  * @Description:
  */
+@Getter
+@AllArgsConstructor
 public enum  EnvMonitorItemLiveParameterEnum {
 
-    HJJKWD("HJJKWD","Temp"),
-    HJJKZD("HJJKZD","Lux"),
-    HJJKSD("HJJKSD","HUMI"),
-    HJJKCO("HJJKCO","CO"),
-    HJJKCO2("HJJKCO2","CO2");
-    private String parameterType;
-    private String itemType;
+    HJJKWD("HJJKWD_TYPE","Temp"),
+    HJJKZD("HJJKZD_TYPE","Lux"),
+    HJJKSD("HJJKSD_TYPE","HUMI"),
+    HJJKCO("HJJKCO_TYPE","CO"),
+    HJJKCO2("HJJKCO2_TYPE","CO2");
+    public final String itemType;
+    public final String parameterType;
 
-    EnvMonitorItemLiveParameterEnum(String itemType, String parameterType) {
-    }
-
-    public String getParameterType() {
-        return parameterType;
-    }
-
-    public void setParameterType(String parameterType) {
-        this.parameterType = parameterType;
-    }
-
-    public String getItemType() {
-        return itemType;
-    }
-
-    public void setItemType(String itemType) {
-        this.itemType = itemType;
-    }
-
-    public static String getParameterType(String itemType){
+    public static EnvMonitorItemLiveParameterEnum getMonitorItemLiveEnumByTypeCode(String itemType){
         for (EnvMonitorItemLiveParameterEnum envMonitorItemLiveParameterEnum : EnvMonitorItemLiveParameterEnum.values()) {
-            if(envMonitorItemLiveParameterEnum.itemType.equals(itemType)){
-                return envMonitorItemLiveParameterEnum.getParameterType();
+            if(envMonitorItemLiveParameterEnum.getItemType().equals(itemType)){
+                return envMonitorItemLiveParameterEnum;
             }
         }
-        return null;
+        throw new IllegalArgumentException("name is invalid");
     }
 }

@@ -29,21 +29,21 @@
         </where>
     </select>
     <select id="getHourlyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
-        select HOUR(alarm_time) as time,count(*)
+        select HOUR(date_time) as time,count(*)
         from tbl_history_moment
-        where alarm_time BETWEEN CONCAT(#{date},' 00:00:00') AND CONCAT(#{date},' 23:59:59') and code = #{parameterCode}
-        group by HOUR(alarm_time)
+        where date_time BETWEEN #{startTime} AND #{endTime} and code = #{parameterCode}
+        group by HOUR(date_time)
     </select>
     <select id="getDailyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
-        select DAY(alarm_time) as time,count(*)
+        select DAY(date_time) as time,count(*)
         from tbl_history_moment
-        where alarm_time BETWEEN CONCAT(#{date},' 00:00:00') AND CONCAT(#{date},' 23:59:59') and code = #{parameterCode}
-        group by DAY(alarm_time)
+        where date_time BETWEEN #{startTime} AND #{endTime} and code = #{parameterCode}
+        group by DAY(date_time)
     </select>
     <select id="getMonthlyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
-        select MONTH (alarm_time) as time,count(*)
+        select MONTH (date_time) as time,count(*)
         from tbl_history_moment
-        where alarm_time BETWEEN CONCAT(#{date},' 00:00:00') AND CONCAT(#{date},' 23:59:59') and code = #{parameterCode}
-        group by MONTH (alarm_time)
+        where date_time BETWEEN #{startTime} AND #{endTime} and code = #{parameterCode}
+        group by MONTH (date_time)
     </select>
 </mapper>
