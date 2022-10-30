@@ -47,7 +47,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
 
     /**
      * @Author: liwencai
-     * @Description: 
+     * @Description: 获取设备信息
      * @Date: 2022/10/27
      * @Param: paramVO: 
      * @Return: java.util.List<com.thtf.environment.vo.EnvMonitorItemResultVO>
@@ -65,23 +65,23 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
 
     /**
      * @Author: liwencai
-     * @Description: 
+     * @Description: 获取每小时的历史数据
      * @Date: 2022/10/27
-     * @Param: itemCode: 
-     * @Param: parameterCode: 
-     * @Param: date: 
+     * @Param: itemCode: 设备编码
+     * @Param: parameterCode: 参数编码
+     * @Param: date: yyyy-MM-dd 格式日期
      * @Return: com.thtf.environment.vo.EChartsVO
      */
     EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date);
 
     /**
      * @Author: liwencai
-     * @Description: 
+     * @Description: 获取每日历史数据
      * @Date: 2022/10/27
-     * @Param: itemCode: 
-     * @Param: itemTypeCode: 
-     * @Param: parameterCode: 
-     * @Param: date: 
+     * @Param: itemCode: 设备编码
+     * @Param: itemTypeCode: 设备类别编码
+     * @Param: parameterCode: 参数编码
+     * @Param: date: yyyy-MM-dd 格式日期
      * @Return: com.thtf.environment.vo.EChartsVO
      */
     EChartsVO getDailyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);
@@ -90,11 +90,20 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Author: liwencai
      * @Description: 
      * @Date: 2022/10/27
-     * @Param: itemCode: 
- * @Param: itemTypeCode:
- * @Param: parameterCode:
- * @Param: date:
+     * @Param: itemCode: 设备编码
+     * @Param: itemTypeCode: 设备类别编码
+     * @Param: parameterCode: 参数编码
+     * @Param: date: yyyy-MM-dd 格式日期
      * @Return: com.thtf.environment.vo.EChartsVO
      */
     EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date);
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取分组信息
+     * @Date: 2022/10/30
+     * @Param sysCode: 子系统编码
+     * @return: com.thtf.environment.dto.PageInfoVO
+     */
+    PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,Integer pageNumber,Integer pageSize);
 }

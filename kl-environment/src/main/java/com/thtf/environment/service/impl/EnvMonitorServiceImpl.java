@@ -444,6 +444,24 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         return result;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取分组信息
+     * @Date: 2022/10/30
+     * @Param sysCode: 子系统编码
+     * @return: com.thtf.environment.dto.PageInfoVO
+     */
+    @Override
+    public PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,Integer pageNumber,Integer pageSize) {
+        Integer areaId = null;
+        if(StringUtils.isNotBlank(areaName)){
+            // todo 根据areaName查询areaId
+            // areaId =
+        }
+        // todo itemAPI.listGroupByGroupAndKeywordPage();
+        return null;
+    }
+
     /* =============================== 复用代码区 ==================================== */
 
     private Map<String,String> getTodayStartTimeAndEndTimeString() {
