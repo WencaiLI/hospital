@@ -89,14 +89,17 @@ public class EnvMonitorController {
      * @Author: liwencai
      * @Description: 获取分组设备信息
      * @Date: 2022/10/28
-     * @Param: sysCode:
+     * @Param: sysCode: 子系统编码
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.dto.PageInfoVO>
      */
     @PostMapping("/grouped_item_info")
-    public JsonResult<PageInfoVO> listGroupedItemAlarmInfo(@RequestParam("/sysCode")String sysCode){
-
-        // todo
-        return JsonResult.querySuccess(null);
+    public JsonResult<PageInfoVO> listGroupedItemAlarmInfo(@RequestParam("sysCode")String sysCode,
+                                                           @RequestParam(value = "groupName",required = false)String groupName,
+                                                           @RequestParam(value = "areaName",required = false)String areaName,
+                                                           @RequestParam(value = "keyword",required = false)String keyword,
+                                                           @RequestParam("pageNumber")Integer pageNumber,
+                                                           @RequestParam("pageSize")Integer pageSize){
+        return JsonResult.querySuccess(envMonitorService.listGroupedItemAlarmInfo(sysCode,groupName,areaName,keyword,pageNumber,pageSize));
     }
 
 //    /**
@@ -115,8 +118,8 @@ public class EnvMonitorController {
      * @Author: liwencai
      * @Description: 获取小时度历史数据（天）
      * @Date: 2022/10/25
-     * @Param: parameterTypeCode:
-     * @Param: date: yyyy-MM-dd 格式
+     * @Param: parameterTypeCode: 参数类别编码
+     * @Param: date: yyyy-MM-dd 格式的日期
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_hourly")
@@ -136,8 +139,8 @@ public class EnvMonitorController {
      * @Author: liwencai
      * @Description: 获取日度历史数据（月，星期）
      * @Date: 2022/10/25
-     * @Param: parameterTypeCode:
-     * @Param: date:
+     * @Param: parameterTypeCode: 参数类别编码
+     * @Param: date: yyyy-MM-dd 格式的日期
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_daily")
@@ -152,8 +155,8 @@ public class EnvMonitorController {
      * @Author: liwencai
      * @Description: 获取月度历史数据（年）
      * @Date: 2022/10/25
-     * @Param: parameterTypeCode:
-     * @Param: date:
+     * @Param: parameterTypeCode: 参数类别编码
+     * @Param: date: yyyy-MM-dd 格式的日期
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("history_moment_monthly")

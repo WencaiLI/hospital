@@ -1,6 +1,8 @@
 package com.thtf.environment.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -15,6 +17,7 @@ import java.util.List;
 @Data
 public class AlarmInfoOfLargeScreenDTO {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long itemId; // 设备id
 
     private String itemName; // 设备名称
@@ -25,6 +28,7 @@ public class AlarmInfoOfLargeScreenDTO {
 
     private String areaName; // 区域名称
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long alarmId; // 报警id
 
     private Integer alarmLevel; // 报警级别

@@ -4,15 +4,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Author: liwencai
- * @Date: 2022/9/22 22:26
- * @Description: 播单
+ * @Date: 2022/10/31 15:52
+ * @Description:
  */
 @Data
-public class Playlist {
+public class EnvMonitorGroupDTO {
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long playId; // 播放id
-    private String playTitle; // 播放主题
-    private String playContent; // 播放信息
+    private Long id;
+    private String name;
+    private String areaName;
+    private List<EnvMonitorItemTypeDTO> result;
+
 }
