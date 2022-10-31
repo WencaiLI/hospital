@@ -1,5 +1,7 @@
 package com.thtf.environment.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 /**
@@ -10,6 +12,7 @@ import lombok.Data;
 @Data
 public class LargeScreenOnOpenStatusDTO {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long itemId; // 设备id
 
     private String itemCode; // 设备编码

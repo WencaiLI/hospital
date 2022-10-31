@@ -96,9 +96,10 @@ public class EnvMonitorController {
     public JsonResult<PageInfoVO> listGroupedItemAlarmInfo(@RequestParam("sysCode")String sysCode,
                                                            @RequestParam(value = "groupName",required = false)String groupName,
                                                            @RequestParam(value = "areaName",required = false)String areaName,
+                                                           @RequestParam(value = "keyword",required = false)String keyword,
                                                            @RequestParam("pageNumber")Integer pageNumber,
                                                            @RequestParam("pageSize")Integer pageSize){
-        return JsonResult.querySuccess(envMonitorService.listGroupedItemAlarmInfo(sysCode,groupName,areaName,pageNumber,pageSize));
+        return JsonResult.querySuccess(envMonitorService.listGroupedItemAlarmInfo(sysCode,groupName,areaName,keyword,pageNumber,pageSize));
     }
 
 //    /**
