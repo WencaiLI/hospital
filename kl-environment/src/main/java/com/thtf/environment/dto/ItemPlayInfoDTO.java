@@ -18,11 +18,17 @@ import java.util.List;
 @Data
 public class ItemPlayInfoDTO {
     @JsonSerialize(using = ToStringSerializer.class)
+    private Long id; // 设备id
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long itemId; // 设备id
 
     private String itemCode; // 设备编码
 
-    private List<Playlist> playlist; // 播单信息列表
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long playId; // 播单id
+
+    private String playName; // 播单名称
+    // private List<Playlist> playlist; // 播单信息列表
 
     private String screenType; // 屏幕类型（横屏竖屏）（最好使用枚举类，枚举状态）
 

@@ -1,8 +1,11 @@
 package com.thtf.environment.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
+import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -108,7 +112,7 @@ public class InfoPublishController {
         if(null != pageSize){
             map.put("pageSize",pageSize);
         }
-        return JsonResult.success(infoPublishService.getLargeScreenInfo(map));
+        return JsonResult.querySuccess(infoPublishService.getLargeScreenInfo(map));
     }
 
     // todo 查询终端发布内容
@@ -128,6 +132,18 @@ public class InfoPublishController {
                                                           @RequestParam(value = "keyword",required = false) String keyword,
                                                           @RequestParam(value = "pageNumber") Integer pageNumber,
                                                           @RequestParam(value = "pageSize") Integer pageSize){
-        return JsonResult.success(infoPublishService.getLargeScreenAlarmInfo(sysCode,keyword,pageNumber,pageSize));
+        return JsonResult.querySuccess(infoPublishService.getLargeScreenAlarmInfo(sysCode,keyword,pageNumber,pageSize));
+    }
+
+    @PostMapping("/remote_switch")
+    public JsonResult<Boolean> remoteSwitch(@RequestParam("sysCode") String sysCode,
+                                            @RequestParam("itemCode") @JsonSerialize(using = ToStringSerializer.class) List<Long> itemCodeList){
+        return JsonResult.success(infoPublishService.remoteSwitch(sysCode,itemCodeList));
+    }
+
+
+    @PostMapping("/insert_play_order")
+    public JsonResult<Boolean> insertPlayOrder(@RequestBody ItemPlayInfoDTO param){
+        return JsonResult.success(infoPublishService.insertPlayOrder(param));
     }
 }

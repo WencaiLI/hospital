@@ -3,9 +3,7 @@ package com.thtf.environment.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
-import com.thtf.common.dto.itemserver.CodeAndNameDTO;
-import com.thtf.common.dto.itemserver.ItemGroupKeywordParamDTO;
-import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
@@ -289,12 +287,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Override
     public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
         List<TimeValueDTO> hourlyHistoryMoment;
+        if(StringUtils.isBlank(parameterCode)){
+            String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
+            parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+        }
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
-            if(StringUtils.isBlank(parameterCode)){
-                String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
-                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
-            }
             hourlyHistoryMoment = tblHistoryMomentMapper.getHourlyHistoryMoment(parameterCode,date+DAY_START_SUFFIX,date+DAY_END_SUFFIX);
         }
         List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
@@ -465,6 +463,61 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         pageInfoVO.setList(resultList);
         return pageInfoVO;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 区域环境情况
+     * @Date: 2022/11/1
+     * @Param: sysCode: 子系统编码
+     * @Param: areaCode: 区域编码
+     * @Param: buildingCodes: 建筑编码集
+     * @Return: java.util.List<com.thtf.environment.vo.GroupAlarmInfoVO>
+     */
+    @Override
+    public List<GroupAlarmInfoVO> getGroupAlarmDisplayInfo(String sysCode, String areaCode, String buildingCodes) {
+
+        List<GroupAlarmInfoVO> resultList = new ArrayList<>();
+        /* 获取全部的分组id 根据sysCode */
+        ItemGroupParamVO tblGroup = new ItemGroupParamVO();
+        tblGroup.setSystemCode(sysCode);
+        List<TblGroup> allGroup = itemAPI.queryAllGroup(tblGroup).getData();
+        // 获取所有的分组id
+        List<Long> groupIdList = allGroup.stream().map(TblGroup::getId).collect(Collectors.toList());
+        List<ItemAlarmInfoDTO> groupAlarmInfo = itemAPI.countAlarmItemNumber(sysCode,groupIdList.stream().map(String::valueOf).collect(Collectors.toList())).getData();
+        List<Long> alarmGroupIdList = new ArrayList<>();
+        groupAlarmInfo.forEach(e->{
+            if(e.getMalfunctionAlarmNumber()>0 || e.getMonitorAlarmNumber()>0 ){
+                alarmGroupIdList.add(Long.valueOf(e.getAttribute().toString()));
+            }
+        });
+
+        List<TblItemType> itemTypeList = itemAPI.getItemTypesBySysId(sysCode).getBody().getData();
+        List<String> itemTypeCodeList = itemTypeList.stream().map(TblItemType::getCode).collect(Collectors.toList());
+        // 获取每个设备对应分组
+        List<ItemTypeGroupListDTO> itemTypeGroupListDTO = itemAPI.listItemTypeNestedGroupKeyInfo(sysCode, itemTypeCodeList).getData();
+        Map<String, List<TblGroup>> itemTypeGroupMap = new HashMap<>();
+        itemTypeGroupListDTO.forEach(e->{
+            itemTypeGroupMap.put(e.getItemTypeCode(),e.getGroupInfo());
+        });
+
+        for (TblItemType itemType : itemTypeList) {
+            GroupAlarmInfoVO groupAlarmInfoVO = new GroupAlarmInfoVO();
+            String property;
+            try {
+                property = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemType.getCode()).getParameterTypeName();
+            }catch (Exception e){
+                property = itemType.getName();
+            }
+            groupAlarmInfoVO.setProperty(property);
+            groupAlarmInfoVO.setCode(itemType.getCode());
+            List<TblGroup> groupList = itemTypeGroupMap.get(itemType.getCode());
+            List<Long> list = new ArrayList<>(alarmGroupIdList);
+            list.retainAll(groupList.stream().map(TblGroup::getId).collect(Collectors.toList()));
+            groupAlarmInfoVO.setValue(list.size());
+            resultList.add(groupAlarmInfoVO);
+        }
+        return resultList;
     }
 
     List<String> getAllParameterCodeNeed(){

@@ -27,6 +27,21 @@ public class EnvMonitorController {
     @Autowired
     EnvMonitorService envMonitorService;
 
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取前端展示数据
+     * @Date: 2022/10/25
+     * @Param: sysCode: 子系统编码
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EnvMonitorDisplayVO>
+     */
+    @PostMapping("/display_group_alarm")
+    public JsonResult<List<GroupAlarmInfoVO>> getGroupAlarmDisplayInfo(@RequestParam("sysCode") String sysCode,
+                                                                       @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                                       @RequestParam(value = "buildingCodes",required = false) String buildingCodes){
+        return JsonResult.querySuccess(envMonitorService.getGroupAlarmDisplayInfo(sysCode,areaCode,buildingCodes));
+    }
+
     /**
      * @Author: liwencai
      * @Description: 获取前端展示数据
@@ -127,7 +142,7 @@ public class EnvMonitorController {
                                                         @RequestParam("itemCode") String itemCode,
                                                         @RequestParam("itemTypeCode") String itemTypeCode,
                                                         @RequestParam("date") String date){
-        if(StringUtils.isNotBlank(date)){
+        if(StringUtils.isBlank(date)){
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             date =  now.format(dtf);
@@ -166,5 +181,4 @@ public class EnvMonitorController {
                                                          @RequestParam("date") String date){
         return JsonResult.querySuccess(envMonitorService.getMonthlyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
-
 }

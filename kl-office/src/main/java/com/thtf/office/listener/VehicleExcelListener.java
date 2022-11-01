@@ -87,9 +87,7 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
 
         /* 车牌小写变大写 */
         if(StringUtils.isNotBlank(dto.getCarNumber())){
-            String upperCase = StringUtils.upperCase(dto.getCarNumber());
-            System.out.println(upperCase);
-            dto.setCarNumber(upperCase);
+            dto.setCarNumber(StringUtils.upperCase(dto.getCarNumber()));
         }
 
         if(! RegexVerifyUtil.verify(dto.getCarNumber(),RegexVerifyUtil.carNumberRegex)){
@@ -216,7 +214,6 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
      * @return: void
      */
     public void responseErrorInfo(){
-        System.out.println(response.getContentType());
         response.setCharacterEncoding("utf-8");
 //        response.setHeader("Pragma", "No-Cache");
 //        response.setHeader("Cache-Control", "No-Cache");
@@ -227,7 +224,6 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
 //        response.setContentType("application/octet-stream");
         response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
 //        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        System.out.println("response.getContentType())"+response.getContentType());
         ServletOutputStream out;
         try {
             String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
