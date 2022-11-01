@@ -2,6 +2,7 @@ package com.thtf.environment.service;
 
 import com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
+import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 
 import java.util.List;
@@ -37,4 +38,8 @@ public interface InfoPublishService {
      * @return: java.util.List<com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO>
      */
     PageInfoVO getLargeScreenAlarmInfo(String sysCode, String keyword, Integer pageNumber, Integer pageSize);
+
+    Boolean remoteSwitch(String sysCode, List<Long> itemCodeList);
+
+    Boolean insertPlayOrder(ItemPlayInfoDTO param);
 }

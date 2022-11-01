@@ -106,4 +106,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize);
+
+
+    List<GroupAlarmInfoVO> getGroupAlarmDisplayInfo(String sysCode, String areaCode, String buildingCodes);
 }

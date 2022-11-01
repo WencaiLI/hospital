@@ -12,6 +12,7 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
+import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.dto.convert.AlarmConvert;
 import com.thtf.environment.dto.convert.ItemConvert;
@@ -20,6 +21,7 @@ import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -65,14 +67,19 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      */
     @Override
     public PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap) {
+        String parameterCode = null;
+        String parameterValue = null;
+        if(null != paramMap.get("onOffStatus")){
+            parameterCode = "OnOffStatus";
+            parameterValue = "1";
+        }
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
                 (String) paramMap.get("sysCode"), null,null,(String) paramMap.get("areaCode"),
-                "OnOffStatus", String.valueOf(1), (String) paramMap.get("keyword"),
+                parameterCode, parameterValue, (String) paramMap.get("keyword"),
                 (Integer) paramMap.get("pageNumber"), (Integer) paramMap.get("pageSize")
         ).getData();
 
-        PageInfoVO pageInfoVO;
-        pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
         List<ItemNestedParameterVO> list = itemPageInfo.getList();
 
         // 获取设备报警信息
@@ -175,6 +182,34 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         return pageInfoVO;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/1
+     * @Param: sysCode:
+     * @Param: itemCodeList:
+     * @Return: java.lang.Boolean
+     */
+    @Override
+    @Transactional
+    public Boolean remoteSwitch(String sysCode, List<Long> itemCodeList) {
+        redisOperationService.remoteSwitchItemStatusByItemIdList(itemCodeList);
+        // todo 修改设备参数
+        return true;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 新增播单
+     * @Date: 2022/11/1
+     * @Param: param:
+     * @Return: java.lang.Boolean
+     */
+    @Override
+    public Boolean insertPlayOrder(ItemPlayInfoDTO param) {
+        redisOperationService.insertPlayOrder(param);
+        return true;
+    }
 
 
     /**
