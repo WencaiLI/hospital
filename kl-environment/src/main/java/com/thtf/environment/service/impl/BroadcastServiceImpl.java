@@ -2,6 +2,7 @@ package com.thtf.environment.service.impl;
 
 
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * @Author: liwencai
  * @Date: 2022/10/7 13:42
- * @Description:
+ * @Description: 广播接口
  */
 @Service
 public class BroadcastServiceImpl implements BroadcastService {
@@ -48,59 +49,17 @@ public class BroadcastServiceImpl implements BroadcastService {
      * @return: java.util.List<com.thtf.broadcast.dto.DisplayInfoDTO>
      */
     @Override
-    public List<DisplayInfoDTO> displayInfo(String sysCode, String itemType) {
-        List<DisplayInfoDTO> resultList = new ArrayList<>();
-
-        // 广播区域总数 播放中区域
-        DisplayInfoDTO displayInfoDTO_area = new DisplayInfoDTO();
-        List<KeyValueDTO> keyValueDTOList_area = new ArrayList<>();
-
-        KeyValueDTO keyValue_area_total = new KeyValueDTO();
-        keyValue_area_total.setKey("广播区域总数");
-        keyValue_area_total.setValue(1);
-        keyValueDTOList_area.add(keyValue_area_total);
-
-        KeyValueDTO keyValue_area_using = new KeyValueDTO();
-        keyValue_area_using.setKey("播放中区域");
-        keyValue_area_using.setValue(1);
-        keyValueDTOList_area.add(keyValue_area_using);
-
-        displayInfoDTO_area.setResults(keyValueDTOList_area);
-        resultList.add(displayInfoDTO_area);
-
-
-        // 设备总数 运行设备总数
-        DisplayInfoDTO displayInfoDTO_item = new DisplayInfoDTO();
-        List<KeyValueDTO> keyValueDTOList_item = new ArrayList<>();
-
-        KeyValueDTO keyValue_item_total = new KeyValueDTO();
-        keyValue_item_total.setKey("设备总数");
-        // todo
-        keyValue_item_total.setValue(1);
-        keyValueDTOList_item.add(keyValue_item_total);
-
-        KeyValueDTO keyValue_item_using = new KeyValueDTO();
-        keyValue_item_using.setKey("运行设备总数");
-        // todo
-        keyValue_item_using.setValue(1);
-        keyValueDTOList_item.add(keyValue_item_using);
-
-        displayInfoDTO_area.setResults(keyValueDTOList_item);
-        resultList.add(displayInfoDTO_item);
-
-        // 故障报警数量
-        DisplayInfoDTO displayInfoDTO_alarm = new DisplayInfoDTO();
-        List<KeyValueDTO> keyValueDTOList_alarm = new ArrayList<>();
-        KeyValueDTO keyValue_alarm_total = new KeyValueDTO();
-        keyValue_alarm_total.setKey("故障报警总数");
-        // todo
-        keyValue_alarm_total.setValue(1);
-        keyValueDTOList_alarm.add(keyValue_alarm_total);
-
-        displayInfoDTO_alarm.setResults(keyValueDTOList_alarm);
-        resultList.add(displayInfoDTO_alarm);
-
-        return resultList;
+    public DisplayInfoDTO displayInfo(String sysCode, String buildingCodes,String areaCode) {
+        DisplayInfoDTO result = new DisplayInfoDTO();
+//        result.setAreaNum();
+//        result.setRunningAreaNum();
+//        ItemTotalAndOnlineAndAlarmNumDTO itemInfo = itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode, areaCode, buildingCodes).getData();
+//
+//        result.setItemNum(itemInfo.getTotalNum());
+//        result.setRunningItemNum(itemInfo.get);
+//        result.setFaultItemNum(itemInfo.getMalfunctionAlarmNumber());
+//        return resultList;
+        return null;
     }
 
     /**

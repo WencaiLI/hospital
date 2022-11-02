@@ -5,11 +5,13 @@ import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.adminserver.TblOrganizationDTO;
 import com.thtf.common.entity.adminserver.TblUser;
 import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.log.OperateLog;
+import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
-import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
+import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,7 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @PostMapping("/insert")
+    @OperateLog(content = "新增调度记录",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleSchedulingParamVO paramVO){
         Map<String, Object> resultMap = vehicleSchedulingService.insert(paramVO);
         if(resultMap.get("status").equals("error")){
@@ -65,6 +68,7 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @DeleteMapping("/deleteById")
+    @OperateLog(content = "删除调度记录",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> deleteById(@RequestParam("sid") Long sid) {
         if(vehicleSchedulingService.deleteById(sid)){
             return JsonResult.success(true);
@@ -80,6 +84,7 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @PutMapping("/update")
+    @OperateLog(content = "修改调度信息",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleSchedulingParamVO paramVO){
         Map<String, Object> resultMap = vehicleSchedulingService.updateSpec(paramVO);
         if(resultMap.get("status").equals("error")){
@@ -97,6 +102,7 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleScheduling>>
      */
     @PostMapping("/select")
+    @OperateLog(content = "查询调度记录",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<PageInfo<TblVehicleScheduling>> select(@RequestBody VehicleSchedulingParamVO paramVO){
         if(null != paramVO.getPageNumber() && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
@@ -111,18 +117,19 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.vo.VehicleSelectByDateResult>>
      */
     @GetMapping("/selectInfoAboutDri")
+    @OperateLog(content = "查询待命状态的司机的日、月出车情况",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleSelectByDateResult>> selectInfoAboutDri() {
         return JsonResult.querySuccess(vehicleSchedulingService.selectInfoAboutDri());
     }
 
     /**
-     * @Description 生成最新的调度流水号
-     * @param
-     * @return  调度流水号字符串
-     * @author guola
-     * @date 2022-07-28
+     * @Author: liwencai
+     * @Description: 生成最新的调度流水号
+     * @Date: 2022-07-28
+     * @Return: com.thtf.common.response.JsonResult<java.lang.String>
      */
     @GetMapping("/createSerialNumber")
+    @OperateLog(content = "生成最新的调度流水号",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<String> createSerialNumber() {
         try {
             return JsonResult.querySuccess(vehicleSchedulingService.createSerialNumber());
@@ -138,11 +145,11 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.adminserver.TblOrganizationDTO>>
      */
     @GetMapping("/findOrganizationTree")
+    @OperateLog(content = "查询所有部门信息",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     JsonResult<List<TblOrganizationDTO>> findOrganizationTree(){
         try {
             return adminAPI.findOrganizationTree();
         }catch (Exception e) {
-            log.error(e.getMessage());
             return JsonResult.error("查询失败");
         }
     }
@@ -151,10 +158,11 @@ public class VehicleSchedulingController {
      * @Author: liwencai
      * @Description: 通过组织编码查询用户信息
      * @Date: 2022/8/3
-     * @Param organizationCode:
+     * @Param organizationCode: 组织编码
      * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblUser>>>
      */
     @GetMapping("/searchUserByOrganization")
+    @OperateLog(content = "通过组织编码查询用户信息",operateType = OperateType.SELECT,operatePage = "车辆调度页面",systemCode = "kl-office",systemName = "办公微服务")
     ResponseEntity<JsonResult<List<TblUser>>> searchUserByOrganization(@RequestParam(value = "organizationCode") String organizationCode){
         try {
             return adminAPI.searchUserByOrganization(organizationCode);

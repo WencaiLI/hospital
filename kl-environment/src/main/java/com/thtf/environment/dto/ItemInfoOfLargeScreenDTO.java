@@ -51,6 +51,10 @@ public class ItemInfoOfLargeScreenDTO {
 
     private Object storageStatusValue; // 当前音量参数
 
+    private String showDurationParameterCode; // 放映时长参数编码
+
+    private Object showDurationValue; // 放映时长值
+
     private String alarmStatus; // 报警状态
 
     private List<Integer> eye; // 相机视角

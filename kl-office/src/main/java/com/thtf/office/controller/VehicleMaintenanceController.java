@@ -3,6 +3,8 @@ package com.thtf.office.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.log.OperateLog;
+import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.entity.TblVehicleMaintenance;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * <p>
@@ -38,6 +39,7 @@ public class VehicleMaintenanceController {
      * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @PostMapping("/insert")
+    @OperateLog(content = "新增维保信息",operateType = OperateType.SELECT,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
         if(vehicleMaintenanceService.insert(vehicleMaintenanceParamVO)){
             return JsonResult.success(true);
@@ -53,6 +55,7 @@ public class VehicleMaintenanceController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @DeleteMapping("/deleteById")
+    @OperateLog(content = "删除维保信息",operateType = OperateType.SELECT,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> deleteById(@RequestParam("mid") @NotNull Long mid){
         if (vehicleMaintenanceService.deleteById(mid)){
             return JsonResult.success(true);
@@ -68,6 +71,7 @@ public class VehicleMaintenanceController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
+    @OperateLog(content = "修改维保信息",operateType = OperateType.SELECT,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
         if (vehicleMaintenanceService.updateSpec(vehicleMaintenanceParamVO)){
             return JsonResult.success(true);
@@ -83,6 +87,7 @@ public class VehicleMaintenanceController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
+    @OperateLog(content = "查询维保信息",operateType = OperateType.SELECT,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<PageInfo<TblVehicleMaintenance>> select(@RequestBody VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
         if(null != vehicleMaintenanceParamVO.getPageNumber() && null != vehicleMaintenanceParamVO.getPageSize()){
             PageHelper.startPage(vehicleMaintenanceParamVO.getPageNumber(),vehicleMaintenanceParamVO.getPageSize());

@@ -9,6 +9,7 @@ import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @GetMapping("/vehicleStatus")
-    @OperateLog(content = "车辆调度状态实时统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "001",systemName = "kl-office")
+    @OperateLog(content = "车辆调度状态实时统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleStatisticsResultVO>> getVehicleStatus(){
         return JsonResult.querySuccess(vehicleStatisticsService.getVehicleStatus(null));
     }
@@ -49,6 +50,7 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/vehicleCategory")
+    @OperateLog(content = "各类车辆出车统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleStatisticsResultVO>> getVehicleCategory(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getVehicleCategory(paramVO));
     }
@@ -61,6 +63,7 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/rankingsOfOrg")
+    @OperateLog(content = "车辆使用频次行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfOrg(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name")));
     }
@@ -73,6 +76,7 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/rankingsOfVeh")
+    @OperateLog(content = "部门用车频次排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfVeh(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number")));
     }
@@ -81,10 +85,11 @@ public class VehicleStatisticsController {
      * @Author: liwencai
      * @Description: 司机出车频次排行榜
      * @Date: 2022/7/27
-     * @Param null:
-     * @return: null
+     * @Param: paramVO:
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
      */
     @PostMapping("/rankingsOfDri")
+    @OperateLog(content = "司机出车频次排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfDri(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name")));
     }
@@ -97,31 +102,20 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/rankingsOfMai")
+    @OperateLog(content = "车辆维保频次排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfMai(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getMaintenanceRankings(paramVO));
     }
 
     /**
      * @Author: liwencai
-     * @Description: 获取出车工作时长
-     * @Date: 2022/8/28
-     * @Param field: 数据库属性字段
-     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
+     * @Description: 公车调度时长排行榜
+     * @Date: 2022/7/28
+     * @Param: paramVO:
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
      */
-    @Deprecated
-    @PostMapping("/rankingsOfWD")
-    public JsonResult<List<VehicleRankingsResultVO>> getWorkingDurationRankings(String field){
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("field",field);
-        try {
-            return JsonResult.querySuccess(vehicleStatisticsService.getWorkingDurationRankings(paramMap));
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return JsonResult.error("排行失败");
-        }
-    }
-
     @PostMapping("/rankingsOfSchWD")
+    @OperateLog(content = "公车出车时长排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfSchWD(@RequestBody VehicleStatisticsParamVO paramVO){
         try {
             return JsonResult.querySuccess(vehicleStatisticsService.rankingsOfSchWD(paramVO));

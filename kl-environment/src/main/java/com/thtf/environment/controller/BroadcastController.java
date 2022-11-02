@@ -102,9 +102,10 @@ public class BroadcastController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.broadcast.dto.DisplayInfoDTO>>
      */
     @PostMapping("/displayInfo")
-    JsonResult<List<DisplayInfoDTO>> displayInfo(@RequestParam(value ="sysCode")String sysCode,
-                                                 @RequestParam(value ="itemType")String itemType){
-        return JsonResult.success(broadcastService.displayInfo(sysCode,itemType));
+    JsonResult<DisplayInfoDTO> displayInfo(@RequestParam(value = "sysCode")String sysCode,
+                                                 @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
+                                                 @RequestParam(value = "areaCode") String areaCode){
+        return JsonResult.success(broadcastService.displayInfo(sysCode,buildingCodes,areaCode));
     }
 
     /**
