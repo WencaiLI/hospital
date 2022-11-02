@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableFeignClients("com.thtf.common")
 @ComponentScan(basePackages = {"com.thtf.office","com.thtf.common"})
-@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+//@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 public class OfficeServerMain9001 extends SpringBootServletInitializer {
     public static void main(String[] args) {
         SpringApplication.run(OfficeServerMain9001.class, args);
