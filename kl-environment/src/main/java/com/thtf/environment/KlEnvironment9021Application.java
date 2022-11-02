@@ -8,6 +8,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableFeignClients("com.thtf.common")
 @MapperScan("com.thtf.environment.mapper")
 @ComponentScan(basePackages = {"com.thtf.environment","com.thtf.common"})
+@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 public class KlEnvironment9021Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
