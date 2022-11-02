@@ -3,23 +3,21 @@ package com.thtf.office.controller;
 import com.alibaba.excel.EasyExcel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.log.OperateLog;
+import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
-import com.thtf.office.common.util.FileUtils;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
-import com.thtf.office.listener.VehicleExcelListener;
-import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.listener.VehicleExcelListener;
 import com.thtf.office.service.TblVehicleInfoService;
+import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,10 +27,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +65,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
+    @OperateLog(content = "新增维保信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                       @ModelAttribute List<MultipartFile> carImageFile,
                                       @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
@@ -96,6 +95,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
+    @OperateLog(content = "删除公车信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> deleteById(@RequestParam("vid") @NotNull Long vid){
         if(vehicleInfoService.deleteById(vid)){
             return JsonResult.success(true);
@@ -112,6 +112,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
+    @OperateLog(content = "修改公车信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> update(@Validated(VehicleParamValid.Update.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
@@ -142,6 +143,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
+    @OperateLog(content = "查询公车信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<PageInfo<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
         if(null != paramVO.getPageNumber()  && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
@@ -156,7 +158,8 @@ public class VehicleInfoController {
      * @Param keywords:
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
      */
-    @GetMapping("/selectByKey")
+    @GetMapping("/关键词模糊查询(车牌号)")
+    @OperateLog(content = "新增维保信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
         return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
     }
@@ -171,6 +174,7 @@ public class VehicleInfoController {
      * @date 2022-06-14
      */
     @PostMapping("/itemImport")
+    @OperateLog(content = "批量导入车辆信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<String> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
         return JsonResult.success(vehicleInfoService.batchImport(uploadFile, uploadFile.getOriginalFilename(), type, null));
     }
@@ -182,6 +186,7 @@ public class VehicleInfoController {
      * @date 2022-06-14
      */
     @GetMapping("/importProgress")
+    @OperateLog(content = "获取批量导入设备信息进度",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<BigDecimal> importProgress() {
         try{
             return JsonResult.querySuccess(vehicleInfoService.importProgress());
@@ -199,6 +204,7 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/importTemplateDownload")
+    @OperateLog(content = "公车信息批量导入模板下载",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
        //  FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
         response.setCharacterEncoding("utf-8");
@@ -372,11 +378,12 @@ public class VehicleInfoController {
 
     /**
      * @Author: liwencai
-     * @Description: 公车批量导入
+     * @Description: 公车信息批量导入
      * @Date: 2022/7/26
      * @return: void
      */
     @PostMapping("/batchImport")
+    @OperateLog(content = "公车信息批量导入",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response) throws IOException {
         try {
             EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
@@ -393,6 +400,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult>
      */
     @GetMapping("/selectByCidAndMonth")
+    @OperateLog(content = "查询指定类别下汽车的调度排行",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleSelectByDateResult>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
         List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(cid);
         return JsonResult.querySuccess(result);
@@ -405,6 +413,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @GetMapping("/updateInfoStatus")
+    @OperateLog(content = "修改公车状态",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> updateInfoStatus(){
         return JsonResult.querySuccess(true);
     }

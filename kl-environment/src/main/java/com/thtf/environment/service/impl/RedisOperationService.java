@@ -1,15 +1,20 @@
 package com.thtf.environment.service.impl;
 
-import cn.hutool.core.lang.generator.SnowflakeGenerator;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +33,7 @@ public class RedisOperationService {
 
     private final static String BUILDING_AREA_KEY = "_building_area_name";
 
-    private final static String REMOTE_KEY = "remote_key";
+    private final static String REMOTE_KEY = "_remote_key";
 
     @Autowired
     IdGeneratorSnowflake idGeneratorSnowflake;
@@ -65,14 +70,14 @@ public class RedisOperationService {
         }
     }
 
-
-    public Boolean remoteSwitchItemStatusByItemIdList(List<Long> itemIdList){
-        for (Long itemId : itemIdList) {
-            Integer valueInRedis = (Integer)redisTemplate.opsForHash().get(APPLICATION_NAME + REMOTE_KEY, itemId);
+    @Transactional
+    public Boolean remoteSwitchItemStatusByItemCodeList(List<String> itemCodeList){
+        for (String itemCode : itemCodeList) {
+            Integer valueInRedis = (Integer)redisTemplate.opsForHash().get(APPLICATION_NAME + REMOTE_KEY, itemCode);
             if(null == valueInRedis || 0 == valueInRedis){ // 当处理默认设备编码
-                redisTemplate.opsForHash().put(APPLICATION_NAME+REMOTE_KEY,itemId,1); // 将其转换为被控制状态
+                redisTemplate.opsForHash().put(APPLICATION_NAME+REMOTE_KEY,itemCode,1); // 将其转换为被控制状态
             }else if(1 == valueInRedis){
-                redisTemplate.opsForHash().put(APPLICATION_NAME+REMOTE_KEY,itemId,0);
+                redisTemplate.opsForHash().put(APPLICATION_NAME+REMOTE_KEY,itemCode,0);
             }else {
                 log.error("出错");
             }
@@ -80,12 +85,40 @@ public class RedisOperationService {
         return true;
     }
 
+    @Transactional
     public Boolean insertPlayOrder(ItemPlayInfoDTO param) {
-//        String key = APPLICATION_NAME+"_PLAY_ORDER";
-//        String property
-//        Long playOrderId =  idGeneratorSnowflake.snowflakeId();
-//
-//        param.setId(property);
+        // String key = APPLICATION_NAME+"_PLAY_ORDER";
+        Long playOrderId =  idGeneratorSnowflake.snowflakeId();
+        param.setId(playOrderId);
+        if(StringUtils.isBlank(param.getItemCode())){
+            return false;
+        }
+        List<ItemPlayInfoDTO> playOrderByItemCode = this.getPlayOrderByItemCode(param.getItemCode());
+        if(null == playOrderByItemCode) {
+            playOrderByItemCode = new ArrayList<>();
+        }
+        playOrderByItemCode.add(param);
+        redisTemplate.opsForHash().put(APPLICATION_NAME + "_play_order", param.getItemCode(),playOrderByItemCode);
         return true;
+    }
+
+
+    public List<ItemPlayInfoDTO> getPlayOrderByItemCode(String itemCode) {
+        List<ItemPlayInfoDTO> resultList = new ArrayList<>();
+        Object objectInRedis = redisTemplate.opsForHash().get(APPLICATION_NAME + "_play_order", itemCode);
+        if(null == objectInRedis){
+            return null;
+        }else {
+            for (Object object : (List<Object>)objectInRedis) {
+                System.out.println(object);
+                // 将list中的数据转成json字符串
+                String jsonObject= JSON.toJSONString(object);
+                //将json转成需要的对象
+                ItemPlayInfoDTO itemPlayInfoDTO = JSONObject.parseObject(jsonObject,ItemPlayInfoDTO.class);
+                resultList.add(itemPlayInfoDTO);
+                System.out.println(itemPlayInfoDTO);
+            }
+        }
+        return resultList;
     }
 }

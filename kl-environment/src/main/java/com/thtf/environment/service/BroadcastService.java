@@ -20,9 +20,9 @@ public interface BroadcastService {
      * @Date: 2022/10/7
      * @Param sysCode: 子系统编码
      * @Param itemType: 设备类别编码
-     * @return: java.util.List<com.thtf.broadcast.dto.DisplayInfoDTO>
+     * @return: com.thtf.broadcast.dto.DisplayInfoDTO
      */
-    List<DisplayInfoDTO> displayInfo(String sysCode, String itemType);
+    DisplayInfoDTO displayInfo(String sysCode, String buildingCodes, String areaCode);
 
     /**
      * @Author: liwencai 

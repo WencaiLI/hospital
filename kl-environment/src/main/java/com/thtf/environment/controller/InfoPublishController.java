@@ -2,6 +2,7 @@ package com.thtf.environment.controller;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
@@ -13,10 +14,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -115,7 +115,24 @@ public class InfoPublishController {
         return JsonResult.querySuccess(infoPublishService.getLargeScreenInfo(map));
     }
 
-    // todo 查询终端发布内容
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备关联的摄像头信息
+     * @Date: 2022/11/2
+     * @Param: itemCode: 设备编码
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.itemserver.TblVideoItem>>
+     */
+    @GetMapping("/listRelatedVideo")
+    public JsonResult<List<TblVideoItem>> listRelatedVideo(@RequestParam("itemCode")String itemCode){
+        return JsonResult.querySuccess(itemAPI.getVideoItemListByItemCode(itemCode).getBody().getData());
+    }
+
+    @PostMapping("/listLargeScreenContent")
+    public JsonResult<List<ItemPlayInfoDTO>> listLargeScreenContent(@RequestParam("sysCode")String  sysCode,
+                                                                    @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
+                                                                    @RequestParam(value = "areaCode",required = false)String  areaCode){
+        return JsonResult.querySuccess(infoPublishService.listLargeScreenContent(sysCode,buildingCodes,areaCode));
+    }
 
     /**
      * @Author: liwencai
@@ -135,14 +152,31 @@ public class InfoPublishController {
         return JsonResult.querySuccess(infoPublishService.getLargeScreenAlarmInfo(sysCode,keyword,pageNumber,pageSize));
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 切换远程开关的状态
+     * @Date: 2022/11/2
+     * @Param: sysCode:
+     * @Param: itemCodes:
+     * @Return: com.thtf.common.response.JsonResult<java.lang.Boolean>
+     */
     @PostMapping("/remote_switch")
     public JsonResult<Boolean> remoteSwitch(@RequestParam("sysCode") String sysCode,
-                                            @RequestParam("itemCode") @JsonSerialize(using = ToStringSerializer.class) List<Long> itemCodeList){
-        return JsonResult.success(infoPublishService.remoteSwitch(sysCode,itemCodeList));
+                                            @RequestParam("itemCodes") String itemCodes){
+        if(StringUtils.isNotBlank(itemCodes)){
+            Boolean aBoolean = infoPublishService.remoteSwitch(sysCode, itemCodes);
+            if(aBoolean){
+                return JsonResult.success();
+            }else {
+                return JsonResult.error("修改失败");
+            }
+
+        }else {
+            return JsonResult.error("请传入设备编码");
+        }
     }
 
-
-    @PostMapping("/insert_play_order")
+    @PostMapping("/play_order_insert")
     public JsonResult<Boolean> insertPlayOrder(@RequestBody ItemPlayInfoDTO param){
         return JsonResult.success(infoPublishService.insertPlayOrder(param));
     }

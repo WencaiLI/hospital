@@ -92,16 +92,11 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
 
     /**
      * @Author: liwencai
-     * @Description: 获取公车使用时长的排行榜
-     * @Date: 2022/8/28
-     * @Param paramVO:
-     * @return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
+     * @Description: 公车调度时长排行榜
+     * @Date: 2022/11/2
+     * @Param: paramVO:
+     * @Return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
      */
-    @Override
-    public List<VehicleRankingsResultVO> getWorkingDurationRankings(Map<String, Object> map){
-        return vehicleInfoMapper.getWorkingDurationRankings(map);
-    }
-
     @Override
     public List<VehicleRankingsResultVO> rankingsOfSchWD(VehicleStatisticsParamVO paramVO) {
         return vehicleSchedulingMapper.rankingsOfSchWD(paramVO);

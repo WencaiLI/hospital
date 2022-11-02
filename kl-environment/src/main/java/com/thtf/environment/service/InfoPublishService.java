@@ -39,7 +39,9 @@ public interface InfoPublishService {
      */
     PageInfoVO getLargeScreenAlarmInfo(String sysCode, String keyword, Integer pageNumber, Integer pageSize);
 
-    Boolean remoteSwitch(String sysCode, List<Long> itemCodeList);
+    Boolean remoteSwitch(String sysCode, String itemCodes);
 
     Boolean insertPlayOrder(ItemPlayInfoDTO param);
+
+    List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode);
 }

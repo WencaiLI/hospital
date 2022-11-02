@@ -6,6 +6,7 @@ import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
+import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
@@ -110,6 +111,8 @@ public class InfoPublishServiceImpl implements InfoPublishService {
                     innerResult.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
                 }
             });
+            // todo 播放时长未知 默认为 0
+            innerResult.setShowDurationValue(0);
 
             for (TblItemParameter p : itemNestedParameterVO.getParameterList()) {
                 if ("OnOffStatus".equals(p.getParameterType())) {
@@ -192,9 +195,10 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      */
     @Override
     @Transactional
-    public Boolean remoteSwitch(String sysCode, List<Long> itemCodeList) {
-        redisOperationService.remoteSwitchItemStatusByItemIdList(itemCodeList);
-        // todo 修改设备参数
+    public Boolean remoteSwitch(String sysCode, String itemCodes) {
+        if( itemAPI.negateBooleanParameter(itemCodes,"OnOffStatus").getData()){
+            redisOperationService.remoteSwitchItemStatusByItemCodeList(Arrays.stream(itemCodes.split(",")).collect(Collectors.toList()));
+        }
         return true;
     }
 
@@ -209,6 +213,50 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     public Boolean insertPlayOrder(ItemPlayInfoDTO param) {
         redisOperationService.insertPlayOrder(param);
         return true;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/2
+     * @Param: sysCode:
+     * @Param: buildingCodes:
+     * @Param: areaCode:
+     * @Return: java.util.List<com.thtf.environment.dto.ItemPlayInfoDTO>
+     */
+    @Override
+    public List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode) {
+        List<ItemPlayInfoDTO> resultList = new ArrayList<>();
+        // 根据区域和子系统获取和建筑编码获取大屏系统
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(sysCode);
+        if(StringUtils.isNotBlank(buildingCodes)){
+            tblItem.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+        }else {
+            tblItem.setAreaCode(areaCode);
+        }
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        // 获取大屏id
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
+        for (String itemCode : itemCodeList) {
+            ItemPlayInfoDTO result;
+            // 从redis里获取缓存的
+            try {
+                List<ItemPlayInfoDTO> playOrderByItemCode = redisOperationService.getPlayOrderByItemCode(itemCode);
+                if (playOrderByItemCode != null && playOrderByItemCode.size() > 0) {
+                    result = playOrderByItemCode.get(0);
+                    List<TblVideoItem> data = itemAPI.getVideoItemListByItemCode(itemCode).getBody().getData();
+                    if(null != data && data.size()>0){ // todo 获取方式存在问题
+                        result.setVideoItemInfo(data.get(0));
+                    }
+                    resultList.add(result);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        return resultList;
     }
 
 
