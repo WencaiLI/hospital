@@ -6,6 +6,7 @@ import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
+import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.InfoPublishService;
@@ -87,7 +88,7 @@ public class InfoPublishController {
     public JsonResult<PageInfoVO> getLargeScreenInfo(@RequestParam("sysCode") String sysCode,
                                                      @RequestParam(value = "areaCode",required = false) String areaCode,
                                                      @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                     @RequestParam(value = "onOffStatus",required = false) Integer onOffStatus,
+                                                     @RequestParam(value = "runValue",required = false) String runValue,
                                                      @RequestParam(value = "keyword",required = false) String keyword,
                                                      @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                                      @RequestParam(value = "pageSize",required = false) Integer pageSize){
@@ -100,8 +101,8 @@ public class InfoPublishController {
                 map.put("areaCode",areaCode);
             }
         }
-        if(null != onOffStatus){
-            map.put("onOffStatus",onOffStatus);
+        if(StringUtils.isNotBlank(runValue)){
+            map.put(ParameterConstant.ON_OFF_STATUS,runValue);
         }
         if(StringUtils.isNotBlank(keyword)){
             map.put("keyword",keyword);
@@ -127,11 +128,22 @@ public class InfoPublishController {
         return JsonResult.querySuccess(itemAPI.getVideoItemListByItemCode(itemCode).getBody().getData());
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取信息发布大屏内容
+     * @Date: 2022/11/2
+     * @Param: sysCode: 子系统编码
+     * @Param: buildingCodes: 建筑编码集
+     * @Param: areaCode: 区域编码
+     * @Param: itemCodes: 设备编码集
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.ItemPlayInfoDTO>>
+     */
     @PostMapping("/listLargeScreenContent")
     public JsonResult<List<ItemPlayInfoDTO>> listLargeScreenContent(@RequestParam("sysCode")String  sysCode,
                                                                     @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
-                                                                    @RequestParam(value = "areaCode",required = false)String  areaCode){
-        return JsonResult.querySuccess(infoPublishService.listLargeScreenContent(sysCode,buildingCodes,areaCode));
+                                                                    @RequestParam(value = "areaCode",required = false)String  areaCode,
+                                                                    @RequestParam(value = "itemCodes",required = false)String itemCodes){
+        return JsonResult.querySuccess(infoPublishService.listLargeScreenContent(sysCode,buildingCodes,areaCode,itemCodes));
     }
 
     /**

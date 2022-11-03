@@ -6,11 +6,11 @@ import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.response.JsonResult;
-import com.thtf.environment.dto.DisplayInfoDTO;
-import com.thtf.environment.dto.KeyValueDTO;
-import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.environment.dto.*;
 import com.thtf.environment.service.BroadcastService;
+import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +31,9 @@ public class BroadcastController {
 
     @Autowired
     BroadcastService broadcastService;
+
+    @Autowired
+    InfoPublishService infoPublishService;
 
     @Resource
     AlarmAPI alarmAPI;
@@ -97,15 +100,15 @@ public class BroadcastController {
      * @Author: liwencai
      * @Description: 前端展示界面数据
      * @Date: 2022/10/7
-     * @Param sysCode:
-     * @Param itemType:
+     * @Param sysCode: 子系统编码
+     * @Param itemType: 设备类别
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.broadcast.dto.DisplayInfoDTO>>
      */
     @PostMapping("/displayInfo")
     JsonResult<DisplayInfoDTO> displayInfo(@RequestParam(value = "sysCode")String sysCode,
                                                  @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
-                                                 @RequestParam(value = "areaCode") String areaCode){
-        return JsonResult.success(broadcastService.displayInfo(sysCode,buildingCodes,areaCode));
+                                                 @RequestParam(value = "areaCode",required = false) String areaCode){
+        return JsonResult.querySuccess(broadcastService.displayInfo(sysCode,buildingCodes,areaCode));
     }
 
     /**
@@ -117,47 +120,85 @@ public class BroadcastController {
      */
     @PostMapping("/controlInfo")
     JsonResult<List<KeyValueDTO>> controlInfo(@RequestParam(value ="sysCode")String sysCode){
-        return JsonResult.success(broadcastService.controlInfo(sysCode));
+        return JsonResult.querySuccess(broadcastService.controlInfo(sysCode));
     }
 
     /**
      * @Author: liwencai
      * @Description: 获取广播设备信息
      * @Date: 2022/10/7
-     * @Param keyword:
-     * @Param sysCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param keyword: 关键词
+     * @Param sysCode: 子系统编码
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.environment.dto.ItemInfoOfBroadcastDTO>>
      */
     @PostMapping("/getItemInfo")
-    JsonResult<PageInfoVO> getItemInfo(@RequestParam(value = "keyword") String keyword,
-                                       @RequestParam(value = "sysCode") String sysCode,
+    JsonResult<PageInfoVO> getItemInfo(@RequestParam("sysCode") String sysCode,
+                                       @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
                                        @RequestParam(value = "areaCode",required = false) String areaCode,
+                                       @RequestParam(value = "runValue",required = false) String runValue,
+                                       @RequestParam(value = "keyword",required = false) String keyword,
                                        @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                        @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.success(broadcastService.getItemInfo(keyword,sysCode,areaCode,pageNumber,pageSize));
+        return JsonResult.querySuccess(broadcastService.getItemInfo(sysCode,buildingCodes,areaCode,runValue,keyword,pageNumber,pageSize));
     }
 
     /**
      * @Author: liwencai
      * @Description:
      * @Date: 2022/10/7
-     * @Param keyword:
-     * @Param sysCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param keyword: 关键词
+     * @Param sysCode: 子系统编码
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: com.thtf.common.response.JsonResult<com.thtf.environment.dto.PageInfoVO>
      */
     @PostMapping("/getAlarmInfo")
-    JsonResult<PageInfoVO> getAlarmInfo(@RequestParam("keyword") String keyword,
-                                        @RequestParam(value = "sysCode") String sysCode,
+    JsonResult<PageInfoVO> getAlarmInfo(@RequestParam(value = "sysCode") String sysCode,
+                                        @RequestParam(value = "keyword",required = false) String keyword,
                                         @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                         @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.success(broadcastService.getAlarmInfo(keyword,sysCode,pageNumber,pageSize));
+        return JsonResult.querySuccess(broadcastService.getAlarmInfo(keyword,sysCode,pageNumber,pageSize));
     }
 
-    // todo 终端监听
+    /**
+     * @Author: liwencai
+     * @Description: 终端监听 获取终端内容
+     * @Date: 2022/11/3
+     * @Param: itemCode:
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.BroadcastPublishContentDTO>>
+     */
+    @GetMapping("/getPublishContent")
+    JsonResult<List<BroadcastPublishContentDTO>>  getPublishContent(@RequestParam("itemCode") String itemCode){
+        return JsonResult.querySuccess(broadcastService.getPublishContent(itemCode));
+    }
 
-    // todo 远程控制
+    @PostMapping("/publishContent")
+    JsonResult<Boolean>  publishContent(@RequestBody BroadcastContentInsertDTO param){
+        return JsonResult.querySuccess(broadcastService.publishContent(param));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 切换远程开关的状态
+     * @Date: 2022/11/2
+     * @Param: sysCode:
+     * @Param: itemCodes:
+     * @Return: com.thtf.common.response.JsonResult<java.lang.Boolean>
+     */
+    @PostMapping("/remote_switch")
+    public JsonResult<Boolean> remoteSwitch(@RequestParam("sysCode") String sysCode,
+                                            @RequestParam("itemCodes") String itemCodes){
+        if(StringUtils.isNotBlank(itemCodes)){
+            Boolean aBoolean = infoPublishService.remoteSwitch(sysCode, itemCodes);
+            if(aBoolean){
+                return JsonResult.success();
+            }else {
+                return JsonResult.error("修改失败");
+            }
+        }else {
+            return JsonResult.error("请传入设备编码");
+        }
+    }
 }

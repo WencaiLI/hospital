@@ -4,6 +4,7 @@ package com.thtf.environment.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.environment.dto.BroadcastContentInsertDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -120,5 +121,21 @@ public class RedisOperationService {
             }
         }
         return resultList;
+    }
+
+    public Boolean publishContent(BroadcastContentInsertDTO param) {
+//        // String key = APPLICATION_NAME+"_PLAY_ORDER";
+//        Long playOrderId =  idGeneratorSnowflake.snowflakeId();
+//        param.setId(playOrderId);
+//        if(StringUtils.isBlank(param.getItemCode())){
+//            return false;
+//        }
+//        List<BroadcastContentInsertDTO> playOrderByItemCode = this.getPlayOrderByItemCode(param.getItemCode());
+//        if(null == playOrderByItemCode) {
+//            playOrderByItemCode = new ArrayList<>();
+//        }
+//        playOrderByItemCode.add(param);
+//        redisTemplate.opsForHash().put(APPLICATION_NAME + "_play_order", param.getItemCode(),playOrderByItemCode);
+        return true;
     }
 }

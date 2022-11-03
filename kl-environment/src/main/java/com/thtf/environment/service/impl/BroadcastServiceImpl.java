@@ -2,14 +2,14 @@ package com.thtf.environment.service.impl;
 
 
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
-import com.thtf.common.entity.itemserver.TblItem;
-import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.service.BroadcastService;
@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
  * @Author: liwencai
  * @Date: 2022/10/7 13:42
@@ -51,15 +51,20 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     public DisplayInfoDTO displayInfo(String sysCode, String buildingCodes,String areaCode) {
         DisplayInfoDTO result = new DisplayInfoDTO();
-//        result.setAreaNum();
-//        result.setRunningAreaNum();
-//        ItemTotalAndOnlineAndAlarmNumDTO itemInfo = itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode, areaCode, buildingCodes).getData();
-//
-//        result.setItemNum(itemInfo.getTotalNum());
-//        result.setRunningItemNum(itemInfo.get);
-//        result.setFaultItemNum(itemInfo.getMalfunctionAlarmNumber());
-//        return resultList;
-        return null;
+        if(StringUtils.isBlank(buildingCodes)){
+            buildingCodes = null;
+        }
+        if (StringUtils.isBlank(areaCode)){
+            areaCode = null;
+        }
+        ItemTotalAndOnlineAndAlarmNumDTO state = itemAPI.getItemParameterAndTotalAndAlarmItemNumber(sysCode, buildingCodes, areaCode,
+                ParameterConstant.ON_OFF_STATUS, ParameterConstant.ON_OFF_STATUS_ON_VALUE).getData();
+        result.setItemNum(state.getTotalNum());
+        result.setRunningItemNum(state.getOnlineNum());
+        result.setFaultItemNum(state.getMalfunctionAlarmNumber());
+        result.setAreaNum(0); // todo liwencai 此处目前前端使用websocket,等确定方式后确定实现方式
+        result.setRunningAreaNum(0); // todo liwencai 此处目前前端使用websocket,等确定方式后确定实现方式
+        return result;
     }
 
     /**
@@ -99,60 +104,63 @@ public class BroadcastServiceImpl implements BroadcastService {
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     @Override
-    public PageInfoVO getItemInfo(String keyword, String sysCode, String areaCode, Integer pageNumber, Integer pageSize) {
-        List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList =  adminAPI.getAllChildBuildingAreaCodeList(areaCode).getData();
+    public PageInfoVO getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize) {
+
+        String parameterCode = null;
+        String parameterValue = null;
+        if(StringUtils.isNotBlank(runVale)){
+            parameterCode = ParameterConstant.ON_OFF_STATUS;
+            parameterValue = runVale;
         }
-        PageInfo<TblItem> tblItemPageInfo = itemAPI.searchItemBySysCodeAndTypeCodeAndAreaCodeListAndKeywordPage(sysCode, null, keyword, areaCodeList, pageNumber, pageSize).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblItemPageInfo);
+        PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
+                sysCode, null, buildingCodes ,areaCode,parameterCode, parameterValue, keyword,pageNumber,pageSize).getData();
 
-        List<Long> itemIds = tblItemPageInfo.getList().stream().map(TblItem::getId).collect(Collectors.toList());
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
+        List<ItemNestedParameterVO> list = itemPageInfo.getList();
 
-        // 获取所有设备的点位信息
-        List<TblItemParameter> itemParameterList = itemAPI.getParameterListByItemIds(itemIds).getBody().getData();
-
+        // 获取设备报警信息
+        List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
 
         List<ItemInfoOfBroadcastDTO> resultList = new ArrayList<>();
         // 获取设备基本信息
-        for (TblItem item : tblItemPageInfo.getList()) {
+        for (ItemNestedParameterVO item : itemPageInfo.getList()) {
             ItemInfoOfBroadcastDTO itemInfoOfBroadcastDTO = new ItemInfoOfBroadcastDTO();
             itemInfoOfBroadcastDTO.setItemId(item.getId());
             itemInfoOfBroadcastDTO.setItemCode(item.getCode());
             itemInfoOfBroadcastDTO.setItemName(item.getName());
             itemInfoOfBroadcastDTO.setAreaCode(item.getAreaCode());
-            itemInfoOfBroadcastDTO.setAreaName(redisOperationService.getBuildAreaNameByCode(item.getAreaCode()));
+            itemInfoOfBroadcastDTO.setAreaName(item.getAreaName());
             // todo 怎么获取IP地址存疑
             itemInfoOfBroadcastDTO.setIpAddress("10.10.82.146");
             // 获取该设备的参数
-            itemParameterList.forEach(e->{
+            item.getParameterList().forEach(e->{
                 if(e.getItemCode().equals(item.getCode())){
-                    if(e.getParameterType().equals("OnlineState")){
+                    if(e.getParameterType().equals(ParameterConstant.ONLINE_STATUS)){
                         itemInfoOfBroadcastDTO.setOnlineParameterCode(e.getCode());
+                        itemInfoOfBroadcastDTO.setOnlineParameterValue(e.getValue());
                     }
-                    // todo 替换OnlineState
-                    if(e.getParameterType().equals("OnlineState")){
-                        itemInfoOfBroadcastDTO.setOnlineParameterCode(e.getCode());
-                    }
-                    // todo 替换OnlineState
-                    if(e.getParameterType().equals("OnlineState")){
-                        itemInfoOfBroadcastDTO.setOnlineParameterCode(e.getCode());
-                    }
-                    // todo 替换OnlineState
-                    if(e.getParameterType().equals("OnlineState")){
-                        itemInfoOfBroadcastDTO.setOnlineParameterCode(e.getCode());
+                    if(e.getParameterType().equals("GBTaskState")){ // 广播任务状态
+                        itemInfoOfBroadcastDTO.setTaskParameterCode(e.getCode());
+                        itemInfoOfBroadcastDTO.setTaskParameterValue(e.getValue());
                     }
                 }
             });
 
+            // 转换模型定位信息
+            if(StringUtils.isNotBlank(item.getViewLongitude())){
+                itemInfoOfBroadcastDTO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+
+            if(StringUtils.isNotBlank(item.getViewLatitude())){
+                itemInfoOfBroadcastDTO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+
             // 获取报警信息
-            TblAlarmRecordUnhandle alarmRecordUnhandle = alarmAPI.getAlarmInfoByItemCodeLimitOne(item.getCode()).getData();
-            if(null != alarmRecordUnhandle && alarmRecordUnhandle.getAlarmCategory() == 1){
-                itemInfoOfBroadcastDTO.setAlarmStatus("故障报警");
-            }
-            if(null != alarmRecordUnhandle && alarmRecordUnhandle.getAlarmCategory() == 0){
-                itemInfoOfBroadcastDTO.setAlarmStatus("监测报警");
-            }
+            allAlarmRecordUnhandled.forEach(e->{
+                if(e.getItemCode().equals(itemInfoOfBroadcastDTO.getItemCode())){
+                    itemInfoOfBroadcastDTO.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
+                }
+            });
 
             resultList.add(itemInfoOfBroadcastDTO);
         }
@@ -203,5 +211,29 @@ public class BroadcastServiceImpl implements BroadcastService {
         pageInfoVO.setList(resultList);
 
         return pageInfoVO;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/3
+     * @Param: itemCode: 设备编码
+     * @Return: java.util.List<com.thtf.environment.dto.BroadcastPublishContentDTO>
+     */
+    @Override
+    public List<BroadcastPublishContentDTO> getPublishContent(String itemCode) {
+        return null;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/3
+     * @Param: param:
+     * @Return: java.lang.Boolean
+     */
+    @Override
+    public Boolean publishContent(BroadcastContentInsertDTO param) {
+        return redisOperationService.publishContent(param);
     }
 }

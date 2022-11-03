@@ -11,6 +11,7 @@ import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
+import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
@@ -70,13 +71,13 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     public PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap) {
         String parameterCode = null;
         String parameterValue = null;
-        if(null != paramMap.get("onOffStatus")){
-            parameterCode = "OnOffStatus";
-            parameterValue = "1";
+        if(null != paramMap.get(ParameterConstant.ON_OFF_STATUS)){
+            parameterCode = ParameterConstant.ON_OFF_STATUS;
+            parameterValue = (String) paramMap.get(ParameterConstant.ON_OFF_STATUS);
         }
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
-                (String) paramMap.get("sysCode"), null,null,(String) paramMap.get("areaCode"),
-                parameterCode, parameterValue, (String) paramMap.get("keyword"),
+                (String) paramMap.get("sysCode"), null, (String) paramMap.get("buildingCodes") ,(String) paramMap.get("areaCode"),
+                parameterCode, parameterValue , (String) paramMap.get("keyword"),
                 (Integer) paramMap.get("pageNumber"), (Integer) paramMap.get("pageSize")
         ).getData();
 
@@ -105,7 +106,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
                 innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
-
+            // 匹配报警信息
             allAlarmRecordUnhandled.forEach(e->{
                 if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
                     innerResult.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
@@ -115,7 +116,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             innerResult.setShowDurationValue(0);
 
             for (TblItemParameter p : itemNestedParameterVO.getParameterList()) {
-                if ("OnOffStatus".equals(p.getParameterType())) {
+                if ("State".equals(p.getParameterType())) {
                     innerResult.setRunParameterCode(p.getCode());
                     innerResult.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
                 }
@@ -148,12 +149,12 @@ public class InfoPublishServiceImpl implements InfoPublishService {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取信息发布大屏报警信息
      * @Date: 2022/9/23
-     * @Param sysCode:
-     * @Param keyword:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param sysCode: 子系统编码
+     * @Param keyword: 关键词
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: java.util.List<com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO>
      */
     @Override
@@ -163,10 +164,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         List<AlarmInfoOfLargeScreenDTO> alarmInfoOfLargeScreenDTOS = alarmConvert.toAlarmInfoOfLargeScreenDTOList(data.getList());
         List<TblItem> itemList = itemAPI.searchItemByItemCodeList(data.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList())).getData();
 
-
-
         for (AlarmInfoOfLargeScreenDTO largeScreen : alarmInfoOfLargeScreenDTOS) {
-
             // 匹配eye和center确定视角
             itemList.forEach(e->{
                 if(e.getCode().equals(largeScreen.getItemCode())){
@@ -187,16 +185,16 @@ public class InfoPublishServiceImpl implements InfoPublishService {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 远程开关
      * @Date: 2022/11/1
-     * @Param: sysCode:
-     * @Param: itemCodeList:
+     * @Param: sysCode: 子系统编码
+     * @Param: itemCodeList: 设备编码集
      * @Return: java.lang.Boolean
      */
     @Override
     @Transactional
     public Boolean remoteSwitch(String sysCode, String itemCodes) {
-        if( itemAPI.negateBooleanParameter(itemCodes,"OnOffStatus").getData()){
+        if( itemAPI.negateBooleanParameter(itemCodes,ParameterConstant.ON_OFF_STATUS).getData()){
             redisOperationService.remoteSwitchItemStatusByItemCodeList(Arrays.stream(itemCodes.split(",")).collect(Collectors.toList()));
         }
         return true;
@@ -217,15 +215,16 @@ public class InfoPublishServiceImpl implements InfoPublishService {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取信息发布大屏内容
      * @Date: 2022/11/2
-     * @Param: sysCode:
-     * @Param: buildingCodes:
-     * @Param: areaCode:
-     * @Return: java.util.List<com.thtf.environment.dto.ItemPlayInfoDTO>
+     * @Param: sysCode: 子系统编码
+     * @Param: buildingCodes: 建筑编码集
+     * @Param: areaCode: 区域编码
+     * @Param: itemCodes: 设备编码集
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.ItemPlayInfoDTO>>
      */
     @Override
-    public List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode) {
+    public List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode, String itemCodes) {
         List<ItemPlayInfoDTO> resultList = new ArrayList<>();
         // 根据区域和子系统获取和建筑编码获取大屏系统
         TblItem tblItem = new TblItem();
@@ -234,6 +233,9 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             tblItem.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
         }else {
             tblItem.setAreaCode(areaCode);
+        }
+        if(StringUtils.isNotBlank(itemCodes)){
+            tblItem.setCodeList(Collections.singletonList(itemCodes));
         }
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
         // 获取大屏id
@@ -255,16 +257,16 @@ public class InfoPublishServiceImpl implements InfoPublishService {
                 e.printStackTrace();
             }
         }
-
         return resultList;
     }
 
+    /* *************************** 复用代码区域 开始 ************************** */
 
     /**
      * @Author: liwencai
      * @Description: 结合redis，根据区域编码查询区域名称
      * @Date: 2022/9/23
-     * @Param areaCode:
+     * @Param areaCode: 区域编码
      * @return: java.lang.String
      */
     public String getAreaNameByAreaCode(String areaCode) {
@@ -299,8 +301,8 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      * @Author: liwencai
      * @Description: 计算两时间的差值（单位/秒）
      * @Date: 2022/8/31
-     * @Param startTime:
-     * @Param endTime:
+     * @Param startTime: 开始时间
+     * @Param endTime: 结束时间
      * @return: java.lang.Long
      */
     public Long timeGap(LocalDateTime startTime,LocalDateTime endTime,ChronoUnit chronoUnit){
@@ -314,10 +316,10 @@ public class InfoPublishServiceImpl implements InfoPublishService {
 
     /**
      * @Author: liwencai
-     * @Description: 获取时间差
+     * @Description: 获取时间差（*天*小时*分*秒）
      * @Date: 2022/10/27
-     * @Param: startTime:
-     * @Param: endTime:
+     * @Param: startTime: 开始时间
+     * @Param: endTime: 结束使劲按
      * @Return: java.lang.String
      */
     public String getTimeGap(LocalDateTime startTime,LocalDateTime endTime){
@@ -340,4 +342,5 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         // 输出结果
         return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
     }
+    /* *************************** 复用代码区域 结束 ************************** */
 }
