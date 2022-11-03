@@ -1,9 +1,6 @@
 package com.thtf.environment.service;
 
-import com.thtf.environment.dto.DisplayInfoDTO;
-import com.thtf.environment.dto.ItemInfoOfBroadcastDTO;
-import com.thtf.environment.dto.KeyValueDTO;
-import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.environment.dto.*;
 
 import java.util.List;
 
@@ -44,17 +41,28 @@ public interface BroadcastService {
      * @Param pageSize:
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfBroadcastDTO>
      */
-    PageInfoVO getItemInfo(String keyword, String sysCode, String areaCode, Integer pageNumber, Integer pageSize);
+    PageInfoVO getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai 
      * @Description:
      * @Date: 2022/10/7
      * @Param keyword: 
- * @Param sysCode:
- * @Param pageNumber:
- * @Param pageSize:
+     * @Param sysCode:
+     * @Param pageNumber:
+     * @Param pageSize:
      * @return: com.thtf.environment.dto.PageInfoVO 
      */
     PageInfoVO getAlarmInfo(String keyword, String sysCode, Integer pageNumber, Integer pageSize);
+
+    List<BroadcastPublishContentDTO> getPublishContent(String itemCode);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/3
+     * @Param: param:
+     * @Return: java.lang.Boolean
+     */
+    Boolean publishContent(BroadcastContentInsertDTO param);
 }

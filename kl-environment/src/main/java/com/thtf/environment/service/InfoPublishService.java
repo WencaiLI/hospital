@@ -1,7 +1,5 @@
 package com.thtf.environment.service;
 
-import com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO;
-import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 
@@ -39,9 +37,34 @@ public interface InfoPublishService {
      */
     PageInfoVO getLargeScreenAlarmInfo(String sysCode, String keyword, Integer pageNumber, Integer pageSize);
 
+    /**
+     * @Author: liwencai
+     * @Description: 远程控制
+     * @Date: 2022/11/3
+     * @Param: sysCode: 
+     * @Param: itemCodes: 
+     * @Return: java.lang.Boolean
+     */
     Boolean remoteSwitch(String sysCode, String itemCodes);
 
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/11/3
+     * @Param: param: 
+     * @Return: java.lang.Boolean
+     */
     Boolean insertPlayOrder(ItemPlayInfoDTO param);
 
-    List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode);
+    /**
+     * @Author: liwencai
+     * @Description: 获取信息发布大屏内容
+     * @Date: 2022/11/2
+     * @Param: sysCode: 子系统编码
+     * @Param: buildingCodes: 建筑编码集
+     * @Param: areaCode: 区域编码
+     * @Param: itemCodes: 设备编码集
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.ItemPlayInfoDTO>>
+     */
+    List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode, String itemCodes);
 }
