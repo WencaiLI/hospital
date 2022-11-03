@@ -170,13 +170,25 @@ public class BroadcastController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.BroadcastPublishContentDTO>>
      */
     @GetMapping("/getPublishContent")
-    JsonResult<List<BroadcastPublishContentDTO>>  getPublishContent(@RequestParam("itemCode") String itemCode){
+    JsonResult<List<BroadcastContentInsertDTO>>  getPublishContent(@RequestParam("itemCode") String itemCode){
         return JsonResult.querySuccess(broadcastService.getPublishContent(itemCode));
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/11/3
+     * @Param: param: 
+     * @Return: com.thtf.common.response.JsonResult<java.lang.Boolean>
+     */
     @PostMapping("/publishContent")
     JsonResult<Boolean>  publishContent(@RequestBody BroadcastContentInsertDTO param){
-        return JsonResult.querySuccess(broadcastService.publishContent(param));
+        Boolean flag = broadcastService.publishContent(param);
+        if(flag){
+            return JsonResult.success();
+        }else {
+            return JsonResult.error("发布失败");
+        }
     }
 
     /**

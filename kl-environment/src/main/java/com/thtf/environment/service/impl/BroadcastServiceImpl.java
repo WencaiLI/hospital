@@ -219,10 +219,11 @@ public class BroadcastServiceImpl implements BroadcastService {
      * @Date: 2022/11/3
      * @Param: itemCode: 设备编码
      * @Return: java.util.List<com.thtf.environment.dto.BroadcastPublishContentDTO>
+     * @return
      */
     @Override
-    public List<BroadcastPublishContentDTO> getPublishContent(String itemCode) {
-        return null;
+    public List<BroadcastContentInsertDTO> getPublishContent(String itemCode) {
+        return redisOperationService.listBroadcastContent(itemCode);
     }
 
     /**
@@ -234,6 +235,6 @@ public class BroadcastServiceImpl implements BroadcastService {
      */
     @Override
     public Boolean publishContent(BroadcastContentInsertDTO param) {
-        return redisOperationService.publishContent(param);
+        return redisOperationService.publishBroadcastContent(param);
     }
 }
