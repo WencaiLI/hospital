@@ -111,31 +111,47 @@ public class RedisOperationService {
             return null;
         }else {
             for (Object object : (List<Object>)objectInRedis) {
-                System.out.println(object);
                 // 将list中的数据转成json字符串
                 String jsonObject= JSON.toJSONString(object);
                 //将json转成需要的对象
                 ItemPlayInfoDTO itemPlayInfoDTO = JSONObject.parseObject(jsonObject,ItemPlayInfoDTO.class);
                 resultList.add(itemPlayInfoDTO);
-                System.out.println(itemPlayInfoDTO);
             }
         }
         return resultList;
     }
 
-    public Boolean publishContent(BroadcastContentInsertDTO param) {
-//        // String key = APPLICATION_NAME+"_PLAY_ORDER";
-//        Long playOrderId =  idGeneratorSnowflake.snowflakeId();
-//        param.setId(playOrderId);
-//        if(StringUtils.isBlank(param.getItemCode())){
-//            return false;
-//        }
-//        List<BroadcastContentInsertDTO> playOrderByItemCode = this.getPlayOrderByItemCode(param.getItemCode());
-//        if(null == playOrderByItemCode) {
-//            playOrderByItemCode = new ArrayList<>();
-//        }
-//        playOrderByItemCode.add(param);
-//        redisTemplate.opsForHash().put(APPLICATION_NAME + "_play_order", param.getItemCode(),playOrderByItemCode);
+    public Boolean publishBroadcastContent(BroadcastContentInsertDTO param) {
+        // String key = APPLICATION_NAME+"_PLAY_ORDER";
+        Long playOrderId =  idGeneratorSnowflake.snowflakeId();
+        param.setId(playOrderId);
+        if(StringUtils.isBlank(param.getItemCode())){
+            return false;
+        }
+        List<BroadcastContentInsertDTO> playOrderByItemCode = this.listBroadcastContent(param.getItemCode());
+        if(null == playOrderByItemCode) {
+            playOrderByItemCode = new ArrayList<>();
+        }
+        playOrderByItemCode.add(param);
+        redisTemplate.opsForHash().put(APPLICATION_NAME + "_broadcast_content", param.getItemCode(),playOrderByItemCode);
         return true;
+    }
+
+    public List<BroadcastContentInsertDTO> listBroadcastContent(String itemCode) {
+        List<BroadcastContentInsertDTO> resultList = new ArrayList<>();
+        Object objectInRedis = redisTemplate.opsForHash().get(APPLICATION_NAME + "_broadcast_content", itemCode);
+        if(null == objectInRedis){
+            return null;
+        }else {
+            for (Object object : (List<Object>)objectInRedis) {
+                // 将list中的数据转成json字符串
+                String jsonObject= JSON.toJSONString(object);
+                //将json转成需要的对象
+                BroadcastContentInsertDTO broadcastContentInsertDTO = JSONObject.parseObject(jsonObject,BroadcastContentInsertDTO.class);
+                resultList.add(broadcastContentInsertDTO);
+                System.out.println(broadcastContentInsertDTO);
+            }
+        }
+        return resultList;
     }
 }

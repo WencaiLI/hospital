@@ -55,7 +55,14 @@ public interface BroadcastService {
      */
     PageInfoVO getAlarmInfo(String keyword, String sysCode, Integer pageNumber, Integer pageSize);
 
-    List<BroadcastPublishContentDTO> getPublishContent(String itemCode);
+    /**
+     * @Author: liwencai
+     * @Description: 
+     * @Date: 2022/11/3
+     * @Param: itemCode: 
+     * @Return: java.util.List<com.thtf.environment.dto.BroadcastContentInsertDTO>
+     */
+    List<BroadcastContentInsertDTO> getPublishContent(String itemCode);
 
     /**
      * @Author: liwencai
