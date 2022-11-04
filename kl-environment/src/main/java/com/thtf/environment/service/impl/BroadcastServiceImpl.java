@@ -2,13 +2,12 @@ package com.thtf.environment.service.impl;
 
 
 import com.github.pagehelper.PageInfo;
-import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
-import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
-import com.thtf.common.dto.itemserver.TblItemDTO;
+import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.PageInfoConvert;
@@ -28,8 +27,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class BroadcastServiceImpl implements BroadcastService {
-    @Resource
-    AdminAPI adminAPI;
+
     @Resource
     ItemAPI itemAPI;
     @Resource
@@ -57,13 +55,33 @@ public class BroadcastServiceImpl implements BroadcastService {
         if (StringUtils.isBlank(areaCode)){
             areaCode = null;
         }
+        CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
+        if(StringUtils.isNotBlank(buildingCodes)){
+            countItemByParameterListDTO.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+        }else {
+            countItemByParameterListDTO.setAreaCode(areaCode);
+        }
+        countItemByParameterListDTO.setSysCode(sysCode);
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.GB_TASK);
+        countItemByParameterListDTO.setParameterValue(ParameterConstant.GB_TASK_ON_VALUE);
+
+        result.setMonitorNum(itemAPI.countItemByParameterList(countItemByParameterListDTO).getData());
+        // 设备一般信息
         ItemTotalAndOnlineAndAlarmNumDTO state = itemAPI.getItemParameterAndTotalAndAlarmItemNumber(sysCode, buildingCodes, areaCode,
                 ParameterConstant.ON_OFF_STATUS, ParameterConstant.ON_OFF_STATUS_ON_VALUE).getData();
         result.setItemNum(state.getTotalNum());
         result.setRunningItemNum(state.getOnlineNum());
         result.setFaultItemNum(state.getMalfunctionAlarmNumber());
-        result.setAreaNum(0); // todo liwencai 此处目前前端使用websocket,等确定方式后确定实现方式
-        result.setRunningAreaNum(0); // todo liwencai 此处目前前端使用websocket,等确定方式后确定实现方式
+        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode, ParameterConstant.GB_TASK, ParameterConstant.GB_TASK_ON_VALUE).getData();
+
+        if(null == data){
+            result.setAreaNum(0); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+            result.setRunningAreaNum(0); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+        }else {
+            result.setAreaNum(data.getTotalNum()); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+            result.setRunningAreaNum(data.getOtherNum()); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+        }
+
         return result;
     }
 
@@ -139,7 +157,7 @@ public class BroadcastServiceImpl implements BroadcastService {
                         itemInfoOfBroadcastDTO.setOnlineParameterCode(e.getCode());
                         itemInfoOfBroadcastDTO.setOnlineParameterValue(e.getValue());
                     }
-                    if(e.getParameterType().equals("GBTaskState")){ // 广播任务状态
+                    if(e.getParameterType().equals(ParameterConstant.GB_TASK)){ // 广播任务状态
                         itemInfoOfBroadcastDTO.setTaskParameterCode(e.getCode());
                         itemInfoOfBroadcastDTO.setTaskParameterValue(e.getValue());
                     }
