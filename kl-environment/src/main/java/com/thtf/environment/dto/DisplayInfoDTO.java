@@ -22,5 +22,7 @@ public class DisplayInfoDTO {
 
     private Integer faultItemNum; // 故障报警
 
+    private Integer monitorNum; // 故障报警
+
    //  List<KeyValueDTO> results;
 }

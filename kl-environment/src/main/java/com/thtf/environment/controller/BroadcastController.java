@@ -5,7 +5,9 @@ import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
+import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
+import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.service.BroadcastService;
 import com.thtf.environment.service.InfoPublishService;
@@ -40,6 +42,7 @@ public class BroadcastController {
 
     @Resource
     AdminAPI adminAPI;
+
 
     /**
      * @Author: liwencai
@@ -106,8 +109,8 @@ public class BroadcastController {
      */
     @PostMapping("/displayInfo")
     JsonResult<DisplayInfoDTO> displayInfo(@RequestParam(value = "sysCode")String sysCode,
-                                                 @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
-                                                 @RequestParam(value = "areaCode",required = false) String areaCode){
+                                           @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
+                                           @RequestParam(value = "areaCode",required = false) String areaCode){
         return JsonResult.querySuccess(broadcastService.displayInfo(sysCode,buildingCodes,areaCode));
     }
 
@@ -213,4 +216,16 @@ public class BroadcastController {
             return JsonResult.error("请传入设备编码");
         }
     }
+
+//    /**
+//     * @Author: liwencai
+//     * @Description: 分组的相关数据
+//     * @Date: 2022/11/4
+//     * @Param: sysCode: 子系统编码
+//     * @Return: com.thtf.common.response.JsonResult
+//     */
+//    @PostMapping("/group_count")
+//    public JsonResult countGroup(@RequestParam("sysCode") String sysCode){
+//        return itemAPI.countGroupByParameter(sysCode, ParameterConstant.GB_TASK,ParameterConstant.GB_TASK_ON_VALUE);
+//    }
 }
