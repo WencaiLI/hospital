@@ -4,10 +4,8 @@ package com.thtf.environment.service.impl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
-import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
 import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.PageInfoConvert;
@@ -81,7 +79,6 @@ public class BroadcastServiceImpl implements BroadcastService {
             result.setAreaNum(data.getTotalNum()); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
             result.setRunningAreaNum(data.getOtherNum()); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
         }
-
         return result;
     }
 
