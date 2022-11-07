@@ -1,7 +1,5 @@
 package com.thtf.office.controller;
 
-import com.thtf.common.log.OperateLog;
-import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
@@ -37,7 +35,6 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @GetMapping("/vehicleStatus")
-    @OperateLog(content = "车辆调度状态实时统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleStatisticsResultVO>> getVehicleStatus(){
         return JsonResult.querySuccess(vehicleStatisticsService.getVehicleStatus(null));
     }
@@ -50,7 +47,6 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/vehicleCategory")
-    @OperateLog(content = "各类车辆出车统计",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleStatisticsResultVO>> getVehicleCategory(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getVehicleCategory(paramVO));
     }
@@ -63,7 +59,6 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/rankingsOfOrg")
-    @OperateLog(content = "车辆使用频次行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfOrg(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name")));
     }
@@ -76,7 +71,6 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/rankingsOfVeh")
-    @OperateLog(content = "部门用车频次排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfVeh(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number")));
     }
@@ -89,7 +83,6 @@ public class VehicleStatisticsController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
      */
     @PostMapping("/rankingsOfDri")
-    @OperateLog(content = "司机出车频次排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfDri(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name")));
     }
@@ -102,7 +95,6 @@ public class VehicleStatisticsController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/rankingsOfMai")
-    @OperateLog(content = "车辆维保频次排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfMai(@RequestBody VehicleStatisticsParamVO paramVO){
         return JsonResult.querySuccess(vehicleStatisticsService.getMaintenanceRankings(paramVO));
     }
@@ -115,7 +107,6 @@ public class VehicleStatisticsController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>>
      */
     @PostMapping("/rankingsOfSchWD")
-    @OperateLog(content = "公车出车时长排行榜",operateType = OperateType.SELECT,operatePage = "车辆调度统计页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfSchWD(@RequestBody VehicleStatisticsParamVO paramVO){
         try {
             return JsonResult.querySuccess(vehicleStatisticsService.rankingsOfSchWD(paramVO));

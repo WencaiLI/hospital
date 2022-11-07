@@ -1,4 +1,4 @@
-package com.thtf.office;
+package com.thtf.face_recognition;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -15,14 +15,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan("com.thtf.office.mapper")
 @EnableTransactionManagement
 @EnableFeignClients("com.thtf.common")
-@ComponentScan(basePackages = {"com.thtf.office","com.thtf.common"})
-public class OfficeServerMain9001 extends SpringBootServletInitializer {
+@ComponentScan(basePackages = {"com.thtf.face_recognition","com.thtf.common"})
+public class FaceRecognitionApplication extends SpringBootServletInitializer {
+
     public static void main(String[] args) {
-        SpringApplication.run(OfficeServerMain9001.class, args);
+        SpringApplication.run(FaceRecognitionApplication.class, args);
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(OfficeServerMain9001.class);
+        return application.sources(FaceRecognitionApplication.class);
     }
+
 }
