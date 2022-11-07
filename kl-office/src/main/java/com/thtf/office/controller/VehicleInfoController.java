@@ -65,7 +65,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    @OperateLog(content = "新增维保信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "新增维保信息",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                       @ModelAttribute List<MultipartFile> carImageFile,
                                       @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
@@ -95,7 +95,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
-    @OperateLog(content = "删除公车信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "删除公车信息",operateType = OperateType.DELETE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> deleteById(@RequestParam("vid") @NotNull Long vid){
         if(vehicleInfoService.deleteById(vid)){
             return JsonResult.success(true);
@@ -112,7 +112,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
-    @OperateLog(content = "修改公车信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "修改公车信息",operateType = OperateType.UPDATE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> update(@Validated(VehicleParamValid.Update.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
@@ -143,7 +143,6 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
-    @OperateLog(content = "查询公车信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<PageInfo<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
         if(null != paramVO.getPageNumber()  && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
@@ -159,7 +158,6 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
      */
     @GetMapping("/关键词模糊查询(车牌号)")
-    @OperateLog(content = "新增维保信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
         return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
     }
@@ -174,7 +172,7 @@ public class VehicleInfoController {
      * @date 2022-06-14
      */
     @PostMapping("/itemImport")
-    @OperateLog(content = "批量导入车辆信息",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "批量导入车辆信息",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<String> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
         return JsonResult.success(vehicleInfoService.batchImport(uploadFile, uploadFile.getOriginalFilename(), type, null));
     }
@@ -186,7 +184,6 @@ public class VehicleInfoController {
      * @date 2022-06-14
      */
     @GetMapping("/importProgress")
-    @OperateLog(content = "获取批量导入设备信息进度",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<BigDecimal> importProgress() {
         try{
             return JsonResult.querySuccess(vehicleInfoService.importProgress());
@@ -204,7 +201,6 @@ public class VehicleInfoController {
      * @return: void
      */
     @GetMapping("/importTemplateDownload")
-    @OperateLog(content = "公车信息批量导入模板下载",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
        //  FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
         response.setCharacterEncoding("utf-8");
@@ -383,7 +379,7 @@ public class VehicleInfoController {
      * @return: void
      */
     @PostMapping("/batchImport")
-    @OperateLog(content = "公车信息批量导入",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "公车信息批量导入",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response) throws IOException {
         try {
             EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
@@ -400,7 +396,6 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult>
      */
     @GetMapping("/selectByCidAndMonth")
-    @OperateLog(content = "查询指定类别下汽车的调度排行",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<List<VehicleSelectByDateResult>> selectByCidAndMonth(@RequestParam(value = "cid") @NotNull Long cid){
         List<VehicleSelectByDateResult> result = vehicleInfoService.selectByCidByDate(cid);
         return JsonResult.querySuccess(result);
@@ -413,7 +408,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @GetMapping("/updateInfoStatus")
-    @OperateLog(content = "修改公车状态",operateType = OperateType.SELECT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "修改公车状态",operateType = OperateType.UPDATE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
     public JsonResult<Boolean> updateInfoStatus(){
         return JsonResult.querySuccess(true);
     }
