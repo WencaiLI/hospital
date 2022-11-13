@@ -27,7 +27,7 @@ import java.util.List;
 @Slf4j
 public class RedisOperationService {
     @Resource
-    RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${spring.application.name}")
     private String APPLICATION_NAME;
@@ -37,7 +37,7 @@ public class RedisOperationService {
     private final static String REMOTE_KEY = "_remote_key";
 
     @Autowired
-    IdGeneratorSnowflake idGeneratorSnowflake;
+    private IdGeneratorSnowflake idGeneratorSnowflake;
 
     /**
      * @Author: liwencai

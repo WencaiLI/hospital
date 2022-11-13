@@ -52,22 +52,22 @@ import java.util.stream.Collectors;
 public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper, TblVehicleInfo> implements TblVehicleInfoService {
 
     @Resource
-    TblVehicleInfoMapper vehicleInfoMapper;
+    private TblVehicleInfoMapper vehicleInfoMapper;
 
     @Resource
-    TblVehicleSchedulingMapper vehicleSchedulingMapper;
+    private TblVehicleSchedulingMapper vehicleSchedulingMapper;
 
     @Resource
-    VehicleInfoConverter vehicleInfoConverter;
+    private VehicleInfoConverter vehicleInfoConverter;
 
     @Autowired
-    IdGeneratorSnowflake idGeneratorSnowflake;
+    private IdGeneratorSnowflake idGeneratorSnowflake;
 
     @Autowired
-    TblVehicleCategoryMapper vehicleCategoryMapper;
+    private TblVehicleCategoryMapper vehicleCategoryMapper;
 
     @Autowired
-    AdminAPI adminAPI;
+    private AdminAPI adminAPI;
 
     /**
      * 实时统计导入进度最大100

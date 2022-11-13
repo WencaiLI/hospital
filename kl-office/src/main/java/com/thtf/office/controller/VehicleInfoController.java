@@ -49,10 +49,10 @@ import java.util.Map;
 public class VehicleInfoController {
 
     @Resource
-    TblVehicleInfoService vehicleInfoService;
+    private TblVehicleInfoService vehicleInfoService;
 
     @Resource
-    VehicleInfoConverter vehicleInfoConverter;
+    private VehicleInfoConverter vehicleInfoConverter;
 
     @Autowired
     private FileUtil fileUtil;

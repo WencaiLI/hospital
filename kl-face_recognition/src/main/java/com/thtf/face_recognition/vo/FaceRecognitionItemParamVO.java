@@ -9,4 +9,24 @@ import lombok.Data;
  */
 @Data
 public class FaceRecognitionItemParamVO {
+
+    /**
+     * 关键词
+     */
+    private String sysCode;
+
+    /**
+     * 关键词
+     */
+    private String keyword;
+
+    /**
+     * 页号
+     */
+    private Integer pageNumber;
+
+    /**
+     * 页大小
+     */
+    private Integer pageSize;
 }

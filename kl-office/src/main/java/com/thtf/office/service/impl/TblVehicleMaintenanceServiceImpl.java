@@ -32,16 +32,16 @@ import java.util.List;
 public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMaintenanceMapper, TblVehicleMaintenance> implements TblVehicleMaintenanceService {
 
     @Resource
-    TblVehicleMaintenanceMapper vehicleMaintenanceMapper;
+    private TblVehicleMaintenanceMapper vehicleMaintenanceMapper;
     
     @Resource
-    VehicleMaintenanceConverter vehicleMaintenanceConverter;
+    private VehicleMaintenanceConverter vehicleMaintenanceConverter;
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
     
     @Autowired
-    AdminAPI adminAPI;
+    private AdminAPI adminAPI;
 
     /**
      * @Author: liwencai 

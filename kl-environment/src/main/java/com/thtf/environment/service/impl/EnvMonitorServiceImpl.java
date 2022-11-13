@@ -45,25 +45,25 @@ import java.util.stream.Collectors;
 public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, TblHistoryMoment> implements EnvMonitorService {
 
     @Autowired
-    TblHistoryMomentMapper tblHistoryMomentMapper;
+    private TblHistoryMomentMapper tblHistoryMomentMapper;
 
     @Resource
-    ItemAPI itemAPI;
+    private ItemAPI itemAPI;
 
     @Resource
-    AlarmAPI alarmAPI;
+    private AlarmAPI alarmAPI;
 
     @Resource
-    AdminAPI adminAPI;
+    private AdminAPI adminAPI;
 
     @Resource
-    ItemTypeConvert itemTypeConvert;
+    private ItemTypeConvert itemTypeConvert;
 
     @Resource
-    PageInfoConvert pageInfoConvert;
+    private PageInfoConvert pageInfoConvert;
 
     @Resource
-    ItemParameterConvert itemParameterConvert;
+    private ItemParameterConvert itemParameterConvert;
 
     private final static String TBL_HISTORY_MOMENT = "tbl_history_moment";
     private final static String DAY_START_SUFFIX = " 00:00:00";

@@ -37,10 +37,10 @@ import java.util.Map;
 public class VehicleSchedulingController {
 
     @Resource
-    TblVehicleSchedulingService vehicleSchedulingService;
+    private TblVehicleSchedulingService vehicleSchedulingService;
 
     @Autowired
-    AdminAPI adminAPI;
+    private AdminAPI adminAPI;
 
     /**
      * @Author: liwencai

@@ -30,11 +30,11 @@ import java.util.stream.Collectors;
 public class InfoPublishController {
     // todo 信息发布需要对接高博医院的信息发布的系统，做对发布信息的统计
     @Autowired
-    InfoPublishService infoPublishService;
+    private InfoPublishService infoPublishService;
     @Resource
-    ItemAPI itemAPI;
+    private ItemAPI itemAPI;
     @Resource
-    AlarmAPI alarmAPI;
+    private AlarmAPI alarmAPI;
 
     /**
      * @Author: liwencai

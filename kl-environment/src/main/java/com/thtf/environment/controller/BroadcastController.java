@@ -32,16 +32,16 @@ import java.util.Map;
 public class BroadcastController {
 
     @Autowired
-    BroadcastService broadcastService;
+    private BroadcastService broadcastService;
 
     @Autowired
-    InfoPublishService infoPublishService;
+    private InfoPublishService infoPublishService;
 
     @Resource
-    AlarmAPI alarmAPI;
+    private AlarmAPI alarmAPI;
 
     @Resource
-    AdminAPI adminAPI;
+    private AdminAPI adminAPI;
 
 
     /**
