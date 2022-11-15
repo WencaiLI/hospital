@@ -16,15 +16,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableFeignClients("com.thtf.common")
 @ComponentScan(basePackages = {"com.thtf.face_recognition","com.thtf.common"})
-public class FaceRecognitionApplication extends SpringBootServletInitializer {
+public class FaceRecognitionServer9024Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        SpringApplication.run(FaceRecognitionApplication.class, args);
+        SpringApplication.run(FaceRecognitionServer9024Application.class, args);
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(FaceRecognitionApplication.class);
+        return application.sources(FaceRecognitionServer9024Application.class);
     }
 
 }

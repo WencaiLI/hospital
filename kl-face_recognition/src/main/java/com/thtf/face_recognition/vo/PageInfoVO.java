@@ -1,4 +1,4 @@
-package com.thtf.environment.dto;
+package com.thtf.face_recognition.vo;
 
 import lombok.Data;
 

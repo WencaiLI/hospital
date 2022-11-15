@@ -1,7 +1,7 @@
-package com.thtf.environment.dto.convert;
+package com.thtf.face_recognition.dto.mapstruct;
 
 import com.github.pagehelper.PageInfo;
-import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.face_recognition.vo.PageInfoVO;
 import org.mapstruct.Mapper;
 
 /**

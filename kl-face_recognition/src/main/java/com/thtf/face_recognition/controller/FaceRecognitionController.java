@@ -48,7 +48,7 @@ public class FaceRecognitionController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.face_recognition.vo.FaceRecognitionItemResultVO>>
      */
     @PostMapping("/listFaceRecognitionItem")
-    public JsonResult<List<FaceRecognitionItemResultVO>> listFaceRecognitionItem(@RequestBody FaceRecognitionItemParamVO paramVO){
+    public JsonResult<PageInfoVO> listFaceRecognitionItem(@RequestBody FaceRecognitionItemParamVO paramVO){
         return JsonResult.querySuccess(faceRecognitionService.listFaceRecognitionItem(paramVO));
     }
 
@@ -63,6 +63,4 @@ public class FaceRecognitionController {
     public JsonResult<List<FaceRecognitionAlarmResultVO>> listFaceRecognitionAlarm(@RequestBody FaceRecognitionAlarmParamVO paramVO){
         return JsonResult.querySuccess(manufacturerApiService.listFaceRecognitionAlarm(paramVO));
     }
-
-
 }

@@ -202,15 +202,11 @@ public class VehicleInfoController {
      */
     @GetMapping("/importTemplateDownload")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
-       //  FileUtils.downloadStaticExcelFile(response,"ExcelTemplate/vehicleTemplate.xlsx","公车信息导入模板.xlsx");
         response.setCharacterEncoding("utf-8");
         response.setHeader("Pragma", "No-Cache");
         response.setHeader("Cache-Control", "No-Cache");
         response.setDateHeader("Expires", 0);
-        // response.setContentType("application/msexcel; charset=UTF-8");
         response.setContentType("application/vnd.ms-excel");
-        // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-        // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
         InputStream fs ;
         ServletOutputStream out;
         try {
@@ -231,146 +227,7 @@ public class VehicleInfoController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        ClassPathResource resource = new ClassPathResource("ExcelTemplate/vehicleTemplate.xlsx");
-//        InputStream inputStream = resource.getInputStream();
-//        Workbook workbook = WorkbookFactory.create(inputStream);
-//        response.setCharacterEncoding("UTF-8");
-//        response.setHeader("content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("公车信息导入模板.xlsx", "UTF-8"));
-//        workbook.write(response.getOutputStream());
-
-//        try {
-//            ServletOutputStream out;
-//            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
-//                    + "ExcelTemplate/vehicleTemplate.xls";
-//            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
-//            FileInputStream in = new FileInputStream(filePath);
-//            out = response.getOutputStream();
-//            out.flush();
-//            int aRead;
-//            while ((aRead = in.read()) != -1) {
-//                out.write(aRead);
-//            }
-//            out.flush();
-//            in.close();
-//            out.close();
-//
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
-
-
-//        try {
-//            ServletOutputStream out;
-//            String filePath = this.getClass().getResource("/").getPath().replaceFirst("/", "")
-//                    + "ExcelTemplate/vehicleTemplate.xlsx";
-//            // String path = this.getClass().getClassLoader().getResource("").getPath();//注意getResource("")里面是空字符串
-//            FileInputStream in = new FileInputStream(filePath);
-//            out = response.getOutputStream();
-//            out.flush();
-//            int aRead;
-//            while ((aRead = in.read()) != -1) {
-//                out.write(aRead);
-//            }
-//            out.flush();
-//            in.close();
-//            out.close();
-//
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
-//        FileInputStream fis ;
-//        ServletOutputStream out;
-//        try {
-//            out = response.getOutputStream();
-//            URL resource = this.getClass().getClassLoader().getResource("ExcelTemplate/vehicleTemplate.xlsx");
-//            File file = new File(resource.toURI());
-//            fis = new FileInputStream(file);
-//            int aRead;
-//            while ((aRead = fis.read()) != -1) {
-//                out.write(aRead);
-//            }
-//            out.close();
-//            fis.close();
-//        } catch (IOException | URISyntaxException e) {
-//            e.printStackTrace();
-//        }
-//
-
     }
-
-//    /**
-//     * 下载导入模板
-//     *
-//     * @return
-//     */
-//    @RequestMapping(value = "/downImportModelFile", produces = "application/json")
-//    @ResponseBody
-//    public JsonResult<Boolean> downImportModelFile(HttpServletRequest request, HttpServletResponse response) {
-//        Boolean result = downFile(importModel, request, response);
-//        return JsonResult.success();
-//    }
-//    /**
-//     * 下载文件
-//     *      下载中英文件名的文件
-//     * @param filePath 文件路径
-//     * @return
-//     */
-//    public JsonResult<Boolean> downFile(String filePath, HttpServletRequest request, HttpServletResponse response) {
-//        InputStream fis = null;
-//        OutputStream toClient = null;
-//        File file = new File(filePath);
-//        if(!file.exists()){
-//            return JsonResult.error("file path is not exist");
-//        }
-//        try {
-//            // 以流的形式下载文件。
-//            fis = new BufferedInputStream(new FileInputStream(filePath));
-//            byte[] buffer = new byte[fis.available()];
-//            fis.read(buffer);
-//            // 设置Response
-//            setResponse(request,response,file);
-//            toClient = new BufferedOutputStream(response.getOutputStream());
-//            toClient.write(buffer);
-//            return null;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return JsonResult.error(e.getMessage());
-//        } finally {
-//            try {
-//                if (null != fis) {
-//                    IOUtils.closeQuietly(fis);
-//                }
-//                if (null != toClient) {
-//                    toClient.flush();
-//                    IOUtils.closeQuietly(toClient);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//    /**
-//     * 设置response
-//     * @param request
-//     * @param response
-//     * @param file
-//     */
-//    public void setResponse(HttpServletRequest request,HttpServletResponse response,File file) {
-//        ServletContext sc = request.getSession().getServletContext();
-//        String fileName = file.getName();
-//        String filePath = file.getPath();
-//        // 清空response
-//        response.reset();
-//        // 设置response的Header
-////        response.setHeader("Content-Disposition",
-////                "attachment;filename="+ new String(fileName.getBytes(),"ISO8859-1"));
-//        response.setHeader("Content-Disposition","attachment;filename*=UTF-8''"+ URLEncoder.encode(fileName));
-//        response.addHeader("Content-Length", "" + file.length());
-//        response.setContentType(sc.getMimeType(filePath));
-//    }
-
-
 
     /**
      * @Author: liwencai
@@ -380,10 +237,11 @@ public class VehicleInfoController {
      */
     @PostMapping("/batchImport")
     @OperateLog(content = "公车信息批量导入",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
-    public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response) throws IOException {
+    public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response){
         try {
             EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
         }catch (Exception e){
+            e.printStackTrace();
             log.error(e.getMessage());
         }
     }

@@ -16,6 +16,16 @@ public class FaceRecognitionItemParamVO {
     private String sysCode;
 
     /**
+     * 建筑编码（逗号分隔）
+     */
+    private String buildingCodes;
+
+    /**
+     * 建筑区域编码
+     */
+    private String areaCodes;
+
+    /**
      * 关键词
      */
     private String keyword;

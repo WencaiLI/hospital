@@ -1,5 +1,6 @@
 package com.thtf.face_recognition.vo;
 
+import com.thtf.common.dto.itemserver.ListVideoItemResultDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -89,4 +90,8 @@ public class FaceRecognitionItemResultVO {
      */
     private List<Integer> center;
 
+//    /**
+//     * 摄像设备
+//     */
+//    private ListVideoItemResultDTO videoInfo;
 }
