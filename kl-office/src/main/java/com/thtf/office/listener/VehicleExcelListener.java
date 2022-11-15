@@ -1,8 +1,10 @@
 package com.thtf.office.listener;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -15,6 +17,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.time.Instant;
@@ -23,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -220,21 +224,35 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
      */
 
     public void responseErrorInfo(){
-        response.setCharacterEncoding("utf-8");
-        response.setHeader("Pragma", "No-Cache");
-        response.setHeader("Cache-Control", "No-Cache");
-        response.setDateHeader("Expires", 0);
-        response.setContentType("application/vnd.ms-excel");
+//        response.setCharacterEncoding("utf-8");
+//        response.setHeader("Pragma", "No-Cache");
+//        response.setHeader("Cache-Control", "No-Cache");
+//        response.setDateHeader("Expires", 0);
+//        response.setContentType("application/vnd.ms-excel");
+//        String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
+//        try {
+//            response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
         ServletOutputStream out;
         try {
-            String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
-            response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
+            //            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
+            String fileName = System.currentTimeMillis() + ".xlsx";
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf8");
+            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
             out = response.getOutputStream();
             //创建流
 //            ByteArrayOutputStream bos=new ByteArrayOutputStream();
-            EasyExcel.write(response.getOutputStream(), VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
-//            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
+            ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
+//            WriteSheet writeSheet =new WriteSheet();
+//            String[] s = new String[2];
+//
+//            writeSheet.setHead(Arrays.asList());
             out.close();
+            excelWriter.finish();
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
