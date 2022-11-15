@@ -25,7 +25,7 @@ import java.util.List;
 public class EnvMonitorController {
 
     @Autowired
-    EnvMonitorService envMonitorService;
+    private EnvMonitorService envMonitorService;
 
 
     /**

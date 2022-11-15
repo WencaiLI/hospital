@@ -31,6 +31,7 @@ import java.util.List;
  * @Description: 公车Excel导入监听器 注意：Listener不能被spring管理，要每次读取excel都要new,然后里面用到spring可以构造方法传进去
  */
 @Slf4j
+@SuppressWarnings({"All"})
 public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcelImportDTO> {
 
     private final TblVehicleInfoService vehicleInfoService;
@@ -75,7 +76,11 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
     public void invoke(VehicleInfoExcelImportDTO dto, AnalysisContext analysisContext) {
 
 
-        // 出现错误的列的数量
+        System.out.println("执行");
+
+        /**
+         * 出现错误的列的数量
+         */
         int errorColumnNum = 0;
         // 出现错误的行号
         int rowNumber = analysisContext.readRowHolder().getRowIndex();
@@ -213,17 +218,13 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
      * @Date: 2022/8/10
      * @return: void
      */
+
     public void responseErrorInfo(){
         response.setCharacterEncoding("utf-8");
-//        response.setHeader("Pragma", "No-Cache");
-//        response.setHeader("Cache-Control", "No-Cache");
-//        response.setDateHeader("Expires", 0);
-        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
-//        response.setContentType("application/json; charset=UTF-8");
-        response.setHeader("responseType","blob");
-//        response.setContentType("application/octet-stream");
-        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-//        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Pragma", "No-Cache");
+        response.setHeader("Cache-Control", "No-Cache");
+        response.setDateHeader("Expires", 0);
+        response.setContentType("application/vnd.ms-excel");
         ServletOutputStream out;
         try {
             String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
@@ -239,4 +240,32 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
             log.error(e.getMessage());
         }
     }
+
+
+//    public void responseErrorInfo(){
+//        response.setCharacterEncoding("utf-8");
+////        response.setHeader("Pragma", "No-Cache");
+////        response.setHeader("Cache-Control", "No-Cache");
+////        response.setDateHeader("Expires", 0);
+//        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
+////        response.setContentType("application/json; charset=UTF-8");
+//        response.setHeader("responseType","blob");
+////        response.setContentType("application/octet-stream");
+//        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+////        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//        ServletOutputStream out;
+//        try {
+//            String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
+//            response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
+//            out = response.getOutputStream();
+//            //创建流
+////            ByteArrayOutputStream bos=new ByteArrayOutputStream();
+//            EasyExcel.write(response.getOutputStream(), VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
+////            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
+//            out.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            log.error(e.getMessage());
+//        }
+//    }
 }

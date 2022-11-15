@@ -12,6 +12,7 @@
     <module>kl-elevator</module>
     <module>kl-environment</module>
     <module>kl-broadcast</module>
+    <module>kl-face_recognition</module>
   </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

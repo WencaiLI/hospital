@@ -2,8 +2,10 @@ package com.thtf.face_recognition.controller;
 
 import com.thtf.common.response.JsonResult;
 import com.thtf.face_recognition.service.FaceRecognitionService;
+import com.thtf.face_recognition.service.ManufacturerApiService;
 import com.thtf.face_recognition.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +21,11 @@ public class FaceRecognitionController {
 
     @Autowired
     private FaceRecognitionService faceRecognitionService;
+
+
+    @Autowired
+    @Qualifier("Megvii") // 旷世人脸识别接口实现
+    private ManufacturerApiService manufacturerApiService;
 
 
     /**
@@ -41,7 +48,7 @@ public class FaceRecognitionController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.face_recognition.vo.FaceRecognitionItemResultVO>>
      */
     @PostMapping("/listFaceRecognitionItem")
-    public JsonResult<List<FaceRecognitionItemResultVO>> listFaceRecognitionItem(@RequestBody FaceRecognitionItemParamVO paramVO){
+    public JsonResult<PageInfoVO> listFaceRecognitionItem(@RequestBody FaceRecognitionItemParamVO paramVO){
         return JsonResult.querySuccess(faceRecognitionService.listFaceRecognitionItem(paramVO));
     }
 
@@ -54,8 +61,6 @@ public class FaceRecognitionController {
      */
     @PostMapping("/listFaceRecognitionAlarm")
     public JsonResult<List<FaceRecognitionAlarmResultVO>> listFaceRecognitionAlarm(@RequestBody FaceRecognitionAlarmParamVO paramVO){
-        return JsonResult.querySuccess(faceRecognitionService.listFaceRecognitionAlarm(paramVO));
+        return JsonResult.querySuccess(manufacturerApiService.listFaceRecognitionAlarm(paramVO));
     }
-
-
 }

@@ -43,19 +43,19 @@ import java.util.stream.Stream;
 public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategoryMapper, TblVehicleCategory> implements TblVehicleCategoryService {
 
     @Resource
-    VehicleCategoryConverter vehicleCategoryConverter;
+    private VehicleCategoryConverter vehicleCategoryConverter;
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
 
     @Resource
-    TblVehicleCategoryMapper vehicleCategoryMapper;
+    private TblVehicleCategoryMapper vehicleCategoryMapper;
 
     @Resource
-    TblVehicleInfoMapper vehicleInfoMapper;
+    private TblVehicleInfoMapper vehicleInfoMapper;
 
     @Autowired
-    AdminAPI adminAPI;
+    private AdminAPI adminAPI;
     /**
      * @Author: liwencai
      * @Description: 新增公车类别

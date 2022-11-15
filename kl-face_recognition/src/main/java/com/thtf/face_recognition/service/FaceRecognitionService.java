@@ -12,7 +12,7 @@ import java.util.List;
 public interface FaceRecognitionService {
     FaceRecognitionDisplayVO getDisplayInfo(String sysCode);
 
-    List<FaceRecognitionItemResultVO> listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO);
+    PageInfoVO listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO);
 
-    List<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO);
+//    List<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO);
 }
