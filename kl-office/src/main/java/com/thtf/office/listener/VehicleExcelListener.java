@@ -4,7 +4,6 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.excel.write.metadata.WriteSheet;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -15,18 +14,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -251,6 +247,7 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
 //            String[] s = new String[2];
 //
 //            writeSheet.setHead(Arrays.asList());
+            out.flush();
             out.close();
             excelWriter.finish();
         } catch (Exception e) {
