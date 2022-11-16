@@ -1,4 +1,5 @@
-FROM openjdk:8u242-jre-slim
+FROM anapsix/alpine-java:8_jdk_unlimited
+#FROM openjdk:8u242-jre-slim
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 COPY ./kl-office/target/kl-office-1.0-SNAPSHOT.jar kl-office.jar
