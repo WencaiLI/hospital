@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -233,21 +234,25 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
 //        }
         ServletOutputStream out;
         try {
-            //            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
-            String fileName = "公车错误信息" + ".xls";
-            response.setContentType("application/vnd.ms-excel");
-            response.setCharacterEncoding("utf8");
-            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
-            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            out = response.getOutputStream();
-            //创建流
-//            ByteArrayOutputStream bos=new ByteArrayOutputStream();
-            ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
+//            //            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
+//            String fileName = "aaaaaa" + ".xlsx";
+//            response.setContentType("application/vnd.ms-excel");
+//            response.setCharacterEncoding("utf8");
+//            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+//            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+//            out = response.getOutputStream();
+//            //创建流
+////            ByteArrayOutputStream bos=new ByteArrayOutputStream();
+//            VehicleInfoExcelErrorImportDTO vehicleInfoExcelErrorImportDTO = new VehicleInfoExcelErrorImportDTO();
+//            vehicleInfoExcelErrorImportDTO.setErrorInfo("错误测试");
+//            errorList.add(vehicleInfoExcelErrorImportDTO);
+            ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(),VehicleInfoExcelErrorImportDTO.class).build();
+            WriteSheet writeSheet =  new WriteSheet();
+            writeSheet.setSheetName("错误数据");
+            excelWriter.write(errorList,writeSheet);
 //            WriteSheet writeSheet =new WriteSheet();
-//            String[] s = new String[2];
-//
 //            writeSheet.setHead(Arrays.asList());
-            out.flush();
+//            out.flush();
 //            out.close();
             excelWriter.finish();
         } catch (Exception e) {
