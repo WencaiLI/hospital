@@ -234,7 +234,7 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
         ServletOutputStream out;
         try {
             //            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
-            String fileName = System.currentTimeMillis() + ".xlsx";
+            String fileName = "公车错误信息" + ".xls";
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf8");
             response.setHeader("Content-disposition", "attachment;filename=" + fileName);
@@ -248,7 +248,7 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
 //
 //            writeSheet.setHead(Arrays.asList());
             out.flush();
-            out.close();
+//            out.close();
             excelWriter.finish();
         } catch (Exception e) {
             e.printStackTrace();
