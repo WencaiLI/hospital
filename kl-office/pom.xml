@@ -285,17 +285,17 @@
                 </configuration>
 
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <nonFilteredFileExtensions>
-                        <nonFilteredFileExtension>xls</nonFilteredFileExtension>
-                        <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-resources-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <encoding>UTF-8</encoding>-->
+<!--                    <nonFilteredFileExtensions>-->
+<!--                        <nonFilteredFileExtension>xls</nonFilteredFileExtension>-->
+<!--                        <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>-->
+<!--                    </nonFilteredFileExtensions>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
 
         </plugins>
 <!--        <resources>-->
