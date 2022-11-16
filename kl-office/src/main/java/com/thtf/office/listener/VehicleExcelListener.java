@@ -235,11 +235,11 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
         ServletOutputStream out;
         try {
 //            //            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
-//            String fileName = "aaaaaa" + ".xlsx";
-//            response.setContentType("application/vnd.ms-excel");
-//            response.setCharacterEncoding("utf8");
-//            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
-//            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            String fileName = "aaaaaa" + ".xls";
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf8");
+            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
 //            out = response.getOutputStream();
 //            //创建流
 ////            ByteArrayOutputStream bos=new ByteArrayOutputStream();
