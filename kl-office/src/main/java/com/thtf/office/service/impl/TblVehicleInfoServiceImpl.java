@@ -272,7 +272,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             paramVO.setModelKeyword(null);
         }
         if(StringUtils.isNotBlank(paramVO.getCarNumber())){
-            paramVO.setCarNumber(null);
+            paramVO.setCarNumberKeyword(null);
         }
         return vehicleInfoMapper.select(paramVO);
     }
@@ -286,6 +286,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      * @return: java.lang.Object
      */
     @Override
+    @Deprecated
     public List<TblVehicleInfo> selectByKey(String keywords) {
        return vehicleInfoMapper.selectByKey(keywords);
     }
