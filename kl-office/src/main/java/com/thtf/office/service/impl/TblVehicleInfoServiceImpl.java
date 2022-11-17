@@ -31,13 +31,14 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -262,6 +263,17 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      */
     @Override
     public List<TblVehicleInfo> select(VehicleInfoParamVO paramVO) {
+        // 目前只针对厂商和车牌号进行模糊查询
+        if(StringUtils.isNotBlank(paramVO.getKeyword())){
+            paramVO.setModelKeyword(paramVO.getKeyword());
+            paramVO.setCarNumberKeyword(paramVO.getKeyword());
+        }
+        if(StringUtils.isNotBlank(paramVO.getModel())){
+            paramVO.setModelKeyword(null);
+        }
+        if(StringUtils.isNotBlank(paramVO.getCarNumber())){
+            paramVO.setCarNumber(null);
+        }
         return vehicleInfoMapper.select(paramVO);
     }
 

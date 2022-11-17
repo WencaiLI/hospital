@@ -1,12 +1,15 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.log.OperateLog;
 import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
+import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
@@ -32,6 +35,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -150,17 +154,17 @@ public class VehicleInfoController {
         return JsonResult.querySuccess(PageInfo.of(vehicleInfoService.select(paramVO)));
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 关键词模糊查询(车牌号)
-     * @Date: 2022/8/4
-     * @Param keywords:
-     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
-     */
-    @GetMapping("/关键词模糊查询(车牌号)")
-    public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
-        return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
-    }
+//    /**
+//     * @Author: liwencai
+//     * @Description: 关键词模糊查询(车牌号)
+//     * @Date: 2022/8/4
+//     * @Param keywords:
+//     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
+//     */
+//    @GetMapping("/selectByKey")
+//    public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
+//        return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
+//    }
 
     /**
      * Excel批量导入车辆信息
@@ -192,8 +196,24 @@ public class VehicleInfoController {
             return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
         }
     }
-
-
+    @GetMapping("/importTemplateDownloadNew")
+    public void importTemplateDownloadNew(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
+        ExcelWriter excelWriter = null;
+        try {
+            excelWriter = EasyExcel.write(response.getOutputStream(), VehicleInfoExcelImportDTO.class)
+                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
+                    .build();
+            WriteSheet writeSheet =  new WriteSheet();
+            writeSheet.setSheetName("sheet");
+            List<VehicleInfoExcelImportDTO> list = new ArrayList<>();
+            excelWriter.write(list,writeSheet);
+        }finally {
+        // 千万别忘记关闭流
+        if (excelWriter != null) {
+            excelWriter.finish();
+        }
+    }
+    }
     /**
      * @Author: liwencai
      * @Description: 公车信息批量导入模板下载

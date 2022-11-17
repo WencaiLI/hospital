@@ -77,4 +77,10 @@ public class VehicleInfoParamVO implements Serializable {
     private Integer pageNumber;
 
     private Integer pageSize;
+
+    private String keyword;
+
+    private String carNumberKeyword;
+
+    private String modelKeyword;
 }

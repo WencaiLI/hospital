@@ -18,6 +18,18 @@
             <if test="vehicleCategoryId != null">
                 and vehicle_category_id = #{vehicleCategoryId}
             </if>
+
+            <if test="null != keyword">
+                <trim prefix="and (" prefixOverrides="or" suffix=")">
+                    <if test="null != carNumberKeyword">
+                        or car_number like CONCAT('%',#{carNumberKeyword},'%')
+                    </if>
+                    <if test="null != modelKeyword">
+                        or model like CONCAT('%',#{modelKeyword},'%')
+                    </if>
+                </trim>
+            </if>
+
         </where>
     </select>
     <!-- 删除与指定公车类别关联的公车信息 -->
