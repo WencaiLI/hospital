@@ -154,17 +154,18 @@ public class VehicleInfoController {
         return JsonResult.querySuccess(PageInfo.of(vehicleInfoService.select(paramVO)));
     }
 
-//    /**
-//     * @Author: liwencai
-//     * @Description: 关键词模糊查询(车牌号)
-//     * @Date: 2022/8/4
-//     * @Param keywords:
-//     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
-//     */
-//    @GetMapping("/selectByKey")
-//    public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
-//        return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
-//    }
+    /**
+     * @Author: liwencai
+     * @Description: 关键词模糊查询(车牌号)
+     * @Date: 2022/8/4
+     * @Param keywords:
+     * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleInfo>>>
+     */
+    // @GetMapping("/selectByKey")
+    @Deprecated
+    public JsonResult<List<TblVehicleInfo>> selectByKey(@NotNull @RequestParam(value="key") String keywords){
+        return JsonResult.querySuccess(vehicleInfoService.selectByKey(keywords));
+    }
 
     /**
      * Excel批量导入车辆信息
