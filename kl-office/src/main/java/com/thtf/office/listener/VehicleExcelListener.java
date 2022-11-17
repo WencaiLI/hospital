@@ -5,9 +5,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.alibaba.excel.write.metadata.style.WriteCellStyle;
-import com.alibaba.excel.write.metadata.style.WriteFont;
-import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
+import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -16,9 +14,6 @@ import com.thtf.office.service.TblVehicleInfoService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.mapstruct.factory.Mappers;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -180,7 +175,7 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
         }
         /* ************数据验证结束************* */
         if(errorColumnNum>0){
-            vehicleInfoExcelErrorImportDTO.setRowNumber(String.valueOf(rowNumber));
+            // vehicleInfoExcelErrorImportDTO.setRowNumber(String.valueOf(rowNumber));
             vehicleInfoExcelErrorImportDTO.setErrorInfo(stringBuilder.toString());
             errorList.add(vehicleInfoExcelErrorImportDTO);
         }else {
@@ -230,41 +225,19 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
      */
 
     public void responseErrorInfo(){
-//        response.setCharacterEncoding("utf-8");
-//        response.setHeader("Pragma", "No-Cache");
-//        response.setHeader("Cache-Control", "No-Cache");
-//        response.setDateHeader("Expires", 0);
-//        response.setContentType("application/vnd.ms-excel");
-//        String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
-//        try {
-//            response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
         ServletOutputStream out;
         try {
-//            //            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
             String fileName = "aaaaaa" + ".xls";
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf8");
             response.setHeader("Content-disposition", "attachment;filename=" + fileName);
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-//            out = response.getOutputStream();
-//            //创建流
-////            ByteArrayOutputStream bos=new ByteArrayOutputStream();
-//            VehicleInfoExcelErrorImportDTO vehicleInfoExcelErrorImportDTO = new VehicleInfoExcelErrorImportDTO();
-//            vehicleInfoExcelErrorImportDTO.setErrorInfo("错误测试");
-//            errorList.add(vehicleInfoExcelErrorImportDTO);
             ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(),VehicleInfoExcelErrorImportDTO.class)
-                    .registerWriteHandler(getStyleStrategy())
+                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
                     .build();
             WriteSheet writeSheet =  new WriteSheet();
-            writeSheet.setSheetName("错误数据");
+            writeSheet.setSheetName("sheet");
             excelWriter.write(errorList,writeSheet);
-//            WriteSheet writeSheet =new WriteSheet();
-//            writeSheet.setHead(Arrays.asList());
-//            out.flush();
-//            out.close();
             excelWriter.finish();
         } catch (Exception e) {
             e.printStackTrace();
@@ -290,64 +263,5 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
         }
     }
 
-//    public void responseErrorInfo(){
-//        response.setCharacterEncoding("utf-8");
-////        response.setHeader("Pragma", "No-Cache");
-////        response.setHeader("Cache-Control", "No-Cache");
-////        response.setDateHeader("Expires", 0);
-//        response.setContentType("application/vnd.ms-excel; charset=UTF-8");
-////        response.setContentType("application/json; charset=UTF-8");
-//        response.setHeader("responseType","blob");
-////        response.setContentType("application/octet-stream");
-//        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-////        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//        ServletOutputStream out;
-//        try {
-//            String filename = "excel"+LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+".xls";
-//            response.setHeader("Content-Disposition","attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
-//            out = response.getOutputStream();
-//            //创建流
-////            ByteArrayOutputStream bos=new ByteArrayOutputStream();
-//            EasyExcel.write(response.getOutputStream(), VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
-////            EasyExcel.write(bos, VehicleInfoExcelErrorImportDTO.class).sheet().doWrite(errorList);
-//            out.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            log.error(e.getMessage());
-//        }
-//    }
-
-    public static HorizontalCellStyleStrategy getStyleStrategy(){
-        // 头的策略
-        WriteCellStyle headWriteCellStyle = new WriteCellStyle();
-        // 背景设置为灰色
-        headWriteCellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        WriteFont headWriteFont = new WriteFont();
-        headWriteFont.setFontHeightInPoints((short)12);
-        // 字体样式
-        headWriteFont.setFontName("微软雅黑");
-        headWriteCellStyle.setWriteFont(headWriteFont);
-        //自动换行
-        headWriteCellStyle.setWrapped(false);
-        // 水平对齐方式
-        headWriteCellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
-        // 垂直对齐方式
-        headWriteCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-
-        // 内容的策略
-        WriteCellStyle contentWriteCellStyle = new WriteCellStyle();
-        // 这里需要指定 FillPatternType 为FillPatternType.SOLID_FOREGROUND 不然无法显示背景颜色.头默认了 FillPatternType所以可以不指定
-//        contentWriteCellStyle.setFillPatternType(FillPatternType.SQUARES);
-        // 背景白色
-        contentWriteCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
-        WriteFont contentWriteFont = new WriteFont();
-        // 字体大小
-        contentWriteFont.setFontHeightInPoints((short)12);
-        // 字体样式
-        contentWriteFont.setFontName("微软雅黑");
-        contentWriteCellStyle.setWriteFont(contentWriteFont);
-        // 这个策略是 头是头的样式 内容是内容的样式 其他的策略可以自己实现
-        return new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
-    }
 
 }
