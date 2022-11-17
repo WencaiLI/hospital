@@ -1,11 +1,13 @@
 package com.thtf.office.service;
 
-import com.thtf.office.dto.VehicleInfoExcelImportDTO;
-import com.thtf.office.vo.VehicleInfoParamVO;
-import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.office.dto.VehicleInfoExcelImportDTO;
+import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -67,4 +69,6 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
     boolean verifyCarNumberForInsert(String carNumber);
 
     boolean verifyCategoryForInsert(String vehicleCategoryName);
+
+    void importTemplateDownloadNew(HttpServletResponse response, List<?> list, Class<?> clazz);
 }

@@ -1,15 +1,12 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.write.metadata.WriteSheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.log.OperateLog;
 import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
-import com.thtf.office.common.exportExcel.EasyExcelStyleUtils;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
@@ -54,6 +51,7 @@ public class VehicleInfoController {
 
     @Resource
     private TblVehicleInfoService vehicleInfoService;
+
 
     @Resource
     private VehicleInfoConverter vehicleInfoConverter;
@@ -199,48 +197,12 @@ public class VehicleInfoController {
     }
 
 
-    @GetMapping("/importTemplateDownloadNew")
-    public void importTemplateDownloadNew(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
+    @GetMapping("/importTemplateDownload")
+    public void importTemplateDownloadNew(HttpServletResponse response) throws IOException, InvalidFormatException {
         List<VehicleInfoExcelImportDTO> list = new ArrayList<>();
         VehicleInfoExcelImportDTO x = new VehicleInfoExcelImportDTO();
-        x.setCarNumber("asssssssssssssssssssssss");
         list.add(x);
-        list.add(x);
-        list.add(x); list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x); list.add(x); list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x);
-        list.add(x);
-
-
-
-
-
-
-        ExcelWriter excelWriter = null;
-        try {
-            excelWriter = EasyExcel.write(response.getOutputStream(), VehicleInfoExcelImportDTO.class)
-                    .registerWriteHandler(new EasyExcelStyleUtils.CustomSheetWriteHandler2())
-//                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
-//                    .registerWriteHandler(new EasyExcelStyleUtils.CustomSheetWriteHandler())
-                    .build();
-            WriteSheet writeSheet = new WriteSheet();
-            writeSheet.setSheetName("sheet");
-            excelWriter.write(list, writeSheet);
-        } finally {
-            // 千万别忘记关闭流
-            if (excelWriter != null) {
-                excelWriter.finish();
-            }
-        }
-        // EasyExcelStyleUtils.customHandlerWrite(list,VehicleInfoExcelImportDTO.class,"公车导入模板下载");
+        vehicleInfoService.importTemplateDownloadNew(response,list,VehicleInfoExcelImportDTO.class);
     }
 
     /**
@@ -249,7 +211,7 @@ public class VehicleInfoController {
      * @Date: 2022/7/26
      * @return: void
      */
-    @GetMapping("/importTemplateDownload")
+    @GetMapping("/importTemplateDownloadOld")
     public void importTemplateDownload(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
         response.setCharacterEncoding("utf-8");
         response.setHeader("Pragma", "No-Cache");
@@ -285,13 +247,14 @@ public class VehicleInfoController {
      */
     @PostMapping("/batchImport")
     @OperateLog(content = "公车信息批量导入",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
-    public void batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response){
+    public JsonResult batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response){
         try {
-            EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(3).sheet().doRead();
+            EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(4).sheet().doRead();
         }catch (Exception e){
             e.printStackTrace();
             log.error(e.getMessage());
         }
+        return JsonResult.success();
     }
 
     /**

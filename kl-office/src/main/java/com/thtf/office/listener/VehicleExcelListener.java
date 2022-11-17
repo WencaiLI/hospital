@@ -1,11 +1,7 @@
 package com.thtf.office.listener;
 
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.util.RegexVerifyUtil;
 import com.thtf.office.dto.VehicleInfoExcelErrorImportDTO;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
@@ -79,9 +75,6 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
     @Override
     @Transactional
     public void invoke(VehicleInfoExcelImportDTO dto, AnalysisContext analysisContext) {
-
-
-        System.out.println("执行");
 
         /**
          * 出现错误的列的数量
@@ -202,6 +195,8 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
         saveData();
         if(errorList.size()>0){
             responseErrorInfo();
+        }else {
+            return;
         }
     }
 
@@ -232,13 +227,14 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
             response.setCharacterEncoding("utf8");
             response.setHeader("Content-disposition", "attachment;filename=" + fileName);
             response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-            ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(),VehicleInfoExcelErrorImportDTO.class)
-                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
-                    .build();
-            WriteSheet writeSheet =  new WriteSheet();
-            writeSheet.setSheetName("sheet");
-            excelWriter.write(errorList,writeSheet);
-            excelWriter.finish();
+//            ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(),VehicleInfoExcelErrorImportDTO.class)
+//                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
+//                    .build();
+//            WriteSheet writeSheet =  new WriteSheet();
+//            writeSheet.setSheetName("sheet");
+//            excelWriter.write(errorList,writeSheet);
+//            excelWriter.finish();
+            vehicleInfoService.importTemplateDownloadNew(response,errorList,VehicleInfoExcelErrorImportDTO.class);
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
