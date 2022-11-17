@@ -9,7 +9,7 @@ import com.thtf.common.log.OperateLog;
 import com.thtf.common.log.OperateType;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.FileUtil;
-import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
+import com.thtf.office.common.exportExcel.EasyExcelStyleUtils;
 import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.dto.converter.VehicleInfoConverter;
@@ -197,24 +197,52 @@ public class VehicleInfoController {
             return JsonResult.error(e.getClass().getName() + ":" + e.getMessage());
         }
     }
+
+
     @GetMapping("/importTemplateDownloadNew")
     public void importTemplateDownloadNew(HttpServletRequest request, HttpServletResponse response) throws IOException, InvalidFormatException {
+        List<VehicleInfoExcelImportDTO> list = new ArrayList<>();
+        VehicleInfoExcelImportDTO x = new VehicleInfoExcelImportDTO();
+        x.setCarNumber("asssssssssssssssssssssss");
+        list.add(x);
+        list.add(x);
+        list.add(x); list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x); list.add(x); list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x);
+        list.add(x);
+
+
+
+
+
+
         ExcelWriter excelWriter = null;
         try {
             excelWriter = EasyExcel.write(response.getOutputStream(), VehicleInfoExcelImportDTO.class)
-                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
+                    .registerWriteHandler(new EasyExcelStyleUtils.CustomSheetWriteHandler2())
+//                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
+//                    .registerWriteHandler(new EasyExcelStyleUtils.CustomSheetWriteHandler())
                     .build();
-            WriteSheet writeSheet =  new WriteSheet();
+            WriteSheet writeSheet = new WriteSheet();
             writeSheet.setSheetName("sheet");
-            List<VehicleInfoExcelImportDTO> list = new ArrayList<>();
-            excelWriter.write(list,writeSheet);
-        }finally {
-        // 千万别忘记关闭流
-        if (excelWriter != null) {
-            excelWriter.finish();
+            excelWriter.write(list, writeSheet);
+        } finally {
+            // 千万别忘记关闭流
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
         }
+        // EasyExcelStyleUtils.customHandlerWrite(list,VehicleInfoExcelImportDTO.class,"公车导入模板下载");
     }
-    }
+
     /**
      * @Author: liwencai
      * @Description: 公车信息批量导入模板下载
@@ -235,9 +263,8 @@ public class VehicleInfoController {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
         try {
-            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xlsx");
+            fs = this.getClass().getClassLoader().getResourceAsStream("ExcelTemplate/vehicleTemplate.xls");
             out = response.getOutputStream();
             int aRead;
             while ((aRead = fs.read()) != -1) {

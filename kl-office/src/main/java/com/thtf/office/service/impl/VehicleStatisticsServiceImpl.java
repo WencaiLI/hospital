@@ -1,6 +1,6 @@
 package com.thtf.office.service.impl;
 
-import com.thtf.office.entity.TblVehicleScheduling;
+import com.thtf.office.dto.VehicleNumberTypeCodeDTO;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.mapper.TblVehicleMaintenanceMapper;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
@@ -9,6 +9,7 @@ import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,17 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
      */
     @Override
     public List<VehicleRankingsResultVO> getRankings(Map<String, Object> map) {
-        return vehicleInfoMapper.getRankings(map);
+        List<VehicleRankingsResultVO> rankings = vehicleInfoMapper.getRankings(map);
+        List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
+        List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
+        for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
+            for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
+                if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
+                    vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
+                }
+            }
+        }
+        return rankings;
     }
 
     /**
@@ -99,6 +110,16 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
      */
     @Override
     public List<VehicleRankingsResultVO> rankingsOfSchWD(VehicleStatisticsParamVO paramVO) {
-        return vehicleSchedulingMapper.rankingsOfSchWD(paramVO);
+        List<VehicleRankingsResultVO> rankings = vehicleSchedulingMapper.rankingsOfSchWD(paramVO);
+        List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
+        List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
+        for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
+            for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
+                if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
+                    vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
+                }
+            }
+        }
+        return rankings;
     }
 }

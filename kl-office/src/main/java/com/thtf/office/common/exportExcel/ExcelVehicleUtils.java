@@ -4,10 +4,7 @@ import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -153,6 +150,7 @@ public class ExcelVehicleUtils {
     }
 
 
+
     public static HorizontalCellStyleStrategy getStyleStrategy(){
         // 头的策略
         WriteCellStyle headWriteCellStyle = new WriteCellStyle();
@@ -184,6 +182,30 @@ public class ExcelVehicleUtils {
         contentWriteCellStyle.setWriteFont(contentWriteFont);
         // 这个策略是 头是头的样式 内容是内容的样式 其他的策略可以自己实现
         return new HorizontalCellStyleStrategy(headWriteCellStyle, contentWriteCellStyle);
+    }
+
+    /**
+     * excel首列序号列样式
+     * @param workbook
+     * @return
+     */
+    public static CellStyle firstCellStyle(Workbook workbook) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        //居中
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        cellStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+        //设置边框
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        //文字
+        Font font = workbook.createFont();
+        font.setBold(Boolean.TRUE);
+        cellStyle.setFont(font);
+        return cellStyle;
     }
 
 }
