@@ -41,7 +41,7 @@ public class EasyExcelStyleUtils {
         // 这里 需要指定写用哪个class去写，然后写到第一个sheet，名字为模板 然后文件流会自动关闭
         EasyExcelFactory.write(fileName, t)
                 //文件样式
-                .registerWriteHandler(new CustomSheetWriteHandler())
+                .registerWriteHandler(new CustomSheetWriteHandler(null))
 //                .registerWriteHandler(new CustomSheetWriteHandler1())
 //                .registerWriteHandler(new CustomCellWriteHandler())
                 .sheet("sheet").doWrite(tList);
@@ -114,7 +114,7 @@ public class EasyExcelStyleUtils {
             if (integer == 0) {
                 EasyExcel.write(response.getOutputStream(), tClass)
                         //文件样式
-                        .registerWriteHandler(new CustomSheetWriteHandler())
+                        .registerWriteHandler(new CustomSheetWriteHandler(null))
                         .registerWriteHandler(new CustomSheetWriteHandler1())
                         .sheet("模板").doWrite(tList);
             }
@@ -167,12 +167,12 @@ public class EasyExcelStyleUtils {
         if (integer == 0) {
             // 这里 需要指定写用哪个class去写，然后写到第一个sheet，名字为模板 然后文件流会自动关闭
             EasyExcelFactory.write(outputStream, clazz)
-                    .registerWriteHandler(new CustomSheetWriteHandler())
+                    .registerWriteHandler(new CustomSheetWriteHandler(null))
                     .registerWriteHandler(new CustomSheetWriteHandler1())
                     .sheet("sheet").doWrite(list);
             //浏览器访问url直接下载文件的方式
             excelWriter = EasyExcelFactory.write(os, clazz)
-                    .registerWriteHandler(new CustomSheetWriteHandler())
+                    .registerWriteHandler(new CustomSheetWriteHandler(null))
                     .registerWriteHandler(new CustomSheetWriteHandler1())
                     .build();
         }
@@ -184,6 +184,12 @@ public class EasyExcelStyleUtils {
      */
     @Slf4j
     public static class CustomSheetWriteHandler implements SheetWriteHandler {
+        private final List<String> constraints;
+
+        public CustomSheetWriteHandler(List<String> collect) {
+            this.constraints = collect;
+        }
+
         @Override
         public void afterSheetCreate(SheetWriteHandlerContext context) {
             log.info("第{}个Sheet写入成功。", context.getWriteSheetHolder().getSheetNo());
@@ -191,9 +197,9 @@ public class EasyExcelStyleUtils {
             log.info("追后一条记录的行数：{}",lastRowIndex);
 
             // 区间设置 给第一列的 第一行到第9行 加下拉框
-            CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(1, 9, 0, 0);
+            CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(4, 500, 1, 1);
             DataValidationHelper helper = context.getWriteSheetHolder().getSheet().getDataValidationHelper();
-            DataValidationConstraint constraint = helper.createExplicitListConstraint(new String[]{"我试试", "我试试啊"});
+            DataValidationConstraint constraint = helper.createExplicitListConstraint(constraints.toArray(new String[0]));
             DataValidation dataValidation = helper.createValidation(constraint, cellRangeAddressList);
             context.getWriteSheetHolder().getSheet().addValidationData(dataValidation);
         }
@@ -216,13 +222,18 @@ public class EasyExcelStyleUtils {
         }
 
     }
-
+//    @Slf4j
+//    public static class CustomSheetWriteHandler2 implements RowWriteHandler {
     @Slf4j
     public static class CustomSheetWriteHandler2 implements SheetWriteHandler {
+
         @Override
         public void afterSheetCreate(SheetWriteHandlerContext context) {
 
-//        }
+//        @Override
+//        public void beforeRowCreate(RowWriteHandlerContext context) {
+
+        //        }
 //
 //        @Override
 //        public void afterSheetDispose(RowWriteHandlerContext context) {
@@ -233,7 +244,6 @@ public class EasyExcelStyleUtils {
 //        public void after(SheetWriteHandlerContext context) {
             Workbook workbook = context.getWriteWorkbookHolder().getWorkbook();
             Sheet sheet = workbook.getSheetAt(0);
-            System.out.println(sheet.getRow(0).getCell(0).getStringCellValue());
             Row row1 = sheet.createRow(0);
             row1.setHeight((short) 500);
 

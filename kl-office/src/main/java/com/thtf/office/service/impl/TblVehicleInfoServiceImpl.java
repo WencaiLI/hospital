@@ -1,11 +1,16 @@
 package com.thtf.office.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.office.common.exportExcel.EasyExcelStyleUtils;
 import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.common.util.SplitListUtil;
@@ -17,7 +22,10 @@ import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
+import com.thtf.office.service.TblVehicleCategoryService;
 import com.thtf.office.service.TblVehicleInfoService;
+import com.thtf.office.vo.VehicleCategoryParamVO;
+import com.thtf.office.vo.VehicleCategoryResultVO;
 import com.thtf.office.vo.VehicleInfoParamVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -39,6 +49,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -66,6 +77,10 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
 
     @Autowired
     private TblVehicleCategoryMapper vehicleCategoryMapper;
+
+
+    @Resource
+    private TblVehicleCategoryService categoryService;
 
     @Autowired
     private AdminAPI adminAPI;
@@ -115,8 +130,16 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Transactional
     public Map<String,Object> insertBatch(List<VehicleInfoExcelImportDTO> list)  {
         for (VehicleInfoExcelImportDTO dto :list) {
+            String vehicleCategoryName = dto.getVehicleCategoryName();
+            LambdaQueryWrapper<TblVehicleCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.select(TblVehicleCategory::getId);
+            lambdaQueryWrapper.eq(TblVehicleCategory::getName,vehicleCategoryName);
+            Long id = vehicleCategoryMapper.selectOne(lambdaQueryWrapper).getId();
             TblVehicleInfo tblVehicleInfo = vehicleInfoConverter.toVehicleInfo(dto);
             tblVehicleInfo.setId(idGeneratorSnowflake.snowflakeId());
+            if(null != id){
+                tblVehicleInfo.setVehicleCategoryId(id);
+            }
             tblVehicleInfo.setCreateTime(LocalDateTime.now());
             tblVehicleInfo.setCreateBy(getOperatorName());
             vehicleInfoMapper.insert(tblVehicleInfo);
@@ -318,6 +341,32 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").eq("name",vehicleCategoryName);
         return vehicleCategoryMapper.selectList(queryWrapper).size() >= 1;
+    }
+
+    @Override
+    public void importTemplateDownloadNew(HttpServletResponse response,List<?> list,Class<?> clazz) {
+        // 查询所有类别
+        List<VehicleCategoryResultVO> itemType = categoryService.select(new VehicleCategoryParamVO());
+        List<String> collect = itemType.stream().map(VehicleCategoryResultVO::getName).collect(Collectors.toList());
+        ExcelWriter excelWriter = null;
+        try {
+            excelWriter = EasyExcel.write(response.getOutputStream(), clazz)
+                    .registerWriteHandler(new EasyExcelStyleUtils.CustomSheetWriteHandler2())
+                    .registerWriteHandler(new EasyExcelStyleUtils.CustomSheetWriteHandler(collect))
+                    .relativeHeadRowIndex(3)
+                    .registerWriteHandler(ExcelVehicleUtils.getStyleStrategy())
+                    .build();
+            WriteSheet writeSheet = new WriteSheet();
+            writeSheet.setSheetName("sheet");
+            excelWriter.write(list, writeSheet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            // 千万别忘记关闭流
+            if (excelWriter != null) {
+                excelWriter.finish();
+            }
+        }
     }
 
     /**
