@@ -24,6 +24,7 @@
             <if test="moneySpent != null" >
                 and money_spent = #{moneySpent}
             </if>
+            order by create_time desc
         </where>
     </select>
     <!-- 公车维保次数排行榜 -->

@@ -53,6 +53,7 @@
             <if test="endTime">
                 and end_time = #{endTime}
             </if>
+            order by create_time desc
         </where>
     </select>
     <!-- 按日、月查询空闲司机的每周月的出车情况 -->

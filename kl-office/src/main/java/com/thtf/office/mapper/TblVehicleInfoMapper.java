@@ -1,9 +1,11 @@
 package com.thtf.office.mapper;
 
-import com.thtf.office.vo.*;
-import com.thtf.office.entity.TblVehicleInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.thtf.office.dto.VehicleNumberTypeCodeDTO;
+import com.thtf.office.entity.TblVehicleInfo;
+import com.thtf.office.vo.*;
 import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Map;
 
@@ -92,4 +94,6 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
     List<TblVehicleInfo> selectByKey(@Param("keywords") String keywords);
 
     List<VehicleRankingsResultVO> getWorkingDurationRankings(Map<String, Object> map);
+
+    List<VehicleNumberTypeCodeDTO> listCarTypeCodeList(@Param("carNumberList") List<String> carNumberList);
 }

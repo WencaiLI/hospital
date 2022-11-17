@@ -11,5 +11,6 @@ import lombok.Data;
 public class VehicleRankingsResultVO {
     private Long top;
     private String attribute;
+    private String attributeTwo;
     private Long number;
 }
