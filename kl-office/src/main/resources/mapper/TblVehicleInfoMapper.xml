@@ -77,12 +77,12 @@
 
     <!-- 排行榜获取 注意：此处使用${}中参数为后端设置不存在sql注入攻击风险 -->
     <select id="getRankings" parameterType="java.util.Map" resultType="com.thtf.office.vo.VehicleRankingsResultVO">
-        select @rowno:=@rowno+1 as top,rate.car_number as attribute,rate.number as number
+        select @rowno:=@rowno+1 as top,rate.${field} as attribute,rate.number as number
         from (
-        select @rowno:=0,car_number ,count(*) as number,delete_time,end_time
+        select @rowno:=0,${field} ,count(*) as number,delete_time,end_time
         from tbl_vehicle_scheduling
         where delete_time is null and NOW() > end_time and end_time BETWEEN #{startTime} and #{endTime}
-        group by car_number
+        group by ${field}
         order by number desc
         ) as rate
     </select>

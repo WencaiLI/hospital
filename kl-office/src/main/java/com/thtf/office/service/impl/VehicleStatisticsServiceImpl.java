@@ -77,15 +77,18 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     @Override
     public List<VehicleRankingsResultVO> getRankings(Map<String, Object> map) {
         List<VehicleRankingsResultVO> rankings = vehicleInfoMapper.getRankings(map);
-        List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
-        List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
-        for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
-            for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
-                if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
-                    vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
+        if(null !=map.get("isNeedCategory") && (Boolean) map.get("isNeedCategory")){
+            List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
+            List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
+            for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
+                for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
+                    if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
+                        vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
+                    }
                 }
             }
         }
+
         return rankings;
     }
 
@@ -98,7 +101,17 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
      */
     @Override
     public List<VehicleRankingsResultVO> getMaintenanceRankings(VehicleStatisticsParamVO paramVO) {
-        return vehicleMaintenanceMapper.getMaintenanceRankings(paramVO);
+        List<VehicleRankingsResultVO> rankings = vehicleMaintenanceMapper.getMaintenanceRankings(paramVO);
+        List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
+        List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
+        for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
+            for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
+                if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
+                    vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
+                }
+            }
+        }
+        return rankings;
     }
 
     /**

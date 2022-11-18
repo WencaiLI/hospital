@@ -60,7 +60,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfOrg")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfOrg(@RequestBody VehicleStatisticsParamVO paramVO){
-        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name")));
+        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"organization_name",false)));
     }
 
     /**
@@ -72,7 +72,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfVeh")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfVeh(@RequestBody VehicleStatisticsParamVO paramVO){
-        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number")));
+        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"car_number",true)));
     }
 
     /**
@@ -84,7 +84,7 @@ public class VehicleStatisticsController {
      */
     @PostMapping("/rankingsOfDri")
     public JsonResult<List<VehicleRankingsResultVO>> rankingsOfDri(@RequestBody VehicleStatisticsParamVO paramVO){
-        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name")));
+        return JsonResult.querySuccess(vehicleStatisticsService.getRankings(getRankingsParam(paramVO.getStartTime(),paramVO.getEndTime(),"driver_name",false)));
     }
 
     /**
@@ -124,11 +124,12 @@ public class VehicleStatisticsController {
      * @Param fieldName: 用于排行的字段（与数据库表中的字段名一致）
      * @return: java.util.Map<java.lang.String,java.lang.Object>
      */
-    Map<String,Object> getRankingsParam(LocalDateTime startTime,LocalDateTime endTime,String fieldName){
+    Map<String,Object> getRankingsParam(LocalDateTime startTime,LocalDateTime endTime,String fieldName,Boolean isNeedCategory){
         Map<String,Object> map = new HashMap<>();
         map.put("startTime",startTime);
         map.put("endTime",endTime);
         map.put("field",fieldName);
+        map.put("isNeedCategory",isNeedCategory);
         return map;
     }
 }
