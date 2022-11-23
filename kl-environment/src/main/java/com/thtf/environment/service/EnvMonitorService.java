@@ -109,4 +109,6 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
 
 
     List<GroupAlarmInfoVO> getGroupAlarmDisplayInfo(String sysCode, String areaCode, String buildingCodes);
+
+    List<ItemCodeAndNameAndTypeVO> listItemCodeAndTypeCodeByTypeCode(String sysCode, String itemTypeCode);
 }
