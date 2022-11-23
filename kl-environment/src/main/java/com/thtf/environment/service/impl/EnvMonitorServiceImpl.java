@@ -553,7 +553,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                         if(itemCodeList.contains(itemParameter.getItemCode()) && parameterCode.equals(itemParameter.getParameterType())){
                             num ++;
                             unit = itemParameter.getUnit();
-                            if(null != itemParameter.getValue()){
+                            if(null != itemParameter.getValue() && StringUtils.isNumeric(itemParameter.getValue())){
                                 totalNum ++;
                                 totalValue += Integer.parseInt(itemParameter.getValue());
                             }
