@@ -679,7 +679,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public static int getMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        return calendar.get(Calendar.MONTH);
+        return calendar.get(Calendar.MONTH)+1;
     }
 
     public static int getYear(Date date) {
