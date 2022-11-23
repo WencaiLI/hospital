@@ -295,8 +295,19 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
         List<TimeValueDTO> hourlyHistoryMoment;
         if(StringUtils.isBlank(parameterCode)){
-            String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
-            parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+            if(StringUtils.isNotBlank(itemTypeCode)){
+                System.out.println(itemTypeCode);
+                String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
+                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+            }else if(StringUtils.isNotBlank(itemCode)){
+                TblItem tblItem = new TblItem();
+                tblItem.setCode(itemCode);
+                List<TblItem> data = itemAPI.queryAllItems(tblItem).getData();
+                if(null != data && data.size()>0){
+                    String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(data.get(0).getTypeCode()).getParameterType();
+                    parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+                }
+            }
         }
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
@@ -329,7 +340,21 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_END_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
-               parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
+                if(StringUtils.isNotBlank(itemTypeCode)){
+                    System.out.println(itemTypeCode);
+                    String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
+                    parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+                }else if(StringUtils.isNotBlank(itemCode)){
+                    TblItem tblItem = new TblItem();
+                    tblItem.setCode(itemCode);
+                    List<TblItem> data = itemAPI.queryAllItems(tblItem).getData();
+                    if(null != data && data.size()>0){
+                        String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(data.get(0).getTypeCode()).getParameterType();
+                        parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+                    }
+                }
+
+//               parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
             }
             hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, getMonthStartAndEndTimeDayString(newDate).get("startTime"),getMonthStartAndEndTimeDayString(newDate).get("endTime"));
         }
@@ -378,7 +403,20 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
-                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
+                if(StringUtils.isNotBlank(itemTypeCode)){
+                    System.out.println(itemTypeCode);
+                    String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
+                    parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+                }else if(StringUtils.isNotBlank(itemCode)){
+                    TblItem tblItem = new TblItem();
+                    tblItem.setCode(itemCode);
+                    List<TblItem> data = itemAPI.queryAllItems(tblItem).getData();
+                    if(null != data && data.size()>0){
+                        String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(data.get(0).getTypeCode()).getParameterType();
+                        parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
+                    }
+                }
+//                parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
             }
             hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, getYearStartAndEndTimeMonthString(newDate).get("startTime"),getYearStartAndEndTimeMonthString(newDate).get("endTime"));
         }
