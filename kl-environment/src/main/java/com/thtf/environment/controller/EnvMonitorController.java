@@ -138,9 +138,9 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_hourly")
-    public JsonResult<EChartsVO> getHourlyHistoryMoment(@RequestParam("parameterCode") String parameterCode,
-                                                        @RequestParam("itemCode") String itemCode,
-                                                        @RequestParam("itemTypeCode") String itemTypeCode,
+    public JsonResult<EChartsVO> getHourlyHistoryMoment(@RequestParam(value = "parameterCode",required = false) String parameterCode,
+                                                        @RequestParam(value = "itemCode",required = false) String itemCode,
+                                                        @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
                                                         @RequestParam("date") String date){
         if(StringUtils.isBlank(date)){
             LocalDateTime now = LocalDateTime.now();
@@ -159,9 +159,9 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_daily")
-    public JsonResult<EChartsVO> getDailyHistoryMoment(@RequestParam("parameterCode") String parameterCode,
-                                                       @RequestParam("itemCode") String itemCode,
-                                                       @RequestParam("itemTypeCode") String itemTypeCode,
+    public JsonResult<EChartsVO> getDailyHistoryMoment(@RequestParam(value = "parameterCode",required = false) String parameterCode,
+                                                       @RequestParam(value = "itemCode",required = false) String itemCode,
+                                                       @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
                                                        @RequestParam("date") String date){
         return JsonResult.querySuccess(envMonitorService.getDailyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
@@ -175,9 +175,9 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("history_moment_monthly")
-    public JsonResult<EChartsVO> getMonthlyHistoryMoment(@RequestParam("parameterCode") String parameterCode,
-                                                         @RequestParam("itemCode") String itemCode,
-                                                         @RequestParam("itemTypeCode") String itemTypeCode,
+    public JsonResult<EChartsVO> getMonthlyHistoryMoment(@RequestParam(value = "parameterCode",required = false) String parameterCode,
+                                                         @RequestParam(value = "itemCode",required = false) String itemCode,
+                                                         @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
                                                          @RequestParam("date") String date){
         return JsonResult.querySuccess(envMonitorService.getMonthlyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
