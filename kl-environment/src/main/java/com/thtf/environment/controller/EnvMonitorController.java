@@ -1,6 +1,7 @@
 package com.thtf.environment.controller;
 
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.EnvMonitorService;
@@ -27,6 +28,27 @@ public class EnvMonitorController {
     @Autowired
     private EnvMonitorService envMonitorService;
 
+    @Autowired
+    private ItemAPI itemAPI;
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取同类别的设备信息
+     * @Date: 2022/11/23
+     * @Param sysCode:
+     * @Param itemTypeCode:
+     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.vo.ItemCodeAndNameAndTypeVO>>
+     */
+    @PostMapping("/listItemCodeAndTypeCodeByTypeCode")
+    public JsonResult<List<ItemCodeAndNameAndTypeVO>> listItemCodeAndTypeCodeByTypeCode(@RequestParam("sysCode") String sysCode,
+                                                        @RequestParam("itemTypeCode") String itemTypeCode){
+        return JsonResult.querySuccess(envMonitorService.listItemCodeAndTypeCodeByTypeCode(sysCode,itemTypeCode));
+    }
+
+    @PostMapping("/monitor_point_info")
+    public JsonResult monitor_point_info(@RequestParam("itemCode") String itemCode){
+        return itemAPI.getMonitorPointInfo(itemCode);
+    }
 
     /**
      * @Author: liwencai
@@ -174,7 +196,7 @@ public class EnvMonitorController {
      * @Param: date: yyyy-MM-dd 格式的日期
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
-    @PostMapping("history_moment_monthly")
+    @PostMapping("/history_moment_monthly")
     public JsonResult<EChartsVO> getMonthlyHistoryMoment(@RequestParam(value = "parameterCode",required = false) String parameterCode,
                                                          @RequestParam(value = "itemCode",required = false) String itemCode,
                                                          @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
