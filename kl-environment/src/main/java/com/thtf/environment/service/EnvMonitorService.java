@@ -108,7 +108,24 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
     PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize);
 
 
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/23
+     * @Param sysCode:
+     * @Param areaCode:
+     * @Param buildingCodes:
+     * @return: java.util.List<com.thtf.environment.vo.GroupAlarmInfoVO>
+     */
     List<GroupAlarmInfoVO> getGroupAlarmDisplayInfo(String sysCode, String areaCode, String buildingCodes);
 
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/23
+     * @Param sysCode:
+ * @Param itemTypeCode:
+     * @return: java.util.List<com.thtf.environment.vo.ItemCodeAndNameAndTypeVO>
+     */
     List<ItemCodeAndNameAndTypeVO> listItemCodeAndTypeCodeByTypeCode(String sysCode, String itemTypeCode);
 }

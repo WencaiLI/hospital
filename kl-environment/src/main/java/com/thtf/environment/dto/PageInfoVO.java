@@ -99,4 +99,9 @@ public class PageInfoVO implements Serializable {
      * 结果集
      */
     private List list;
+
+    /**
+     * 结果集
+     */
+    private List otherList;
 }

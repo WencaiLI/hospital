@@ -9,10 +9,33 @@ import lombok.Data;
  */
 @Data
 public class EnvMonitorItemTypeDTO {
-    private String itemTypeCode; // 设备类别编码
-    private String itemTypeName; // 设备类别名称
-    private Integer itemTotalNum; // 设备总数
-    private String averageValue; // 平均值
-    private String unit; // 单位
-    private Boolean isAlarm; // 是否报警
+    /**
+     * 设备类别编码
+     */
+    private String itemTypeCode;
+
+    /**
+     * 设备类别名称
+     */
+    private String itemTypeName;
+
+    /**
+     * 设备总数
+     */
+    private Integer itemTotalNum;
+
+    /**
+     * 平均值
+     */
+    private String averageValue;
+
+    /**
+     * 单位
+     */
+    private String unit;
+
+    /**
+     *  是否报警
+     */
+    private Boolean isAlarm;
 }
