@@ -7,7 +7,6 @@ import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
-import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
@@ -66,8 +65,8 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
      */
     @Override
-    public List<FloorInfoDTO> getFloorInfo(String buildingCode){
-        List<TblBuildingArea> resourceList = adminAPI.getFloorInfo(buildingCode).getData();
+    public List<FloorInfoDTO> getFloorInfo(String buildingCode,String systemCode){
+        List<TblBuildingArea> resourceList = adminAPI.getFloorInfo(buildingCode,systemCode).getData();
         return floorConverter.toFloorList(resourceList);
     }
 

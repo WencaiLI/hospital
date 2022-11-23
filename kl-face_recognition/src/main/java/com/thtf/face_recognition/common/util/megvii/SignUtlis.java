@@ -17,10 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 public class SignUtlis {
     private static final String SIGN_FORMAT = "%s-%s-%s-%s-%s-%s-%s-%s";
     /**
-     ㆮ名㇇⌅生成卡密昂
+     签名算法生成卡密昂
      @param ctimestamp
      @param cnonce
-     @param requestBody 请≲体对象
+     @param requestBody 请求体对象
      @param requestParam
      @param url
      @param method

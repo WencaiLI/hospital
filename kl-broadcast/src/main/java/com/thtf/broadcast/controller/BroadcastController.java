@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: liwencai
@@ -41,9 +39,10 @@ public class BroadcastController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
      */
     @GetMapping("/getFloorInfo")
-    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode){
+    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode,
+                                                          @RequestParam(value = "sysCode",required = false) String systemCode){
         try {
-            return adminAPI.getFloorInfo(buildingCode);
+            return adminAPI.getFloorInfo(buildingCode,systemCode);
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("服务器错误");

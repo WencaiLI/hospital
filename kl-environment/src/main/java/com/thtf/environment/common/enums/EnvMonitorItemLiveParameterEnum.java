@@ -16,7 +16,8 @@ public enum  EnvMonitorItemLiveParameterEnum {
     HJJKZD("HJJKZD_TYPE","环境监控照度点","Lux","光照"),
     HJJKSD("HJJKSD_TYPE","环境监控湿度点","HUMI","湿度"),
     HJJKCO("HJJKCO_TYPE","环境监控CO浓度点","CO","CO"),
-    HJJKCO2("HJJKCO2_TYPE","环境监控CO2浓度点","CO2","CO2");
+    HJJKCO2("HJJKCO2_TYPE","环境监控CO2浓度点","CO2","CO2"),
+    SWHJJC("SWHJJC_TYPE","室外温度环境监测点","SWHJJC_TEMPLATE","室外温度");
     public final String itemTypeCode;
     public final String itemTypeName;
     public final String parameterType;

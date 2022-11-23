@@ -1,14 +1,13 @@
 package com.thtf.elevator.service;
 
-import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
-import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.itemserver.TblItem;
-import com.thtf.elevator.dto.*;
+import com.thtf.elevator.dto.DisplayInfoDTO;
+import com.thtf.elevator.dto.ElevatorInfoResultDTO;
+import com.thtf.elevator.dto.FloorInfoDTO;
 import com.thtf.elevator.vo.PageInfoVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: liwencai
@@ -93,5 +92,5 @@ public interface ElevatorService {
      * @Date: 2022/10/8
      * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
      */
-    List<FloorInfoDTO> getFloorInfo(String buildingCode);
+    List<FloorInfoDTO> getFloorInfo(String buildingCode,String sysCode);
 }
