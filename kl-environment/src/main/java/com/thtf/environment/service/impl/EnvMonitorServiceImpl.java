@@ -80,6 +80,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode, String areaCode,String buildingCodes) {
+
         return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes).getData();
     }
 
@@ -128,7 +129,13 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 }
             }
         });
-        result.setKeys(initList.stream().map(ItemAlarmInfoDTO::getAttribute).map(Object::toString).collect(Collectors.toList()));
+
+        List<String> keys = new ArrayList<>();
+        List<String> collect = initList.stream().map(ItemAlarmInfoDTO::getAttribute).map(Object::toString).collect(Collectors.toList());
+        collect.forEach(e->{
+            keys.add(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(e).getParameterTypeName());
+        });
+        result.setKeys(keys);
         result.setValues(initList.stream().map(ItemAlarmInfoDTO::getItemNumber).collect(Collectors.toList()));
         return result;
     }

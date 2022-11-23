@@ -1,24 +1,25 @@
 package com.thtf.face_recognition.common.util.megvii;
 
-/**
- * @Author: liwencai
- * @Date: 2022/11/7 13:34
- * @Description:
- */
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+/**
+ * @Author: liwencai
+ * @Date: 2022/11/7 13:34
+ * @Description:
+ */
 public class DigestUtil {
-    /** ㇇⌅名称 */
+    /** 算法名称 */
     private static final String ALGORITHM = "DESede";
-    /** 16进制字⇽ */
-    private static final char[] HEX_DIGITS={'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+    /** 16进制字母 */
+    private static final char[] HEX_DIGITS={'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
     /**
-     * @param decript 要加密的字ㅖ串
-     * @return 加密的字ㅖ串
+     * @param decript 要加密的字符串
+     * @return 加密的字符串
      * SHA1加密
      */
     public final static String SHA1(String decript) {
@@ -26,12 +27,12 @@ public class DigestUtil {
             MessageDigest digest = java.security.MessageDigest
                     .getInstance("SHA-1");
             digest.update(decript.getBytes());
-            byte messageDigest[] = digest.digest();
+            byte[] messageDigest = digest.digest();
             // Create Hex String
-            StringBuffer hexString = new StringBuffer();
+            StringBuilder hexString = new StringBuilder();
             // 字㢲数组转换为 ॱ六进制 数
-            for (int i = 0; i < messageDigest.length; i++) {
-                String shaHex = Integer.toHexString(messageDigest[i] & 0xFF);
+            for (byte b : messageDigest) {
+                String shaHex = Integer.toHexString(b & 0xFF);
                 if (shaHex.length() < 2) {
                     hexString.append(0);
                 }
@@ -45,7 +46,7 @@ public class DigestUtil {
         return "";
     }
     /**
-     * ３DES加密,keyᗵ须是䮯ᓖ大于ㅹ于 3*8 = 24 位
+     * 3DES加密,key必须是长度大于等于 3*8 = 24位
      * @param src
      * @param key
      * @return
@@ -67,7 +68,7 @@ public class DigestUtil {
         }
     }
     /**
-     * 3DESECB解密,keyᗵ须是䮯ᓖ大于ㅹ于 3*8 = 24 位
+     * 3DESECB解密,key必须是长度大于等于 3*8 = 24位
      * @param src
      * @param key
      * @return
@@ -76,7 +77,7 @@ public class DigestUtil {
     public static String decrypt3DES(String src, String key) {
         byte[] keyBytes = key.getBytes();
         try {
-            //--䙊过base64,将字ㅖ串转成byte数组
+            //--通过base64,将字符串转成byte数组
             byte[] bytesrc = StringUtil.hex2byte(src);
             //--解密的key
             DESedeKeySpec dks = new DESedeKeySpec(keyBytes);
@@ -100,7 +101,6 @@ public class DigestUtil {
      * @Last_Edit_By:
      * @Edit_Description
      * @Create_Version:exinhua 1.0
-    32
      */
     public static String encryptMd5(String src) {
         if(StringUtil.isEmpty(src)) {
@@ -108,13 +108,13 @@ public class DigestUtil {
         }
         try {
             byte[] btInput = src.getBytes();
-            // 㧧得MD5摘要㇇⌅的 MessageDigest 对象
+            // 㧧得MD5摘要算法的 MessageDigest 对象
             MessageDigest mdInst = MessageDigest.getInstance("MD5");
             // 使用指定的字㢲更新摘要
             mdInst.update(btInput);
-            // 㧧得密文
+            // 获得密文
             byte[] md = mdInst.digest();
-            // 把密文转换成ॱ六进制的字ㅖ串ᖒᔿ
+            // 把密文转换成ॱ六进制的字符串形式ᔿ
             return byteToHexString(md);
         }
         catch (Exception e) {
@@ -122,7 +122,7 @@ public class DigestUtil {
         }
     }
     /**
-     * 对输ޕ进行sha1加密后，在进行16进制转换
+     * 对输入进行sha1加密后，在进行16进制转换
      * @param value
      * @return
      */
@@ -138,7 +138,7 @@ public class DigestUtil {
         }
     }
     /**
-     * 字㢲数组转换成16进制表示
+     * 字符数组转换成16进制表示
      * @param bytes
      * @return
      */

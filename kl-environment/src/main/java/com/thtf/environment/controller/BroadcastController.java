@@ -51,9 +51,10 @@ public class BroadcastController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
      */
     @GetMapping("/getFloorInfo")
-    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode){
+    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode,
+                                                          @RequestParam(value = "sysCode",required = false) String systemCode){
         try {
-            return adminAPI.getFloorInfo(buildingCode);
+            return adminAPI.getFloorInfo(buildingCode,systemCode);
         }catch (Exception e){
             log.error(e.getMessage());
             return JsonResult.error("服务器错误");

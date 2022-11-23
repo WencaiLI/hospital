@@ -1,14 +1,14 @@
 package com.thtf.face_recognition.common.util.megvii;
 
 /**
- * 字ㅖ串工具㊫
+ * 字符串工具类
  *
  */
 public class StringUtil {
     public static final String[] HEX_ARRAYS = { "0", "1", "2", "3", "4", "5",
             "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
     /**
-     断value是否是nullᡆ㘵其length为0ࡔ *
+     * 判断value是否是null或其length>0
      *
      * @param value
      * @return
@@ -17,7 +17,7 @@ public class StringUtil {
         return value == null || value.length() == 0;
     }
     /**
-     * ࡔ断value是否不是null且其length>0
+     * 判断value是否不是null且其length>0
      *
      * @param value
      * @return
@@ -37,6 +37,7 @@ public class StringUtil {
         }
         return value.trim();
     }
+
     /**
      * byte string to hex string
      *
@@ -57,6 +58,7 @@ public class StringUtil {
         }
         return retBuilder.toString();
     }
+
     /**
      * hex string to byte string
      *
@@ -96,7 +98,7 @@ public class StringUtil {
         return b;
     }
     /**
-     * ࡔ断一个字ㅖ串是否ਚव含数字(10进制)字ㅖ
+     * 判断一个字符串是否只包含数字（10进制）字符
      *
      * @param str
      * @return
@@ -114,7 +116,7 @@ public class StringUtil {
         return true;
     }
     /**
-     * ␧⏶字串串(显示ࡽpn个字ㅖ和后tn个字ㅖ，其余ޘ䜘用*填ݵ(
+     * 混淆字符串串（显示前pn个字符和后tn个字符，其余全部用*填充）
      *
      * @param source
      * @param pn
@@ -124,13 +126,15 @@ public class StringUtil {
     public static String mix(String source, int pn, int tn) {
         return mix(source, pn, tn, '*');
     }
+
+
     /**
-     * ␧⏶字串串(显示ࡽpn个字ㅖ和后tn个字ㅖ，其余ࡽ䜘用mixChar填ݵ(
+     * 混淆字符串串（显示前pn个字符和后tn个字符，其余全部用mixchar填充）
      *
      * @param source
      * @param pn
      * @param tn
-     * @param mixChar
+     * @param mixchar
      * @return
      */
     public static String mix(String source, int pn, int tn, char mixchar) {
@@ -151,8 +155,9 @@ public class StringUtil {
         }
         return tmp.toString();
     }
+
     /**
-     * 㧧取字ㅖ串䮯ᓖ(ޘ角2,ॺ角1)
+     * 获取字符串长度（全角2，半角1）
      * @param value
      * @return
      */
@@ -169,8 +174,9 @@ public class StringUtil {
         }
         return len;
     }
+
     /**
-     断字ㅖ是否是ॺ角ࡔ *
+     * 判断字符是否是半角
      * @param c
      * @return
      */
@@ -178,16 +184,18 @@ public class StringUtil {
         int k = 0x80;
         return c / k == 0 ? true : false;
     }
+
     /**
-     角ޘ断是否时ࡔ *
+     * 判断字符是否是全角
      * @param c
      * @return
      */
     public static final Boolean isSbcCase(char c) {
         return isDbcCase(c);
     }
+
     /**
-     断是否䜭是数字ࡔ *
+     * 判断是否都是数字
      * @param value
      * @return
      */
@@ -202,19 +210,20 @@ public class StringUtil {
         }
         return true;
     }
-        /**
-         * 在指定的字ㅖ串ࡽ䶒填ݵ0，直ࡠ字⇥串的䮯ᓖ达ࡠ指定的䮯ᓖ
-         * 示例：输ޕ6, 2 ---> 䘄回06
-         * @param data 䴰要被填ݵ的字ㅖ串
-         * @param fillStr 䴰要填ݵ得字ㅖ串
-         * @param length 目ḷ字ㅖ串的䮯ᓖ
-         * @return 䘄回填ݵ后的字ㅖ串
-         */
-        public static String frontFillStr(String data, String fillStr, int length) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < length-data.length(); i++) {
-                sb.append(fillStr);
-            }
-            return sb.append(data).toString();
+
+    /**
+     * 在指定的字符串前面填充0，直到字符串的长度达到指定长度
+     * 示例：输入6，2 --> 返回06
+     * @param data 需要被填充的字符串
+     * @param fillStr 需要填充的字符串
+     * @param length 目标字符串的长度
+     * @return 返回填充后的字符串
+     */
+    public static String frontFillStr(String data, String fillStr, int length) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length-data.length(); i++) {
+            sb.append(fillStr);
         }
+        return sb.append(data).toString();
+    }
 }

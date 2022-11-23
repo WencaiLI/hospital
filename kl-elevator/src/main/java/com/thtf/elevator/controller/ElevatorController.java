@@ -1,12 +1,8 @@
 package com.thtf.elevator.controller;
 
-import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
-import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
-import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.itemserver.TblItem;
-import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
@@ -20,10 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -48,9 +41,10 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
      */
     @GetMapping("/getFloorInfo")
-    public JsonResult<List<FloorInfoDTO>> getFloorInfo(@RequestParam("buildingCode") String buildingCode){
+    public JsonResult<List<FloorInfoDTO>> getFloorInfo(@RequestParam("buildingCode") String buildingCode,
+                                                       @RequestParam(value = "sysCode",required = false) String systemCode){
         try {
-            return JsonResult.success(elevatorService.getFloorInfo(buildingCode));
+            return JsonResult.success(elevatorService.getFloorInfo(buildingCode,systemCode));
         }catch (Exception e){
             return JsonResult.error("服务器错误");
         }
