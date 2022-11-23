@@ -461,8 +461,8 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @Param sysCode: 子系统编码
      * @return: com.thtf.environment.dto.PageInfoVO
      */
-    @Override
-    public PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize) {
+    // @Override
+    public PageInfoVO listGroupedItemAlarmInfoOld(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize) {
         String areaCode = null;
         if(StringUtils.isNotBlank(areaName)){
             areaCode = adminAPI.searchAreaCodeByAreaName(areaName).getData();
@@ -522,6 +522,90 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             resultList.add(envMonitorGroupDTO);
         }
         pageInfoVO.setList(resultList);
+        return pageInfoVO;
+    }
+
+    @Override
+    public PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize) {
+        String areaCode = null;
+        if(StringUtils.isNotBlank(areaName)){
+            areaCode = adminAPI.searchAreaCodeByAreaName(areaName).getData();
+        }
+        ItemGroupKeywordParamDTO paramDTO = new ItemGroupKeywordParamDTO();
+        paramDTO.setSystemCode(sysCode);
+        paramDTO.setAreaCode(areaCode);
+        paramDTO.setKeyword(keyword);
+        paramDTO.setPageNumber(pageNumber);
+        paramDTO.setPageSize(pageSize);
+        paramDTO.setName(groupName);
+        PageInfo<TblGroup> pageInfo = itemAPI.listGroupByKeywordOfNameAndAreaCodePage(paramDTO).getData();
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+
+        // List<TblItemType> itemTypeList = itemAPI.getItemTypesBySysId(sysCode).getBody().getData();
+        /* 获取全部的设备编码 */
+        List<String> itemCodeList = new ArrayList<>();
+        for (TblGroup group : pageInfo.getList()) {
+            itemCodeList.addAll(Arrays.asList(group.getContainItemCodes().split(",")));
+        }
+        /* 获取全部区域编码 */
+        List<String> areaCodeList = new ArrayList<>();
+        for (TblGroup group : pageInfo.getList()) {
+            areaCodeList.addAll(Arrays.asList(group.getBuildingAreaCodes().split(",")));
+        }
+        /* 获取全部区域信息 */
+        List<CodeAndNameDTO> areaCodeAndNameList = adminAPI.listAreaNameListByAreaCodeList(areaCodeList).getData();
+        /* 获取所有的参数 */
+        List<TblItemParameter> parameterList = itemAPI.getParameterListByItemCodeListAndParameterTypeCodeList(itemCodeList,this.getAllParameterCodeNeed()).getData();
+        /* 所有类别相关的组信息 */
+        Map<Long, Map<String, Object>> groupAboutItemType = itemTypeInfoOfGroupNew(parameterList, pageInfo.getList(), this.getAllParameterCodeNeed());
+
+        /* 匹配信息 */
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (TblGroup group : pageInfo.getList()) {
+            Map<String, Object> map = groupAboutItemType.get(group.getId());
+//            EnvMonitorGroupDTO envMonitorGroupDTO = new EnvMonitorGroupDTO();
+            map.put("id",group.getId());
+            map.put("name",group.getName());
+
+//            envMonitorGroupDTO.setId(group.getId());
+//            envMonitorGroupDTO.setName(group.getName());
+            /* 匹配区域名称信息 */
+            String[] split = group.getBuildingAreaCodes().split(",");
+            StringBuilder stringBuilder = new StringBuilder();
+            if(split.length>0){
+                for (String area : split) {
+                    areaCodeAndNameList.forEach(e->{
+                        if(e.getCode().equals(area)){
+                            stringBuilder.append(e.getName());
+                            stringBuilder.append(",");
+                        }
+                    });
+                }
+            }
+            if(stringBuilder.length()>0){
+                map.put("areaName",stringBuilder.toString().substring(0,stringBuilder.length()-1));
+                // envMonitorGroupDTO.setAreaName(stringBuilder.toString().substring(0,stringBuilder.length()-1)); // 去除‘，’
+            }
+
+
+
+
+            /* 匹配不同类别的数据 */
+            // envMonitorGroupDTO.setResult(groupAboutItemType.get(group.getId()));
+            resultList.add(map);
+        }
+        List<Map<String, String>> title = new ArrayList<>();
+        List<String> allParameterCodeNeed = getAllParameterCodeNeed();
+        for (String parameterCode : allParameterCodeNeed) {
+            Map<String, String> map1 = new HashMap<>();
+            map1.put("code",parameterCode);
+            map1.put("name",EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getParameterTypeName());
+            title.add(map1);
+        }
+//
+//        map.put("title",title);
+        pageInfoVO.setList(resultList);
+        pageInfoVO.setOtherList(title);
         return pageInfoVO;
     }
 
@@ -601,6 +685,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         return result;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/23
+     * @return: java.util.List<java.lang.String>
+     */
     List<String> getAllParameterCodeNeed(){
         EnvMonitorItemLiveParameterEnum[] values = EnvMonitorItemLiveParameterEnum.values();
         List<String> result = new ArrayList<>();
@@ -610,6 +700,60 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         return result;
     }
 
+    // 获取设备类别编码
+    public Map<Long,Map<String,Object>> itemTypeInfoOfGroupNew(List<TblItemParameter> parameterList,List<TblGroup> groupList,List<String> parameterCodeList){
+        Map<Long,Map<String,Object>> result = new HashMap<>();
+        for (TblGroup group : groupList) {
+            // 该组的设备编码
+            List<String> itemCodeList = Arrays.asList(group.getContainItemCodes().split(","));
+            // 遍历parameterCode
+            Map<String, Object> map = new HashMap<>();
+            for (String parameterCode : parameterCodeList) {
+                Map<String, String> innerMap = new HashMap<>();
+                // 设备总数
+                int num = 0;
+                // 需要统计计算平均值的总值
+                int totalValue = 0;
+                // 需要统计计算平均值的总设备数
+                int totalNum = 0;
+                // 值单位
+                String unit = "";
+                if(null != parameterList && parameterList.size()>0){
+                    unit = parameterList.get(0).getUnit();
+                    for (TblItemParameter itemParameter : parameterList) {
+                        if(itemCodeList.contains(itemParameter.getItemCode()) && parameterCode.equals(itemParameter.getParameterType())){
+                            num ++;
+                            unit = itemParameter.getUnit();
+                            if(null != itemParameter.getValue() && StringUtils.isNumeric(itemParameter.getValue())){
+                                totalNum ++;
+                                totalValue += Integer.parseInt(itemParameter.getValue());
+                            }
+                        }
+                    }
+                }
+                innerMap.put("averageValue",percent(totalValue,totalNum,1));
+                innerMap.put("itemTotalNum", String.valueOf(num));
+                innerMap.put("unit",unit);
+                innerMap.put("itemTypeCode",EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getItemTypeCode());
+                innerMap.put("itemTypeName",EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getItemTypeName());
+                map.put(parameterCode,innerMap);
+            }
+            result.put(group.getId(),map);
+        }
+        return result;
+    }
+
+
+
+    /**
+     * @Author: liwencai 
+     * @Description:
+     * @Date: 2022/11/23
+     * @Param parameterList: 
+     * @Param groupList: 
+     * @Param parameterCodeList: 
+     * @return: java.util.Map<java.lang.Long,java.util.List<com.thtf.environment.dto.EnvMonitorItemTypeDTO>> 
+     */
     public Map<Long, List<EnvMonitorItemTypeDTO>> itemTypeInfoOfGroup(List<TblItemParameter> parameterList,List<TblGroup> groupList,List<String> parameterCodeList){
         Map<Long, List<EnvMonitorItemTypeDTO>> maps = new HashMap<>();
         for (TblGroup group : groupList) {
@@ -646,6 +790,15 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         return maps;
     }
 
+    /**
+     * @Author: liwencai 
+     * @Description:
+     * @Date: 2022/11/23
+     * @Param v1: 
+     * @Param v2: 
+     * @Param place: 
+     * @return: java.lang.String 
+     */
     public static String percent(double v1, double v2,int place) {
         String per = "0";
         if (v2 > 0) {
