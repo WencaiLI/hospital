@@ -12,6 +12,7 @@ import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.enums.EnvMonitorItemLiveParameterEnum;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.ItemParameterConvert;
@@ -23,6 +24,7 @@ import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.api.hint.HintManager;
+import org.checkerframework.checker.units.qual.min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -157,8 +159,8 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @Param: paramVO:
      * @Return: java.util.List<com.thtf.environment.vo.EnvMonitorItemResultVO>
      */
-    @Override
-    public PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO) {
+    // @Override
+    public PageInfoVO listItemInfoOld(EnvMonitorItemParamVO paramVO) {
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
         List<String> itemCodeList;
         List<String> groupIdStringList;
@@ -205,7 +207,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                         inner.add(parameter);
                     }
                 });
-                envMonitorItemResultVO.setParameterList(inner);
+                // envMonitorItemResultVO.setParameterList(inner);
                 resultVOList.add(envMonitorItemResultVO);
             }
             pageInfoVO.setList(resultVOList);
@@ -259,12 +261,249 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                         inner.add(parameter);
                     }
                 });
-                envMonitorItemResultVO.setParameterList(inner);
+                // envMonitorItemResultVO.setParameterList(inner);
                 resultVOList.add(envMonitorItemResultVO);
             }
             pageInfoVO.setList(resultVOList);
             return pageInfoVO;
         }
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/24
+     * @Param paramVO:
+     * @return: com.thtf.environment.dto.PageInfoVO
+     */
+    @Override
+    public PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO) {
+        // 查询故障或报警
+        if(null == paramVO.getAlarmCategory()){
+            return this.listAllItem(paramVO);
+        }else { // 报警设备
+            return this.listAlarmItem(paramVO);
+        }
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取报警设备信息
+     * @Date: 2022/11/24
+     * @Param paramVO:
+     * @return: com.thtf.environment.dto.PageInfoVO
+     */
+    public PageInfoVO listAlarmItem(EnvMonitorItemParamVO paramVO){
+        List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
+        List<String> itemCodeList;
+        List<String> groupIdStringList;
+        PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.getAlarmInfoBySysCodeAndCategoryLimitOneByKeywordPage(paramVO.getKeyword(), paramVO.getAlarmCategory(), paramVO.getSysCode(), paramVO.getPageNumber(), paramVO.getPageSize()).getData();
+        // 设备编码集
+        itemCodeList = pageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+        // 设备参数集
+        List<TblItemParameter> itemParameterList = itemAPI.searchParameterByItemCodes(itemCodeList).getData();
+        // 设备信息集
+        List<TblItem> itemList = itemAPI.searchItemByItemCodeList(itemCodeList).getData();
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        // 分组id集
+        groupIdStringList = itemList.stream().filter(e->null != e.getGroupId()).map(TblItem::getGroupId).map(String::valueOf).collect(Collectors.toList());
+        List<TblGroup> groupList = null;
+        if(groupIdStringList.size()>0){
+            groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
+        }
+        for (TblAlarmRecordUnhandle alarmRecord: pageInfo.getList()) {
+            EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
+            // 匹配设备信息
+            List<TblGroup> finalGroupList = groupList;
+            itemList.forEach(item->{
+                if(item.getCode().equals(alarmRecord.getItemCode())){
+                    envMonitorItemResultVO.setItemCode(item.getCode());
+                    envMonitorItemResultVO.setItemName(item.getName());
+                    envMonitorItemResultVO.setAreaCode(item.getAreaCode());
+                    envMonitorItemResultVO.setAreaName(item.getAreaName());
+                    envMonitorItemResultVO.setAlarmCategory(alarmRecord.getAlarmCategory());
+                    // 匹配设备模型视角信息
+                    if(StringUtils.isNotBlank(item.getViewLongitude())){
+                        envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                    if(StringUtils.isNotBlank(item.getViewLatitude())){
+                        envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                    // 匹配分组信息
+                    if(null != finalGroupList){
+                        finalGroupList.forEach(e->{
+                            if(e.getId().equals(item.getGroupId())){
+                                envMonitorItemResultVO.setGroupId(e.getId());
+                                envMonitorItemResultVO.setGroupName(e.getName());
+                            }
+                        });
+                    }
+
+                }
+            });
+            // 匹配参数
+            itemParameterList.forEach(parameter->{
+                if("OnlineStatus".equals(parameter.getParameterType())){
+                    envMonitorItemResultVO.setOnlineParameterCode(parameter.getCode());
+                    if(null != parameter.getValue()){
+                        envMonitorItemResultVO.setOnlineParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                    }
+                }
+                if("Fault".equals(parameter.getParameterType())){
+                    envMonitorItemResultVO.setFaultParameterCode(parameter.getCode());
+                    if(null != parameter.getValue()){
+                        envMonitorItemResultVO.setFaultParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                    }
+                }
+                if("Alarm".equals(parameter.getParameterType())){
+                    envMonitorItemResultVO.setAlarmParameterCode(parameter.getCode());
+                    if(null != parameter.getValue()){
+                        envMonitorItemResultVO.setAlarmParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                    }
+                }
+                if(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(alarmRecord.getItemTypeCode()).parameterType.equals(parameter.getParameterType())){
+                    if(null != parameter.getValue()){
+                        envMonitorItemResultVO.setDataCollectionValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                    }
+                    envMonitorItemResultVO.setDataCollectionTime(parameter.getDataUpdateTime() == null?parameter.getCreatedTime():parameter.getDataUpdateTime());
+                }
+            });
+            resultVOList.add(envMonitorItemResultVO);
+        }
+        pageInfoVO.setList(resultVOList);
+        return pageInfoVO;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询所有的设备详情（分页）
+     * @Date: 2022/11/24
+     * @Param paramVO:
+     * @return: com.thtf.environment.dto.PageInfoVO
+     */
+    public PageInfoVO listAllItem(EnvMonitorItemParamVO paramVO){
+        List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
+        List<String> itemCodeList;
+        List<String> groupIdStringList;
+        // todo liwencai 需要修改
+        PageInfo<TblItem> pageInfo = itemAPI.searchItemBySysCodeAndTypeCodeAndAreaCodeListAndKeywordPage(paramVO.getSysCode(), paramVO.getItemTypeCode(), paramVO.getKeyword(), null, paramVO.getPageNumber(), paramVO.getPageSize()).getData();
+        // 设备编码集
+        itemCodeList = pageInfo.getList().stream().map(TblItem::getCode).collect(Collectors.toList());
+        // 查询设备参数集
+        List<TblItemParameter> itemParameterList = itemAPI.searchParameterByItemCodes(itemCodeList).getData();
+        // 查询设备的最新报警信息
+        List<TblAlarmRecordUnhandle> alarmList = alarmAPI.getAlarmInfoByItemCodeListLimitOne(itemCodeList).getData();
+        // 分组id集
+        groupIdStringList = pageInfo.getList().stream().filter(e->null != e.getGroupId()).map(TblItem::getGroupId).map(String::valueOf).collect(Collectors.toList());
+        List<TblGroup> groupList = null;
+        if(groupIdStringList.size()>0){
+            groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
+        }
+        // 匹配分组信息集
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        for (TblItem item : pageInfo.getList()) {
+            EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
+            envMonitorItemResultVO.setItemCode(item.getCode());
+            envMonitorItemResultVO.setItemName(item.getName());
+            envMonitorItemResultVO.setAreaCode(item.getAreaCode());
+            envMonitorItemResultVO.setAreaName(item.getAreaName());
+            // 匹配分组信息
+            if(null != groupList){
+                groupList.forEach(e->{
+                    if(e.getId().equals(item.getGroupId())){
+                        envMonitorItemResultVO.setGroupId(e.getId());
+                        envMonitorItemResultVO.setGroupName(e.getName());
+                    }
+                });
+            }
+            // 匹配模型视角信息
+            if(StringUtils.isNotBlank(item.getViewLongitude())){
+                envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            if(StringUtils.isNotBlank(item.getViewLatitude())){
+                envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            // 匹配参数
+            itemParameterList.forEach(parameter->{
+                if(parameter.getItemCode().equals(item.getCode())){
+                    if("OnlineStatus".equals(parameter.getParameterType())){
+                        envMonitorItemResultVO.setOnlineParameterCode(parameter.getCode());
+                        if(null != parameter.getValue()){
+                            envMonitorItemResultVO.setOnlineParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                        }
+                    }
+                    if("Fault".equals(parameter.getParameterType())){
+                        envMonitorItemResultVO.setFaultParameterCode(parameter.getCode());
+                        if(null != parameter.getValue()){
+                            envMonitorItemResultVO.setFaultParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                        }
+                    }
+                    if("Alarm".equals(parameter.getParameterType())){
+                        envMonitorItemResultVO.setAlarmParameterCode(parameter.getCode());
+                        if(null != parameter.getValue()){
+                            envMonitorItemResultVO.setAlarmParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                        }
+                    }
+                    if(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(item.getTypeCode()).parameterType.equals(parameter.getParameterType())){
+                        if(null != parameter.getValue()){
+                                envMonitorItemResultVO.setDataCollectionValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                        }
+                        envMonitorItemResultVO.setDataCollectionTime(parameter.getDataUpdateTime() == null?parameter.getCreatedTime():parameter.getDataUpdateTime());
+                    }
+                }
+            });
+            // 匹配报警信息
+            alarmList.forEach(e->{
+                if(e.getItemCode().equals(item.getCode())){
+                    envMonitorItemResultVO.setAlarmCategory(e.getAlarmCategory());
+                }
+            });
+            resultVOList.add(envMonitorItemResultVO);
+        }
+        pageInfoVO.setList(resultVOList);
+        return pageInfoVO;
+    }
+
+    public Map<String, Object> listParameter(List<TblItemParameter> parameterList,Set<String> parameterCodes){
+        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> innerMap = new HashMap<>();
+        for (TblItemParameter parameter : parameterList) {
+            parameterCodes.forEach(e->{
+                if(parameter.getCode().equals(e)){
+                    innerMap.put("value",parameter.getValue());
+                    innerMap.put("unit",parameter.getUnit());
+                    innerMap.put("valueIsAalarm",this.parameterValueIsTransfinite(parameter.getValue(),parameter.getMax(),parameter.getMin()));
+                    resultMap.put(parameter.getCode(),innerMap);
+                }
+            });
+        }
+        return resultMap;
+    }
+
+    /**
+     * 设备点位参数值是否超过范围（设定值）
+     */
+    public boolean parameterValueIsTransfinite(String pValue,String pMax,String pMin){
+        if(StringUtils.isBlank(pValue) && !StringUtils.isNumeric(pValue)){
+            return false;
+        }
+        double value = ArithUtil.decimalPoint2(Double.parseDouble(pValue));
+        // 比最大设定值大
+        if(StringUtils.isNotBlank(pMax) && StringUtils.isNumeric(pMax)){
+            double max = ArithUtil.decimalPoint2(Double.parseDouble(pMax));
+            if(value>max){
+                return true;
+            }
+        }
+        // 比最小设定值小
+        if(StringUtils.isNotBlank(pMin) && StringUtils.isNumeric(pMin)){
+            double min = ArithUtil.decimalPoint2(Double.parseDouble(pMin));
+            if(value<min){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -291,7 +530,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
-        List<TimeValueDTO> hourlyHistoryMoment;
+        List<TimeValueDTO> hourlyHistoryMoment = null;
         if(StringUtils.isBlank(parameterCode)){
             if(StringUtils.isNotBlank(itemTypeCode)){
                 System.out.println(itemTypeCode);
@@ -310,8 +549,15 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
             hourlyHistoryMoment = tblHistoryMomentMapper.getHourlyHistoryMoment(parameterCode,date+DAY_START_SUFFIX,date+DAY_END_SUFFIX);
+        }catch (Exception e){
+            // hourlyHistoryMoment = null;
         }
-        List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+        List<Integer> collect = new ArrayList<>();
+        if (null != hourlyHistoryMoment){
+            collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+        }else {
+            hourlyHistoryMoment = new ArrayList<>();
+        }
         for (int i = 0; i < 24; i++) {
             if(!collect.contains(i)){
                 TimeValueDTO timeValueDTO = new TimeValueDTO();
@@ -334,7 +580,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             log.error("时间格式错误");
             return null;
         }
-        List<TimeValueDTO> hourlyHistoryMoment;
+        List<TimeValueDTO> hourlyHistoryMoment = null;
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_END_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
@@ -351,12 +597,21 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                         parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
                     }
                 }
-
 //               parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType(),itemCode).getData();
             }
-            hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, getMonthStartAndEndTimeDayString(newDate).get("startTime"),getMonthStartAndEndTimeDayString(newDate).get("endTime"));
+            try {
+                hourlyHistoryMoment = tblHistoryMomentMapper.getDailyHistoryMoment(parameterCode, getMonthStartAndEndTimeDayString(newDate).get("startTime"), getMonthStartAndEndTimeDayString(newDate).get("endTime"));
+            }catch (Exception e){
+                // hourlyHistoryMoment = null;
+            }
         }
-        List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+        List<Integer> collect = new ArrayList<>();
+        if(hourlyHistoryMoment != null){
+            collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+        }else {
+            hourlyHistoryMoment = new ArrayList<>();
+        }
+
         // 填充数据
         int year = getYear(newDate);
         int month = getMonth(newDate);
@@ -397,7 +652,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             log.error("时间格式错误");
             return null;
         }
-        List<TimeValueDTO> hourlyHistoryMoment;
+        List<TimeValueDTO> hourlyHistoryMoment = null;
         try (HintManager hintManager = HintManager.getInstance()) {
             // todo liwencai 此处存在bug
             // 日期是当年的开始时间，至本月时间
@@ -422,7 +677,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 // todo liwencai 获取有问题
                 hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, getYearStartAndEndTimeMonthString(newDate).get("startTime"),getYearStartAndEndTimeMonthString(newDate).get("endTime"));
             }catch (Exception e){
-                hourlyHistoryMoment = null;
+                // hourlyHistoryMoment = null;
             }
         }
         if(null != hourlyHistoryMoment){
@@ -598,7 +853,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         List<String> allParameterCodeNeed = getAllParameterCodeNeed();
         for (String parameterCode : allParameterCodeNeed) {
             Map<String, String> map1 = new HashMap<>();
-            map1.put("code",parameterCode);
+            map1.put("value",parameterCode);
             map1.put("name",EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getParameterTypeName());
             title.add(map1);
         }

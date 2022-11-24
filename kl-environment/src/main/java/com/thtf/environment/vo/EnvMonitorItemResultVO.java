@@ -1,10 +1,12 @@
 package com.thtf.environment.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.environment.dto.VideoInfoDTO;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,22 +18,97 @@ import java.util.List;
  */
 @Data
 public class EnvMonitorItemResultVO {
-    private String itemCode; // 设备编码
-    private String itemName; // 设备名称
-    private String areaCode; // 区域编码
-    private String areaName; // 区域名称
+    /**
+     * 设备编码
+     */
+    private String itemCode;
+
+    /**
+     * 设备名称
+     */
+    private String itemName;
+
+    /**
+     * 区域编程
+     */
+    private String areaCode;
+
+    /**
+     * 区域名称
+     */
+    private String areaName;
+
+    /**
+     * 所在分组id
+     */
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long groupId; // 所在分组id
-    private String groupName; // 所在分组名称
-//    private String onlineParameterCode; // 在线状态参数编码
-//    private String onlineStatus; // 在线状态
-//    private String alarmParameterCode; // 在线状态参数编码
-//    private String alarmStatus; // 在线状态 对应alarmCategory
-//    private List<VideoInfoDTO> videoList; // 摄像机编码信息
-//    private Object dataCollectionValue; // 数据采集值
-//    private LocalDateTime dataCollectionTime; // 数据采集时间
-    private List<TblItemParameter> parameterList;
-    private List<Integer> eye; // 视角定位
-    private List<Integer> center; // 视角定位
+    private Long groupId;
+
+    /**
+     * 所在分组名称
+     */
+    private String groupName;
+
+    /**
+     * 在线状态参数编码
+     */
+    private String onlineParameterCode;
+
+    /**
+     * 在线状态
+     */
+    private String onlineParameterValue;
+
+    /**
+     * 在线状态参数编码
+     */
+    private String alarmParameterCode;
+
+    /**
+     * 在线状态参数编码
+     */
+    private String alarmParameterValue;
+
+    /**
+     * 在线状态参数编码
+     */
+    private String faultParameterCode;
+
+    /**
+     * 故障参数值
+     */
+    private String faultParameterValue;
+
+    /**
+     * 报警状态
+     */
+    private Integer alarmCategory;
+
+    /**
+     * 数据采集值
+     */
+    private Object dataCollectionValue;
+
+    /**
+     * 数据采集时间
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dataCollectionTime;
+
+//    /**
+//     * 参数List
+//     */
+//    private List<TblItemParameter> parameterList;
+
+    /**
+     * 模型视角
+     */
+    private List<Integer> eye;
+
+    /**
+     * 模型视角
+     */
+    private List<Integer> center;
 
 }
