@@ -624,7 +624,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             Map<String, String> map1 = new HashMap<>();
             Map<String, String> map2 = new HashMap<>();
             map1.put("value",parameterCode);
-            map1.put("name",EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getParameterTypeName());
+            map1.put("name",EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getParameterTypeName()+"（"+EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByParameterType(parameterCode).getUnit()+"）");
             title.add(map1);
             map2.put("value",parameterCode+"_"+"itemTotalNum");
             map2.put("name","数量");
@@ -771,7 +771,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                     }
                 }
                 innerMap.put("averageValue",percent(totalValue,totalNum,1));
-                innerMap.put("unit",unit);
+//                innerMap.put("unit",unit);
                 // todo liwencai 设定值未知
                 innerMap.put("configureValue","40");
                 map.put(parameterCode,innerMap);
