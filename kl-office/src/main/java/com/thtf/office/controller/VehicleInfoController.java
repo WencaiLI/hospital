@@ -67,7 +67,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    @OperateLog(content = "新增维保信息",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "新增维保信息",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                       @ModelAttribute List<MultipartFile> carImageFile,
                                       @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
@@ -97,7 +97,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
-    @OperateLog(content = "删除公车信息",operateType = OperateType.DELETE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "删除公车信息",operateType = OperateType.DELETE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> deleteById(@RequestParam("vid") @NotNull Long vid){
         if(vehicleInfoService.deleteById(vid)){
             return JsonResult.success(true);
@@ -114,7 +114,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
-    @OperateLog(content = "修改公车信息",operateType = OperateType.UPDATE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "修改公车信息",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> update(@Validated(VehicleParamValid.Update.class) VehicleInfoParamVO paramVO,
                                                       @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
@@ -175,7 +175,7 @@ public class VehicleInfoController {
      * @date 2022-06-14
      */
     @PostMapping("/itemImport")
-    @OperateLog(content = "批量导入车辆信息",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "批量导入车辆信息",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<String> itemImport(HttpServletRequest request, String type, MultipartFile uploadFile) {
         return JsonResult.success(vehicleInfoService.batchImport(uploadFile, uploadFile.getOriginalFilename(), type, null));
     }
@@ -246,7 +246,7 @@ public class VehicleInfoController {
      * @return: void
      */
     @PostMapping("/batchImport")
-    @OperateLog(content = "公车信息批量导入",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "公车信息批量导入",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult batchImport(@ModelAttribute MultipartFile uploadFile,HttpServletResponse response){
         try {
             EasyExcel.read(uploadFile.getInputStream(), VehicleInfoExcelImportDTO.class, new VehicleExcelListener(vehicleInfoService,response)).headRowNumber(4).sheet().doRead();
@@ -277,7 +277,7 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @GetMapping("/updateInfoStatus")
-    @OperateLog(content = "修改公车状态",operateType = OperateType.UPDATE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "修改公车状态",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> updateInfoStatus(){
         return JsonResult.querySuccess(true);
     }
