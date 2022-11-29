@@ -47,7 +47,7 @@ public class VehicleCategoryController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/insert")
-    @OperateLog(content = "新增公车类别",operateType = OperateType.INSERT,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "新增公车类别",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<String> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleCategoryParamVO vehicleCategoryParamVO){
         Map<String, Object> resultMap = vehicleCategoryService.insert(vehicleCategoryParamVO);
         if(resultMap.get("status").equals("error")){
@@ -65,7 +65,7 @@ public class VehicleCategoryController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @DeleteMapping("/deleteById")
-    @OperateLog(content = "删除公车类别",operateType = OperateType.DELETE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "删除公车类别",operateType = OperateType.DELETE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> deleteById(@RequestParam(value = "cid") @NotNull Long cid){
         if(vehicleCategoryService.deleteById(cid)){
             return JsonResult.success(true);
@@ -82,7 +82,7 @@ public class VehicleCategoryController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
-    @OperateLog(content = "更新公车类别",operateType = OperateType.UPDATE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "更新公车类别",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleCategoryParamVO vehicleCategoryParamVO){
         if(vehicleCategoryService.updateSpec(vehicleCategoryParamVO)){
             return JsonResult.success(true);
@@ -141,7 +141,7 @@ public class VehicleCategoryController {
      * @return: org.springframework.http.ResponseEntity<com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PostMapping("/changeBind")
-    @OperateLog(content = "移除绑定车辆",operateType = OperateType.UPDATE,operatePage = "车辆信息页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "移除绑定车辆",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> changeBind(@RequestBody VehicleCategoryChangeBindVO vehicleCategoryChangeBindVO){
         if(vehicleCategoryService.changeBind(vehicleCategoryChangeBindVO)){
             return JsonResult.success(true);

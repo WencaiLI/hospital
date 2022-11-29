@@ -39,7 +39,7 @@ public class VehicleMaintenanceController {
      * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @PostMapping("/insert")
-    @OperateLog(content = "新增维保信息",operateType = OperateType.INSERT,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "新增维保信息",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
         if(vehicleMaintenanceService.insert(vehicleMaintenanceParamVO)){
             return JsonResult.success(true);
@@ -55,7 +55,7 @@ public class VehicleMaintenanceController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @DeleteMapping("/deleteById")
-    @OperateLog(content = "删除维保信息",operateType = OperateType.DELETE,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "删除维保信息",operateType = OperateType.DELETE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> deleteById(@RequestParam("mid") @NotNull Long mid){
         if (vehicleMaintenanceService.deleteById(mid)){
             return JsonResult.success(true);
@@ -71,7 +71,7 @@ public class VehicleMaintenanceController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.lang.Boolean>>
      */
     @PutMapping("/update")
-    @OperateLog(content = "修改维保信息",operateType = OperateType.UPDATE,operatePage = "车辆维保页面",systemCode = "kl-office",systemName = "办公微服务")
+    @OperateLog(content = "修改维保信息",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleMaintenanceParamVO vehicleMaintenanceParamVO){
         if (vehicleMaintenanceService.updateSpec(vehicleMaintenanceParamVO)){
             return JsonResult.success(true);
