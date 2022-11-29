@@ -756,13 +756,13 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 // 需要统计计算平均值的总设备数
                 int totalNum = 0;
                 // 值单位
-                String unit = "";
+//                String unit = "";
                 if(null != parameterList && parameterList.size()>0){
-                    unit = parameterList.get(0).getUnit();
+//                    unit = parameterList.get(0).getUnit();
                     for (TblItemParameter itemParameter : parameterList) {
                         if(itemCodeList.contains(itemParameter.getItemCode()) && parameterCode.equals(itemParameter.getParameterType())){
                             num ++;
-                            unit = itemParameter.getUnit();
+//                            unit = itemParameter.getUnit();
                             if(null != itemParameter.getValue() && StringUtils.isNumeric(itemParameter.getValue())){
                                 totalNum ++;
                                 totalValue += Integer.parseInt(itemParameter.getValue());
