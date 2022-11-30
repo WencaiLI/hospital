@@ -81,9 +81,8 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     @PostMapping("/displayInfo")
-    JsonResult<List<DisplayInfoDTO>> displayInfo(@RequestParam(value ="sysCode")String sysCode,
-                                                @RequestParam(value ="itemType")String itemType){
-        return JsonResult.querySuccess(elevatorService.displayInfo(sysCode,itemType));
+    JsonResult<List<DisplayInfoDTO>> displayInfo(@RequestParam(value ="sysCode")String sysCode){
+        return JsonResult.querySuccess(elevatorService.displayInfo(sysCode));
     }
 
     /**

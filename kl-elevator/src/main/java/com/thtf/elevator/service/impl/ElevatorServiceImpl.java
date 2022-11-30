@@ -84,27 +84,31 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     @Override
-    public List<DisplayInfoDTO> displayInfo(String sysCode, String itemType) {
+    public List<DisplayInfoDTO> displayInfo(String sysCode) {
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
-        // tblItemType.setParentCode(itemType);
         tblItemType.setSysCode(sysCode);
         // 父类为itemType的设备类别
-        tblItemType.setParentCode(itemType);
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
+        // 移除父类
+        if(null == itemTypeList || itemTypeList.size() == 0){
+            return null;
+        }
+        itemTypeList.removeIf(e->("item".equals(e.getParentCode()) || StringUtils.isBlank(e.getParentCode())));
+
         // 根据类别查询所有的信息
-        for (TblItemType item_type: itemTypeList) {
+        for (TblItemType itemType : itemTypeList) {
             DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
 
             // 查询该类的数量
             TblItem tblItem = new TblItem();
             tblItem.setSystemCode(sysCode);
-            tblItem.setTypeCode(item_type.getCode());
+            tblItem.setTypeCode(itemType .getCode());
             List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
             List<KeyValueDTO> kvList = new ArrayList<>();
             KeyValueDTO keyValueDTO = new KeyValueDTO();
-            keyValueDTO.setKey(item_type.getName());
+            keyValueDTO.setKey(itemType .getName());
             keyValueDTO.setValue(itemList.size());
             kvList.add(keyValueDTO);
             // 查询该类型的运行数量
