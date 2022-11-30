@@ -42,5 +42,5 @@ public class ElevatorInfoResultDTO extends ElevatorStatusVO {
 //    /**
 //     *
 //     */
-//    List<ParameterInfoDTO> parameterList; // 参数列表
+    List<ParameterInfoDTO> parameterList; // 参数列表
 }
