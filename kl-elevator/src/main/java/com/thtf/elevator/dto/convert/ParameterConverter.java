@@ -13,5 +13,7 @@ import java.util.List;
  */
 @Mapper(componentModel = "spring")
 public interface ParameterConverter {
-    List<ParameterInfoDTO> toParameterInfo(List<TblItemParameter> tblItemParameterList);
+
+    ParameterInfoDTO toParameterInfo(TblItemParameter tblItemParameterList);
+    List<ParameterInfoDTO> toParameterInfoList(List<TblItemParameter> tblItemParameterList);
 }
