@@ -96,11 +96,9 @@ public class ElevatorServiceImpl implements ElevatorService {
             return null;
         }
         itemTypeList.removeIf(e->("item".equals(e.getParentCode()) || StringUtils.isBlank(e.getParentCode())));
-
         // 根据类别查询所有的信息
         for (TblItemType itemType : itemTypeList) {
             DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
-
             // 查询该类的数量
             TblItem tblItem = new TblItem();
             tblItem.setSystemCode(sysCode);
@@ -128,6 +126,17 @@ public class ElevatorServiceImpl implements ElevatorService {
             displayInfoDTO.setResults(kvList);
             result.add(displayInfoDTO);
         }
+        // 报警总数
+        KeyValueDTO alarmKV = new KeyValueDTO();
+        alarmKV.setKey("故障报警");
+        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
+        param.setSysCode(sysCode);
+        param.setParameterTypeCode("Alarm");
+        param.setParameterValue("1");
+        alarmKV.setValue(itemAPI.countItemByParameterList(param).getData());
+        DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
+        displayInfoDTO.setResults(new ArrayList<KeyValueDTO>(Collections.singleton(alarmKV)));
+        result.add(displayInfoDTO);
         return result;
     }
 
@@ -140,9 +149,6 @@ public class ElevatorServiceImpl implements ElevatorService {
      */
     @Override
     public Integer alarmNumber(String sysCode) {
-        TblAlarmRecordUnhandle tblAlarmRecordUnhandle = new TblAlarmRecordUnhandle();
-        tblAlarmRecordUnhandle.setSystemCode(sysCode);
-        tblAlarmRecordUnhandle.setAlarmCategory(1);
         CountItemByParameterListDTO param = new CountItemByParameterListDTO();
         param.setSysCode(sysCode);
         param.setParameterTypeCode("Alarm");
