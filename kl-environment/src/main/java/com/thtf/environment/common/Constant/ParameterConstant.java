@@ -44,8 +44,14 @@ public class ParameterConstant {
 
     public final static String BROADCAST_TASK_QUEUE = "TaskQueue";
 
+    /**
+     * 公共广播参数类别编码 - 报警
+     */
     public final static String BROADCAST_ALARM = "Alarm";
 
+    /**
+     * 公共广播参数类别编码 - 故障
+     */
     public final static String BROADCAST_FAULT = "Fault";
 
     /**
@@ -58,7 +64,14 @@ public class ParameterConstant {
      */
     public final static String BROADCAST_PLAY_PORT = "PlayPort";
 
+    /**
+     * 运行状态值为“运行”的值
+     */
     public final static String BROADCAST_TASK_ON_VALUE = "1";
+
+    /**
+     * 运行状态为“关闭”的值
+     */
     public final static String BROADCAST_TASK_OFF_VALUE = "0";
 
 

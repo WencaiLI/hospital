@@ -202,6 +202,18 @@ public class BroadcastServiceImpl implements BroadcastService {
                 innerResult.setAudioValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
+            // 对讲状态
+            if (ParameterConstant.BROADCAST_INTERCOM_STATUS.equals(parameter.getParameterType())) {
+                innerResult.setIntercomStatusParameterCode(parameter.getCode());
+                innerResult.setIntercomStatusValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 消防播报端口
+            if (ParameterConstant.BROADCAST_PLAY_PORT.equals(parameter.getParameterType())) {
+                innerResult.setPlayPortParameterCode(parameter.getCode());
+                innerResult.setPlayPortValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
             // 音量接收方式
             if (ParameterConstant.BROADCAST_AUDIO_CONTROL.equals(parameter.getParameterType())) {
                 innerResult.setAudioReceiveParameterCode(parameter.getCode());

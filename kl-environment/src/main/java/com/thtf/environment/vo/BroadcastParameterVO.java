@@ -91,4 +91,24 @@ public class BroadcastParameterVO {
      */
     private String faultValue;
 
+    /**
+     * 对讲状态编码
+     */
+    private String intercomStatusParameterCode;
+
+    /**
+     * 对讲状态值
+     */
+    private String intercomStatusValue;
+
+    /**
+     * 消防播报端口
+     */
+    private String playPortParameterCode;
+
+    /**
+     * 消防播报端口值
+     */
+    private String playPortValue;
+
 }
