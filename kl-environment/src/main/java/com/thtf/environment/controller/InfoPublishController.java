@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/info_publish")
 @Slf4j
+// todo 信息发布需要对接高博医院的信息发布的系统，做对发布信息的统计
 public class InfoPublishController {
-    // todo 信息发布需要对接高博医院的信息发布的系统，做对发布信息的统计
     @Autowired
     private InfoPublishService infoPublishService;
     @Resource
@@ -73,6 +73,13 @@ public class InfoPublishController {
         return itemAPI.countInfoPublicItemStatus(sysCode,areaCode,itemTypeCodes);
     }
 
+
+    @GetMapping("/monitor_point_info")
+    public JsonResult getMonitorPoint(@RequestParam("sysCode") String sysCode,
+                                      @RequestParam("itemCode") String itemCodes){
+        return JsonResult.querySuccess(infoPublishService.getMonitorPoint(sysCode,itemCodes));
+
+    }
     /**
      * @Author: liwencai
      * @Description: 查询大屏信息

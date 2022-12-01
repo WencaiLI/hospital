@@ -15,50 +15,122 @@ import java.util.List;
 public class ItemInfoOfLargeScreenDTO {
 
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long itemId; // 设备id
 
-    private String itemName; // 设备名称
+    /**
+     * 设备id
+     */
+    private Long itemId;
 
-    private String itemCode; // 设备编码
+    /**
+     * 设备名称
+     */
+    private String itemName;
 
-    private String areaCode; // 所在区域编码
+    /**
+     * 设备编码
+     */
+    private String itemCode;
 
-    private String buildingCode; // 所在区域编码
+    /**
+     * 所在区域编码
+     */
+    private String areaCode;
 
-    private String areaName; // 所在区域名称
+    /**
+     * 所在区域编码
+     */
+    private String buildingCode;
 
-    private String runParameterCode; // 运行状态参数编码
+    /**
+     * 所在区域名称
+     */
+    private String areaName;
 
-    private Object runValue; // 当前运行值
+    /**
+     * 运行状态参数编码
+     */
+     private String runParameterCode;
 
-    private String onlineParameterCode; // 在线状态参数编码
+    /**
+     * 当前运行值
+     */
+    private String runValue;
 
-    private Object onlineValue; // 当前在线状态
+    /**
+     * 在线状态参数编码
+     */
+     private String onlineParameterCode;
 
-    private String luminanceParameterCode; // 亮度参数编码
+    /**
+     * 当前在线状态
+     */
+    private String onlineValue;
 
-    private Object luminanceValue; // 当前亮度参数
+    /**
+     * 亮度参数编码
+     */
+     private String luminanceParameterCode;
 
-    private String volumeParameterCode; // 音量参数编码
+    /**
+     * 当前亮度参数
+     */
+    private String luminanceValue;
 
-    private Object volumeValue; // 当前音量参数
+    /**
+     * 音量参数编码
+     */
+     private String volumeParameterCode;
 
-    private String capacityParameterCode; // 容量参数编码
+    /**
+     * 当前音量参数
+     */
+    private String volumeValue;
 
-    private Object capacityValue; // 当前音量参数
+    /**
+     * 容量参数编码
+     */
+     private String capacityParameterCode;
 
-    private String storageStatusParameterCode; // 存储状态参数编码
+    /**
+     * 当前音量参数
+     */
+    private String capacityValue;
 
-    private Object storageStatusValue; // 当前音量参数
+    /**
+     * 存储状态参数编码
+     */
+     private String storageStatusParameterCode;
 
-    private String showDurationParameterCode; // 放映时长参数编码
+    /**
+     * 当前音量参数
+     */
+    private String storageStatusValue;
 
-    private Object showDurationValue; // 放映时长值
+    /**
+     * 放映时长参数编码
+     */
+     private String showDurationParameterCode;
 
-    private String alarmStatus; // 报警状态
+    /**
+     * 放映时长值
+     */
+    private String showDurationValue;
 
-    private List<Integer> eye; // 相机视角
+    /**
+     * 报警状态
+     */
+    private Integer alarmStatus;
 
-    private List<Integer> center; // 近距离视角
+    /**
+     * 模型视角
+     */
+    private List<Integer> eye;
+
+    /**
+     * 模型视角
+     */
+    private List<Integer> center;
+
+    List<ParameterInfoDTO> parameterList;
 
 }

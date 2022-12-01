@@ -15,7 +15,7 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.enums.EnvMonitorItemLiveParameterEnum;
 import com.thtf.environment.dto.*;
-import com.thtf.environment.dto.convert.ItemParameterConvert;
+import com.thtf.environment.dto.convert.ParameterConverter;
 import com.thtf.environment.dto.convert.ItemTypeConvert;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.entity.TblHistoryMoment;
@@ -63,7 +63,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     private PageInfoConvert pageInfoConvert;
 
     @Resource
-    private ItemParameterConvert itemParameterConvert;
+    private ParameterConverter itemParameterConvert;
 
     private final static String TBL_HISTORY_MOMENT = "tbl_history_moment";
     private final static String DAY_START_SUFFIX = " 00:00:00";
@@ -352,7 +352,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public List<ItemParameterInfoVO> listParameter(String itemCode) {
-        return itemParameterConvert.toItemParameterInfoVO(itemAPI.searchParameterByItemCodes(Collections.singletonList(itemCode)).getData());
+        return itemParameterConvert.toItemParameterInfoVOList(itemAPI.searchParameterByItemCodes(Collections.singletonList(itemCode)).getData());
     }
 
     /**
