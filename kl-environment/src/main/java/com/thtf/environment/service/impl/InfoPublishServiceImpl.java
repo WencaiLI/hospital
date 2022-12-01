@@ -2,7 +2,6 @@ package com.thtf.environment.service.impl;
 
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
-import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
@@ -10,15 +9,12 @@ import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
+import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
-import com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO;
-import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
-import com.thtf.environment.dto.ItemPlayInfoDTO;
-import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.AlarmConvert;
-import com.thtf.environment.dto.convert.ItemConvert;
 import com.thtf.environment.dto.convert.PageInfoConvert;
+import com.thtf.environment.dto.convert.ParameterConverter;
 import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +48,8 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Resource
     PageInfoConvert pageInfoConvert;
     @Resource
+    ParameterConverter parameterConverter;
+    @Resource
     AlarmConvert alarmConvert;
     @Resource
     RedisOperationService redisOperationService;
@@ -71,26 +69,23 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     public PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap) {
         String parameterCode = null;
         String parameterValue = null;
-        if(null != paramMap.get(ParameterConstant.ON_OFF_STATUS)){
-            parameterCode = ParameterConstant.ON_OFF_STATUS;
-            parameterValue = (String) paramMap.get(ParameterConstant.ON_OFF_STATUS);
+        // 运行状态筛选
+        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS)){
+            parameterCode = ParameterConstant.INFO_PUBLISH_RUN_STATUS;
+            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS);
         }
+        // 查询所有设备信息
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
                 (String) paramMap.get("sysCode"), null, (String) paramMap.get("buildingCodes") ,(String) paramMap.get("areaCode"),
                 parameterCode, parameterValue , (String) paramMap.get("keyword"),
                 (Integer) paramMap.get("pageNumber"), (Integer) paramMap.get("pageSize")
         ).getData();
-
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
         List<ItemNestedParameterVO> list = itemPageInfo.getList();
-
-        // 获取设备报警信息
+        // 获取所有设备报警信息
         List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
-
         List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
-
         for (ItemNestedParameterVO itemNestedParameterVO : list) {
-
             ItemInfoOfLargeScreenDTO innerResult = new ItemInfoOfLargeScreenDTO();
             innerResult.setItemId(itemNestedParameterVO.getId());
             innerResult.setItemCode(itemNestedParameterVO.getCode());
@@ -98,53 +93,73 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             innerResult.setAreaCode(itemNestedParameterVO.getAreaCode());
             innerResult.setAreaName(itemNestedParameterVO.getAreaName());
             innerResult.setBuildingCode(itemNestedParameterVO.getBuildingCode());
-
+            // 匹配模型视角
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLongitude())){
                 innerResult.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
-
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
                 innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
             // 匹配报警信息
             allAlarmRecordUnhandled.forEach(e->{
                 if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
-                    innerResult.setAlarmStatus(e.getAlarmCategory() == 1?"故障报警":"监测报警");
+                    innerResult.setAlarmStatus(e.getAlarmCategory());
                 }
             });
-            // todo 播放时长未知 默认为 0
-            innerResult.setShowDurationValue(0);
-
-            for (TblItemParameter p : itemNestedParameterVO.getParameterList()) {
-                if ("State".equals(p.getParameterType())) {
-                    innerResult.setRunParameterCode(p.getCode());
-                    innerResult.setRunValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
-                }
-                if ("OnlineStatus".equals(p.getParameterType())) {
-                    innerResult.setOnlineParameterCode(p.getCode());
-                    innerResult.setOnlineValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
-                }
-                if ("Capacity".equals(p.getParameterType())) {
-                    innerResult.setCapacityParameterCode(p.getCode());
-                    innerResult.setCapacityValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
-                }
-                if ("Luminance".equals(p.getParameterType())) {
-                    innerResult.setLuminanceParameterCode(p.getCode());
-                    innerResult.setLuminanceValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
-                }
-                if ("Volume".equals(p.getParameterType())) {
-                    innerResult.setVolumeParameterCode(p.getCode());
-                    innerResult.setVolumeValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
-                }
-                if ("StorageStatus".equals(p.getParameterType())) {
-                    innerResult.setStorageStatusParameterCode(p.getCode());
-                    innerResult.setStorageStatusValue(p.getValue() + (p.getUnit() == null ? "" : p.getUnit()));
-                }
-            }
+            this.convertToItemInfoOfLargeScreenDTO(innerResult,itemNestedParameterVO.getParameterList());
             resultList.add(innerResult);
         }
         pageInfoVO.setList(resultList);
         return pageInfoVO;
+    }
+
+    public void convertToItemInfoOfLargeScreenDTO(ItemInfoOfLargeScreenDTO innerResult ,List<TblItemParameter> parameterList){
+        List<ParameterInfoDTO> parameterInnerList = new ArrayList<>();
+        for (TblItemParameter parameter : parameterList) {
+            // 容量百分比
+            if (ParameterConstant.INFO_PUBLISH_RUN_STATUS.equals(parameter.getParameterType())) {
+                innerResult.setRunParameterCode(parameter.getCode());
+                innerResult.setRunValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 在线状态
+            if (ParameterConstant.INFO_PUBLISH_ONLINE_STATUS.equals(parameter.getParameterType())) {
+                innerResult.setOnlineParameterCode(parameter.getCode());
+                innerResult.setOnlineValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 亮度
+            if (ParameterConstant.INFO_PUBLISH_LUMINANCE.equals(parameter.getParameterType())) {
+                innerResult.setLuminanceParameterCode(parameter.getCode());
+                innerResult.setLuminanceValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 音量
+            if (ParameterConstant.INFO_PUBLISH_VOLUME.equals(parameter.getParameterType())) {
+                innerResult.setVolumeParameterCode(parameter.getCode());
+                innerResult.setVolumeValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 放映时长
+            if (ParameterConstant.INFO_PUBLISH_RUN_TIME.equals(parameter.getParameterType())) {
+                innerResult.setShowDurationParameterCode(parameter.getCode());
+                innerResult.setShowDurationValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 总容量
+            if (ParameterConstant.INFO_PUBLISH_CAPACITY.equals(parameter.getParameterType())) {
+                innerResult.setCapacityParameterCode(parameter.getCode());
+                innerResult.setCapacityValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 已使用容量和所占百分比
+            if (ParameterConstant.INFO_PUBLISH_STORED_CAPACITY.equals(parameter.getParameterType())) {
+                innerResult.setStorageStatusParameterCode(parameter.getCode());
+                innerResult.setStorageStatusValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+        }
+        innerResult.setParameterList(parameterInnerList);
     }
 
     /**
@@ -170,11 +185,12 @@ public class InfoPublishServiceImpl implements InfoPublishService {
                 if(e.getCode().equals(largeScreen.getItemCode())){
                     if(null != e.getViewLongitude()){
                         largeScreen.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                    if(null != e.getViewLatitude()){
                         largeScreen.setCenter(Arrays.stream(e.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
                     }
                 }
             });
-
             largeScreen.setAreaName(this.getAreaNameByAreaCode(largeScreen.getAreaCode()));
             largeScreen.setStayTime(getTimeGap(largeScreen.getAlarmTime(),LocalDateTime.now()));
             // todo 对接高博医院自身的信息发布系统后再写 largeScreen.setPublishContent();
@@ -194,7 +210,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Override
     @Transactional
     public Boolean remoteSwitch(String sysCode, String itemCodes) {
-        if( itemAPI.negateBooleanParameter(itemCodes,ParameterConstant.ON_OFF_STATUS).getData()){
+        if( itemAPI.negateBooleanParameter(itemCodes,ParameterConstant.INFO_PUBLISH_RUN_STATUS).getData()){
             redisOperationService.remoteSwitchItemStatusByItemCodeList(Arrays.stream(itemCodes.split(",")).collect(Collectors.toList()));
         }
         return true;
@@ -258,6 +274,38 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             }
         }
         return resultList;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/30
+     * @Param sysCode: 子系统编码
+     * @Param itemCode: 设备编码
+     * @return: com.thtf.environment.dto.InfoPublishPointDTO
+     */
+    @Override
+    public ItemInfoOfLargeScreenDTO getMonitorPoint(String sysCode, String itemCode) {
+        List<ItemNestedParameterVO> itemNestedParameterVOList = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode, Collections.singletonList(itemCode)).getData();
+        if(null == itemNestedParameterVOList || itemNestedParameterVOList.size()<1){
+            return null;
+        }
+        ItemNestedParameterVO itemNestedParameterVO = itemNestedParameterVOList.get(0);
+        ItemInfoOfLargeScreenDTO innerResult = new ItemInfoOfLargeScreenDTO();
+        innerResult.setItemId(itemNestedParameterVO.getId());
+        innerResult.setItemCode(itemNestedParameterVO.getCode());
+        innerResult.setItemName(itemNestedParameterVO.getName());
+        innerResult.setAreaCode(itemNestedParameterVO.getAreaCode());
+        innerResult.setAreaName(itemNestedParameterVO.getAreaName());
+        innerResult.setBuildingCode(itemNestedParameterVO.getBuildingCode());
+        if(null != itemNestedParameterVO.getViewLongitude()){
+            innerResult.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+        }
+        if(null != itemNestedParameterVO.getViewLatitude()){
+            innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+        }
+        this.convertToItemInfoOfLargeScreenDTO(innerResult,itemNestedParameterVO.getParameterList());
+        return innerResult;
     }
 
     /* *************************** 复用代码区域 开始 ************************** */

@@ -72,4 +72,14 @@ public interface BroadcastService {
      * @Return: java.lang.Boolean
      */
     Boolean publishContent(BroadcastContentInsertDTO param);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode:
+     * @Param itemCodes:
+     * @return: com.thtf.environment.dto.ItemInfoOfLargeScreenDTO
+     */
+    ItemInfoOfBroadcastDTO getMonitorPoint(String sysCode, String itemCodes);
 }

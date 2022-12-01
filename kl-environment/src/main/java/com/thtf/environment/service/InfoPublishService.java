@@ -1,5 +1,6 @@
 package com.thtf.environment.service;
 
+import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 
@@ -67,4 +68,14 @@ public interface InfoPublishService {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.ItemPlayInfoDTO>>
      */
     List<ItemPlayInfoDTO> listLargeScreenContent(String sysCode, String buildingCodes, String areaCode, String itemCodes);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/11/30
+     * @Param sysCode:
+     * @Param itemCodes:
+     * @return: com.thtf.environment.dto.InfoPublishPointDTO
+     */
+    ItemInfoOfLargeScreenDTO getMonitorPoint(String sysCode, String itemCode);
 }

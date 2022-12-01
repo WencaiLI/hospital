@@ -7,6 +7,7 @@ import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.InfoPublishService;
@@ -27,8 +28,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/info_publish")
 @Slf4j
+// todo 信息发布需要对接高博医院的信息发布的系统，做对发布信息的统计
 public class InfoPublishController {
-    // todo 信息发布需要对接高博医院的信息发布的系统，做对发布信息的统计
     @Autowired
     private InfoPublishService infoPublishService;
     @Resource
@@ -73,6 +74,21 @@ public class InfoPublishController {
         return itemAPI.countInfoPublicItemStatus(sysCode,areaCode,itemTypeCodes);
     }
 
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode:
+     * @Param itemCodes:
+     * @return: com.thtf.common.response.JsonResult
+     */
+    @GetMapping("/monitor_point_info")
+    public JsonResult<ItemInfoOfLargeScreenDTO> getMonitorPoint(@RequestParam("sysCode") String sysCode,
+                                                                @RequestParam("itemCode") String itemCodes){
+        return JsonResult.querySuccess(infoPublishService.getMonitorPoint(sysCode,itemCodes));
+
+    }
     /**
      * @Author: liwencai
      * @Description: 查询大屏信息
@@ -102,7 +118,7 @@ public class InfoPublishController {
             }
         }
         if(StringUtils.isNotBlank(runValue)){
-            map.put(ParameterConstant.ON_OFF_STATUS,runValue);
+            map.put(ParameterConstant.INFO_PUBLISH_RUN_STATUS,runValue);
         }
         if(StringUtils.isNotBlank(keyword)){
             map.put("keyword",keyword);
