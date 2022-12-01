@@ -7,6 +7,7 @@ import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.InfoPublishService;
@@ -74,9 +75,17 @@ public class InfoPublishController {
     }
 
 
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode:
+     * @Param itemCodes:
+     * @return: com.thtf.common.response.JsonResult
+     */
     @GetMapping("/monitor_point_info")
-    public JsonResult getMonitorPoint(@RequestParam("sysCode") String sysCode,
-                                      @RequestParam("itemCode") String itemCodes){
+    public JsonResult<ItemInfoOfLargeScreenDTO> getMonitorPoint(@RequestParam("sysCode") String sysCode,
+                                                                @RequestParam("itemCode") String itemCodes){
         return JsonResult.querySuccess(infoPublishService.getMonitorPoint(sysCode,itemCodes));
 
     }
@@ -109,7 +118,7 @@ public class InfoPublishController {
             }
         }
         if(StringUtils.isNotBlank(runValue)){
-            map.put(ParameterConstant.ON_OFF_STATUS,runValue);
+            map.put(ParameterConstant.INFO_PUBLISH_RUN_STATUS,runValue);
         }
         if(StringUtils.isNotBlank(keyword)){
             map.put("keyword",keyword);

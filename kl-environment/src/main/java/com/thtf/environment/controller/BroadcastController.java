@@ -44,61 +44,61 @@ public class BroadcastController {
     private AdminAPI adminAPI;
 
 
-    /**
-     * @Author: liwencai
-     * @Description: 获取楼层信息
-     * @Date: 2022/9/22
-     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
-     */
-    @GetMapping("/getFloorInfo")
-    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode,
-                                                          @RequestParam(value = "sysCode",required = false) String systemCode){
-        try {
-            return adminAPI.getFloorInfo(buildingCode,systemCode);
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return JsonResult.error("服务器错误");
-        }
-    }
+//    /**
+//     * @Author: liwencai
+//     * @Description: 获取楼层信息
+//     * @Date: 2022/9/22
+//     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
+//     */
+//    @GetMapping("/getFloorInfo")
+//    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode,
+//                                                          @RequestParam(value = "sysCode",required = false) String systemCode){
+//        try {
+//            return adminAPI.getFloorInfo(buildingCode,systemCode);
+//        }catch (Exception e){
+//            log.error(e.getMessage());
+//            return JsonResult.error("服务器错误");
+//        }
+//    }
 
-    /**
-     * @Author: liwencai
-     * @Description: 获取当前最新报警（当日）
-     * @Date: 2022/10/7
-     * @Param sysCode:
-     * @Param pageNumber:
-     * @Param pageSize:
-     * @return: com.thtf.common.response.JsonResult
-     */
-    @GetMapping(value = "/getAlarmUnhandledToday")
-    public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
-                                          @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                          @RequestParam(value = "pageSize",required = false) Integer pageSize){
-
-        try {
-            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return JsonResult.error("服务器错误");
-        }
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description: 报警处置
-     * @Date: 2022/9/2
-     * @Param param:
-     * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
-     */
-    @PutMapping(value = "/disposalAlarm")
-    public JsonResult<Boolean> alarmDisposal(@RequestBody TblAlarmRecord param){
-        try {
-            alarmAPI.handleAlarm(param);
-            return JsonResult.success();
-        }catch (Exception e){
-            return JsonResult.error("操作失败");
-        }
-    }
+//    /**
+//     * @Author: liwencai
+//     * @Description: 获取当前最新报警（当日）
+//     * @Date: 2022/10/7
+//     * @Param sysCode:
+//     * @Param pageNumber:
+//     * @Param pageSize:
+//     * @return: com.thtf.common.response.JsonResult
+//     */
+//    @GetMapping(value = "/getAlarmUnhandledToday")
+//    public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
+//                                          @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+//                                          @RequestParam(value = "pageSize",required = false) Integer pageSize){
+//
+//        try {
+//            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
+//        }catch (Exception e){
+//            log.error(e.getMessage());
+//            return JsonResult.error("服务器错误");
+//        }
+//    }
+//
+//    /**
+//     * @Author: liwencai
+//     * @Description: 报警处置
+//     * @Date: 2022/9/2
+//     * @Param param:
+//     * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
+//     */
+//    @PutMapping(value = "/disposalAlarm")
+//    public JsonResult<Boolean> alarmDisposal(@RequestBody TblAlarmRecord param){
+//        try {
+//            alarmAPI.handleAlarm(param);
+//            return JsonResult.success();
+//        }catch (Exception e){
+//            return JsonResult.error("操作失败");
+//        }
+//    }
 
     /**
      * @Author: liwencai
@@ -126,6 +126,22 @@ public class BroadcastController {
     JsonResult<List<KeyValueDTO>> controlInfo(@RequestParam(value ="sysCode")String sysCode){
         return JsonResult.querySuccess(broadcastService.controlInfo(sysCode));
     }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode:
+     * @Param itemCodes:
+     * @return: com.thtf.common.response.JsonResult
+     */
+    @GetMapping("/monitor_point_info")
+    public JsonResult<ItemInfoOfBroadcastDTO> getMonitorPoint(@RequestParam("sysCode") String sysCode,
+                                                                @RequestParam("itemCode") String itemCodes){
+        return JsonResult.querySuccess(broadcastService.getMonitorPoint(sysCode,itemCodes));
+
+    }
+
 
     /**
      * @Author: liwencai

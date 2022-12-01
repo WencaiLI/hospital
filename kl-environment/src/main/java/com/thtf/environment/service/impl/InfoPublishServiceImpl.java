@@ -70,9 +70,9 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         String parameterCode = null;
         String parameterValue = null;
         // 运行状态筛选
-        if(null != paramMap.get(ParameterConstant.ON_OFF_STATUS)){
-            parameterCode = ParameterConstant.ON_OFF_STATUS;
-            parameterValue = (String) paramMap.get(ParameterConstant.ON_OFF_STATUS);
+        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS)){
+            parameterCode = ParameterConstant.INFO_PUBLISH_RUN_STATUS;
+            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS);
         }
         // 查询所有设备信息
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
@@ -210,7 +210,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Override
     @Transactional
     public Boolean remoteSwitch(String sysCode, String itemCodes) {
-        if( itemAPI.negateBooleanParameter(itemCodes,ParameterConstant.ON_OFF_STATUS).getData()){
+        if( itemAPI.negateBooleanParameter(itemCodes,ParameterConstant.INFO_PUBLISH_RUN_STATUS).getData()){
             redisOperationService.remoteSwitchItemStatusByItemCodeList(Arrays.stream(itemCodes.split(",")).collect(Collectors.toList()));
         }
         return true;
