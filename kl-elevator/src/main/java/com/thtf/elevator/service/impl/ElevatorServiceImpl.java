@@ -117,13 +117,9 @@ public class ElevatorServiceImpl implements ElevatorService {
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
         tblItemType.setSysCode(sysCode);
+        tblItemType.setIsLeaf(ItemTypeConstant.IS_LEAF);
         // 父类为itemType的设备类别
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
-        // 移除父类
-        if(null == itemTypeList || itemTypeList.size() == 0){
-            return null;
-        }
-        itemTypeList.removeIf(e->("item".equals(e.getParentCode()) || StringUtils.isBlank(e.getParentCode())));
         // 根据类别查询所有的信息
         for (TblItemType itemType : itemTypeList) {
             DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
