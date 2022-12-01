@@ -3,6 +3,7 @@ package com.thtf.elevator.service.impl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.dto.itemserver.CountItemByParameterListDTO;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
@@ -14,7 +15,8 @@ import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.elevator.common.enums.ParameterConstant;
+import com.thtf.elevator.common.constant.ItemTypeConstant;
+import com.thtf.elevator.common.constant.ParameterConstant;
 import com.thtf.elevator.dto.*;
 import com.thtf.elevator.dto.convert.FloorConverter;
 import com.thtf.elevator.dto.convert.ItemConverter;
@@ -23,8 +25,6 @@ import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorService;
 import com.thtf.elevator.vo.PageInfoVO;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
-import org.docx4j.wml.Tbl;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -73,6 +73,34 @@ public class ElevatorServiceImpl implements ElevatorService {
     public List<FloorInfoDTO> getFloorInfo(String buildingCode,String systemCode){
         List<TblBuildingArea> resourceList = adminAPI.getFloorInfo(buildingCode,systemCode).getData();
         return floorConverter.toFloorList(resourceList);
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode:
+     * @return: java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>
+     */
+    @Override
+    public List<CodeAndNameDTO> getItemType(String sysCode) {
+        List<CodeAndNameDTO> result;
+        TblItemType tblItemType = new TblItemType();
+        tblItemType.setSysCode(sysCode);
+        tblItemType.setIsLeaf(ItemTypeConstant.IS_LEAF);
+        List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
+        if(null == itemTypeList || itemTypeList.size() == 0){
+            return null;
+        }
+        result = new ArrayList<>();
+        System.out.println(itemTypeList);
+        for (TblItemType itemType : itemTypeList) {
+            CodeAndNameDTO codeAndNameDTO = new CodeAndNameDTO();
+            codeAndNameDTO.setCode(itemType.getCode());
+            codeAndNameDTO.setName(itemType.getName());
+            result.add(codeAndNameDTO);
+        }
+        return result;
     }
 
     /**

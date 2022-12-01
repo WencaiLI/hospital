@@ -1,4 +1,4 @@
-package com.thtf.elevator.common.enums;
+package com.thtf.elevator.common.constant;
 
 /**
  * @Author: liwencai

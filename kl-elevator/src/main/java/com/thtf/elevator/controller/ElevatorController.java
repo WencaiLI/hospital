@@ -1,6 +1,7 @@
 package com.thtf.elevator.controller;
 
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.feign.AlarmAPI;
@@ -157,6 +158,18 @@ public class ElevatorController {
                                                      @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
                                                      @RequestParam(value = "pageSize",required = false)Integer pageSize){
         return JsonResult.querySuccess(elevatorService.getAllElevatorPage(sysCode,itemTypeCode,pageNumber,pageSize));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode: 子系统编码
+     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>>
+     */
+    @GetMapping("/getItemType")
+    public JsonResult<List<CodeAndNameDTO>> getItemType(@RequestParam("sysCode")String sysCode){
+        return JsonResult.querySuccess(elevatorService.getItemType(sysCode));
     }
 
     /**

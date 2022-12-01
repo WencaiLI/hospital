@@ -1,6 +1,7 @@
 package com.thtf.elevator.service;
 
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
@@ -93,4 +94,13 @@ public interface ElevatorService {
      * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
      */
     List<FloorInfoDTO> getFloorInfo(String buildingCode,String sysCode);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2022/12/1
+     * @Param sysCode: 子系统编码
+     * @return: java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>
+     */
+    List<CodeAndNameDTO> getItemType(String sysCode);
 }
