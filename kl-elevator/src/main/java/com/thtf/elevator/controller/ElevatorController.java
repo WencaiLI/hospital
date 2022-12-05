@@ -2,19 +2,15 @@ package com.thtf.elevator.controller;
 
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.CodeAndNameDTO;
-import com.thtf.common.entity.alarmserver.TblAlarmRecord;
 import com.thtf.common.entity.itemserver.TblItem;
-import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
-import com.thtf.elevator.dto.FloorInfoDTO;
 import com.thtf.elevator.dto.ItemFaultStatisticsDTO;
 import com.thtf.elevator.service.ElevatorService;
 import com.thtf.elevator.vo.PageInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
