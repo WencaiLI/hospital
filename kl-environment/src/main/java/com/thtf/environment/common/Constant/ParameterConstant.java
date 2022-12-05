@@ -110,4 +110,21 @@ public class ParameterConstant {
      * 放映时长
      */
     public final static String INFO_PUBLISH_RUN_TIME = "RunTime";
+
+
+    /* 环境监测接口修改 */
+    /**
+     * 在线状态
+     */
+    public final static String ENV_MONITOR_ONLINE = "OnlineStatus";
+
+    /**
+     * 报警
+     */
+    public final static String ENV_MONITOR_ALARM = "Alarm";
+
+    /**
+     * 故障
+     */
+    public final static String ENV_MONITOR_FAULT = "Fault";
 }

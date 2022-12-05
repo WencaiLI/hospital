@@ -125,8 +125,17 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Description:
      * @Date: 2022/11/23
      * @Param sysCode:
- * @Param itemTypeCode:
+     * @Param itemTypeCode:
      * @return: java.util.List<com.thtf.environment.vo.ItemCodeAndNameAndTypeVO>
      */
     List<ItemCodeAndNameAndTypeVO> listItemCodeAndTypeCodeByTypeCode(String sysCode, String itemTypeCode);
+
+    /**
+     * @Author: liwencai
+     * @Description: 监测点位信息
+     * @Date: 2022/12/5
+     * @Param itemCode: 设备编码
+     * @Return: java.lang.Object
+     */
+    Object getMonitorPointInfo(String itemCode);
 }

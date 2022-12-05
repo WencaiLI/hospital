@@ -61,7 +61,7 @@ public class ParameterConstant {
     /**
      * 故障状态
      */
-    public static final String ELEVATOR_FAULT = "FAULT";
+    public static final String ELEVATOR_FAULT = "Fault";
 
     /**
      * 直梯运行状态编码

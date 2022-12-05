@@ -28,9 +28,6 @@ public class EnvMonitorController {
     @Autowired
     private EnvMonitorService envMonitorService;
 
-    @Autowired
-    private ItemAPI itemAPI;
-
     /**
      * @Author: liwencai
      * @Description: 获取同类别的设备信息
@@ -45,9 +42,17 @@ public class EnvMonitorController {
         return JsonResult.querySuccess(envMonitorService.listItemCodeAndTypeCodeByTypeCode(sysCode,itemTypeCode));
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 监测点位信息
+     * @Date: 2022/12/5
+     * @Param itemCode: 设备编码
+     * @Return: com.thtf.common.response.JsonResult
+     */
     @PostMapping("/monitor_point_info")
     public JsonResult monitor_point_info(@RequestParam("itemCode") String itemCode){
-        return itemAPI.getMonitorPointInfo(itemCode);
+        return JsonResult.querySuccess(envMonitorService.getMonitorPointInfo(itemCode));
+
     }
 
     /**
@@ -139,24 +144,14 @@ public class EnvMonitorController {
         return JsonResult.querySuccess(envMonitorService.listGroupedItemAlarmInfo(sysCode,groupName,areaName,keyword,pageNumber,pageSize));
     }
 
-//    /**
-//     * @Author: liwencai
-//     * @Description: 获取设备参数信息
-//     * @Date: 2022/10/25
-//     * @Param: itemCode:
-//     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.ItemParameterInfoVO>
-//     */
-//    @GetMapping("/parameter")
-//    JsonResult<List<ItemParameterInfoVO>> listParameter(@RequestParam("itemCode") String itemCode){
-//        return JsonResult.querySuccess(envMonitorService.listParameter(itemCode));
-//    }
-
     /**
      * @Author: liwencai
      * @Description: 获取小时度历史数据（天）
      * @Date: 2022/10/25
-     * @Param: parameterTypeCode: 参数类别编码
-     * @Param: date: yyyy-MM-dd 格式的日期
+     * @Param parameterCode: 设备参数编码
+     * @Param itemCode: 设备编码
+     * @Param itemTypeCode: 设备类别编码
+     * @Param date: 日期
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EChartsVO>
      */
     @PostMapping("/history_moment_hourly")

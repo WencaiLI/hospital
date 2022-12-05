@@ -28,6 +28,10 @@ public class EnvMonitorItemResultVO {
      */
     private String itemName;
 
+    private String itemTypeCode;
+
+    private String itemTypeName;
+
     /**
      * 区域编程
      */
