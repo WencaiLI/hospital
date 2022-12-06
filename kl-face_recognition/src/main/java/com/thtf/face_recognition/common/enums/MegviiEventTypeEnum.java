@@ -1,4 +1,4 @@
-package com.thtf.face_recognition.common;
+package com.thtf.face_recognition.common.enums;
 
 /**
  * @Author: liwencai

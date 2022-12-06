@@ -25,7 +25,7 @@ public class FaceRecognitionController {
 
 
     @Autowired
-    @Qualifier("Megvii") // 旷世人脸识别接口实现
+    @Qualifier("Megvii")
     private ManufacturerApiService manufacturerApiService;
 
 

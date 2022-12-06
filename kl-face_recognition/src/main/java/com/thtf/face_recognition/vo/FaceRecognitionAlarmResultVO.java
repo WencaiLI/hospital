@@ -1,7 +1,12 @@
 package com.thtf.face_recognition.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -15,7 +20,8 @@ public class FaceRecognitionAlarmResultVO {
     /**
      * 设备id
      */
-    private String itemId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long itemId;
 
     /**
      * 设备编码
@@ -47,7 +53,9 @@ public class FaceRecognitionAlarmResultVO {
      */
     private String alarmType;
 
-    private String alarmTime;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime alarmTime;
 
     private String stayTime;
 
