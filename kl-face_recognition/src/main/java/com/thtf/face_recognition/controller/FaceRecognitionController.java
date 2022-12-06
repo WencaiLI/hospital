@@ -1,6 +1,7 @@
 package com.thtf.face_recognition.controller;
 
 import com.thtf.common.response.JsonResult;
+import com.thtf.face_recognition.dto.DisplayParamDTO;
 import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.service.ManufacturerApiService;
 import com.thtf.face_recognition.vo.*;
@@ -35,9 +36,9 @@ public class FaceRecognitionController {
      * @Param: sysCode: 子系统编码
      * @Return: com.thtf.common.response.JsonResult<com.thtf.face_recognition.vo.FaceRecognitionDisplayVO>
      */
-    @GetMapping("/display")
-    public JsonResult<FaceRecognitionDisplayVO> getDisplayInfo(@RequestParam("sysCode")String sysCode){
-        return JsonResult.querySuccess(faceRecognitionService.getDisplayInfo(sysCode));
+    @PostMapping("/display")
+    public JsonResult<FaceRecognitionDisplayVO> getDisplayInfo(@RequestBody DisplayParamDTO displayParamDTO){
+        return JsonResult.querySuccess(faceRecognitionService.getDisplayInfo(displayParamDTO));
     }
 
     /**

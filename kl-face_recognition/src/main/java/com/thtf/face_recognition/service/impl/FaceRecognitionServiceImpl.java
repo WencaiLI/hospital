@@ -1,11 +1,11 @@
 package com.thtf.face_recognition.service.impl;
 
 import com.github.pagehelper.PageInfo;
-import com.thtf.common.dto.itemserver.ListItemByKeywordPageParamDTO;
-import com.thtf.common.dto.itemserver.ListItemByKeywordPageResultDTO;
-import com.thtf.common.dto.itemserver.ListVideoItemParamDTO;
-import com.thtf.common.dto.itemserver.ListVideoItemResultDTO;
+import com.thtf.common.dto.itemserver.*;
+import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.face_recognition.common.constant.ParameterConstant;
+import com.thtf.face_recognition.dto.DisplayParamDTO;
 import com.thtf.face_recognition.dto.mapstruct.PageInfoConvert;
 import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.vo.*;
@@ -40,8 +40,46 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
 
 
     @Override
-    public FaceRecognitionDisplayVO getDisplayInfo(String sysCode) {
-        return null;
+    public FaceRecognitionDisplayVO getDisplayInfo(DisplayParamDTO displayParamDTO) {
+        FaceRecognitionDisplayVO result = new FaceRecognitionDisplayVO();
+
+        List<String> buildingCodeList = null;
+        String areaCode = null;
+        CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
+        countItemByParameterListDTO.setSysCode(displayParamDTO.getSysCode());
+        if(StringUtils.isNotBlank(displayParamDTO.getBuildingCodes())){
+            buildingCodeList = Arrays.asList(displayParamDTO.getBuildingCodes().split(","));
+            countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
+        }else {
+            if(StringUtils.isNotBlank(displayParamDTO.getAreaCode())){
+                areaCode = displayParamDTO.getAreaCode();
+                countItemByParameterListDTO.setAreaCode(displayParamDTO.getAreaCode());
+            }
+
+        }
+        // 查询在线数量
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
+        countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_ONLINE_VALUE);
+        Integer onlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
+        // 离线数量
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
+        countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_OFFLINE_VALUE);
+        Integer offlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
+        // 报警数量
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ALARM);
+        countItemByParameterListDTO.setParameterValue("1");
+        Integer alarmCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
+        // 设备总数
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(displayParamDTO.getSysCode());
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCode(areaCode);
+        Integer allItemCount = itemAPI.queryAllItemsCount(tblItem).getData();
+        result.setItemNum(allItemCount);
+        result.setAlarmNum(alarmCount);
+        result.setOnlineNum(onlineCount);
+        result.setOfflineNum(offlineCount);
+        return result;
     }
 
     @Override
@@ -73,6 +111,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
             result.setItemName(e.getName());
             result.setItemTypeName(e.getItemTypeName());
             result.setItemDescription(e.getDescription());
+            // 模型视角信息
             if(StringUtils.isNotBlank(e.getViewLongitude())){
                 result.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }

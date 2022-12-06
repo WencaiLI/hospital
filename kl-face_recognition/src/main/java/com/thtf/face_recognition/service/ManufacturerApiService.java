@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @Author: liwencai
  * @Date: 2022/11/13 17:55
- * @Description:
+ * @Description: 制造商服务接口
  */
 public interface ManufacturerApiService {
 

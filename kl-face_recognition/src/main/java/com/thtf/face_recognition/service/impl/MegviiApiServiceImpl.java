@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @Author: liwencai
  * @Date: 2022/11/13 17:57
- * @Description: 人脸识别API（盘古2.0）,旷世科技接口实现
+ * @Description: 制造商：旷世科技 人脸识别API（盘古2.0）
  */
 @Service("Megvii")
 public class MegviiApiServiceImpl implements ManufacturerApiService {
@@ -21,6 +21,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
 
     @Override
     public List<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO) {
+
         return null;
     }
 
