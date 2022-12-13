@@ -42,6 +42,7 @@
         <websocket.version>1.3.7</websocket.version>
         <antlr4-runtime.version>4.7.2</antlr4-runtime.version>
         <commons-langs.version>3.11</commons-langs.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <apollo-client.version>1.7.0</apollo-client.version>
         <ibs.version>1.0-SNAPSHOT</ibs.version>
         <zxing.version>3.3.3</zxing.version>
@@ -259,6 +260,12 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>${jjwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

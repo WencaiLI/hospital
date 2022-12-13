@@ -26,7 +26,7 @@ public class FaceRecognitionItemResultVO {
     /**
      * 设备描述
      */
-    private String itemDescription;
+    private String description;
 
     /**
      * 设备类别
@@ -41,7 +41,7 @@ public class FaceRecognitionItemResultVO {
     /**
      * 在线状态参数值
      */
-    private String onlineParameterValue;
+    private String onlineValue;
 
     /* ******** 摄像机相关信息 ******** */
 
@@ -63,7 +63,12 @@ public class FaceRecognitionItemResultVO {
     /**
      * 方位
      */
-    private String position;
+    private String positionParameterCode;
+
+    /**
+     * 方位值
+     */
+    private String positionValue;
 
     /**
      * 通道号
