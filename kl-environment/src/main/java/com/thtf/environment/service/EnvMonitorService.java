@@ -3,6 +3,7 @@ package com.thtf.environment.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ParameterInfoDTO;
+import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.vo.*;
@@ -137,5 +138,5 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param itemCode: 设备编码
      * @Return: java.lang.Object
      */
-    Object getMonitorPointInfo(String itemCode);
+    EnvItemMonitorDTO getMonitorPointInfo(String itemCode);
 }
