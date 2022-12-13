@@ -17,6 +17,7 @@ import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
 
 import com.thtf.environment.config.ParameterConfigNacos;
+import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.dto.TimeValueDTO;
 import com.thtf.environment.dto.convert.ItemTypeConvert;
@@ -28,6 +29,7 @@ import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.api.hint.HintManager;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -763,11 +765,47 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @Return: java.lang.Object
      */
     @Override
-    public Object getMonitorPointInfo(String itemCode) {
-        ItemMonitorPointInfoDTO monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode).getData();
+    public EnvItemMonitorDTO getMonitorPointInfo(String itemCode) {
+//         ItemMonitorPointInfoDTO monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode).getData();
 //        TblAlarmRecordUnhandle data = alarmAPI.getAlarmInfoByItemCodeLimitOne(itemCode).getData();
 //        monitorPointInfo.setA
-        return monitorPointInfo;
+        EnvItemMonitorDTO result = new EnvItemMonitorDTO();
+        ListItemNestedParametersParamDTO listItemNestedParametersParamDTO = new ListItemNestedParametersParamDTO();
+        listItemNestedParametersParamDTO.setItemCodeList(Collections.singletonList(itemCode));
+
+        List<String> parameterCodeList = new ArrayList<>();
+        parameterCodeList.add(ParameterConstant.ENV_MONITOR_ONLINE);
+        parameterCodeList.add(ParameterConstant.ENV_MONITOR_ALARM);
+        listItemNestedParametersParamDTO.setParameterTypeCodeList(parameterCodeList);
+        List<ListItemNestedParametersResultDTO> data = itemAPI.listItemNestedParameters(listItemNestedParametersParamDTO).getData();
+
+        if(null != data && data.size() == 1){
+            ListItemNestedParametersResultDTO listItemNestedParametersResultDTO = data.get(0);
+            BeanUtils.copyProperties(listItemNestedParametersResultDTO,result);
+            // 填写eye和center
+            if(null != listItemNestedParametersResultDTO.getEye()){
+                result.setEye(listItemNestedParametersResultDTO.getEye());
+            }
+            if(null != listItemNestedParametersResultDTO.getCenter()){
+                result.setCenter(listItemNestedParametersResultDTO.getCenter());
+            }
+            List<TblItemParameter> resultParameterList = new ArrayList<>();
+            List<TblItemParameter> parameterList = listItemNestedParametersResultDTO.getParameterList();
+            parameterList.forEach(e->{
+                if(ParameterConstant.ENV_MONITOR_ALARM.equals(e.getParameterType())){
+                    result.setAlarmParameterCode(e.getCode());
+                    result.setAlarmParameterValue(e.getValue());
+                    resultParameterList.add(e);
+                }
+                if(ParameterConstant.ENV_MONITOR_ONLINE.equals(e.getParameterType())){
+                    result.setOnlineParameterCode(e.getCode());
+                    result.setOnlineParameterValue(e.getValue());
+                    resultParameterList.add(e);
+                }
+            });
+            result.setParameterList(resultParameterList);
+        }
+        return result;
     }
 
 //    /**
