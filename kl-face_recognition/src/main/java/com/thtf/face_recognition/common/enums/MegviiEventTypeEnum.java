@@ -147,7 +147,7 @@ public enum MegviiEventTypeEnum {
      * @Param eventTypeId:
      * @Return: java.lang.String
      */
-    public static String getMegviiEventTypeDescByTypeId(String eventTypeId){
+    public static String getMegviiEventTypeDescByTypeId(Long eventTypeId){
         for (MegviiEventTypeEnum envMonitorItemLiveParameterEnum : MegviiEventTypeEnum.values()) {
             if(envMonitorItemLiveParameterEnum.getId().equals(eventTypeId)){
                 return envMonitorItemLiveParameterEnum.getDesc();

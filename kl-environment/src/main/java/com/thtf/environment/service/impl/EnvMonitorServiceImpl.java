@@ -764,10 +764,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public Object getMonitorPointInfo(String itemCode) {
-        JsonResult<ItemMonitorPointInfoDTO> monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode);
-        TblAlarmRecordUnhandle data = alarmAPI.getAlarmInfoByItemCodeLimitOne(itemCode).getData();
-
-        return null;
+        ItemMonitorPointInfoDTO monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode).getData();
+//        TblAlarmRecordUnhandle data = alarmAPI.getAlarmInfoByItemCodeLimitOne(itemCode).getData();
+//        monitorPointInfo.setA
+        return monitorPointInfo;
     }
 
 //    /**

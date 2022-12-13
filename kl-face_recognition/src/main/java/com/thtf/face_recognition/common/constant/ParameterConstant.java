@@ -28,4 +28,9 @@ public class ParameterConstant {
      * 报警状态编码
      */
     public static final String FACE_RECOGNITION_ALARM = "Alarm";
+
+    /**
+     * 方位
+     */
+    public static final String FACE_RECOGNITION_Position = "Position";
 }

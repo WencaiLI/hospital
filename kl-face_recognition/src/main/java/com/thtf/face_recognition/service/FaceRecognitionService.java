@@ -1,6 +1,7 @@
 package com.thtf.face_recognition.service;
 
 import com.thtf.face_recognition.dto.DisplayParamDTO;
+import com.thtf.face_recognition.dto.FaceRecognitionPointDTO;
 import com.thtf.face_recognition.vo.*;
 
 /**
@@ -13,6 +14,9 @@ public interface FaceRecognitionService {
     FaceRecognitionDisplayVO getDisplayInfo(DisplayParamDTO displayParamDTO);
 
     PageInfoVO listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO);
+
+    FaceRecognitionPointDTO getMonitorPointInfo(String itemCode);
+
 
 //    List<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO);
 }

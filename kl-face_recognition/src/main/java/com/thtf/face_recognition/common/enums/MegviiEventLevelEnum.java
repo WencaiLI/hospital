@@ -7,6 +7,7 @@ import lombok.Data;
  * @Date: 2022/12/7 00:17
  * @Description:
  */
+@SuppressWarnings("All")
 public enum  MegviiEventLevelEnum {
     LEVEL_ONE(1L,"高"),
     LEVEL_TWO(2L,"中"),

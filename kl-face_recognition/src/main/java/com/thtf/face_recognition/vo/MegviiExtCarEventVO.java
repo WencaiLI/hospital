@@ -5,10 +5,10 @@ import lombok.Data;
 /**
  * @Author: liwencai
  * @Date: 2022/12/6 22:22
- * @Description:
+ * @Description: 车辆事件
  */
 @Data
-public class MegviiExtVO {
+public class MegviiExtCarEventVO {
 
     /**
      * 车牌号

@@ -3,18 +3,29 @@ package com.thtf.face_recognition.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.ListItemByKeywordPageParamDTO;
 import com.thtf.common.dto.itemserver.ListItemByKeywordPageResultDTO;
+import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
+import com.thtf.common.entity.itemserver.TblItem;
+import com.thtf.common.entity.itemserver.TblVideoItem;
+import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
 import com.thtf.face_recognition.common.enums.MegviiEventLevelEnum;
+import com.thtf.face_recognition.common.enums.MegviiEventTypeEnum;
+import com.thtf.face_recognition.common.enums.MegviiPersonTypeEnum;
 import com.thtf.face_recognition.common.util.HttpUtil;
-import com.thtf.face_recognition.dto.MegviiListEventRecordParamDTO;
-import com.thtf.face_recognition.dto.MegviiListEventRecordResultDTO;
+import com.thtf.face_recognition.common.util.megvii.StringUtil;
+import com.thtf.face_recognition.dto.*;
 import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.service.ManufacturerApiService;
 import com.thtf.face_recognition.vo.FaceRecognitionAlarmParamVO;
 import com.thtf.face_recognition.vo.FaceRecognitionAlarmResultVO;
+import com.thtf.face_recognition.vo.FaceRecognitionFaultResultVO;
+import com.thtf.face_recognition.vo.MegviiUserInfoDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +52,9 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
     private ItemAPI itemAPI;
 
     @Autowired
+    private AlarmAPI alarmAPI;
+
+    @Autowired
     MegviiConfig megviiConfig;
 
 
@@ -59,7 +73,8 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
      * @Return: java.util.List<com.thtf.face_recognition.vo.FaceRecognitionAlarmResultVO>
      */
     @Override
-    public List<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO) {
+    public MegviiPage<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO) {
+        MegviiPage<FaceRecognitionAlarmResultVO> megviiPage = new MegviiPage<FaceRecognitionAlarmResultVO>();
         List<FaceRecognitionAlarmResultVO> resultVOList = new ArrayList<>();
 
         ListItemByKeywordPageParamDTO listItemByKeywordPageParamDTO = new ListItemByKeywordPageParamDTO();
@@ -88,14 +103,11 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         paramDTO.setEndTime(this.convertLocalDateTimeToTimeStamp(LocalDateTime.now()));
 
         List<MegviiListEventRecordResultDTO> megviiListEventRecordResultDTOS = null;
-        String uri = " /v1/api/event/record/list";
-        String jsonParam = JSON.toJSONString(paramDTO);
-        try {
-            String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
-            megviiListEventRecordResultDTOS =  JSONArray.parseArray(String.valueOf(this.convertToJsonList(jsonResult).get("list")), MegviiListEventRecordResultDTO.class);
-        }catch (Exception ignored){
-
-        }
+        Map<String, Object> map = listEventRecords(paramDTO);
+        megviiListEventRecordResultDTOS = (List<MegviiListEventRecordResultDTO>) map.get("list");
+        megviiPage.setPageNum(Integer.valueOf((String)map.get("pageNum")));
+        megviiPage.setPageSize(Integer.valueOf((String)map.get("pageSize")));
+        megviiPage.setTotal(Integer.valueOf((String)map.get("total")));
         if (null == megviiListEventRecordResultDTOS){
             return null;
         }
@@ -103,10 +115,137 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         for (MegviiListEventRecordResultDTO item : megviiListEventRecordResultDTOS) {
             resultVOList.add(convertToMegviiListEventRecordResultDTO(item,allItems));
         }
-
-        return resultVOList;
+        megviiPage.setList(resultVOList);
+        return megviiPage;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备故障信息
+     * @Date: 2022/12/7
+     * @Param paramVO:
+     * @Return: com.thtf.face_recognition.dto.MegviiPage<com.thtf.face_recognition.vo.FaceRecognitionAlarmResultVO>
+     */
+    @Override
+    public MegviiPage<FaceRecognitionFaultResultVO> listFaceRecognitionFault(FaceRecognitionAlarmParamVO paramVO) {
+        MegviiPage<FaceRecognitionFaultResultVO> result = new MegviiPage<>();
+
+        ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
+        listAlarmInfoLimitOneParamDTO.setSystemCode(paramVO.getSysCode());
+        // 故障
+        listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
+        listAlarmInfoLimitOneParamDTO.setPageSize(paramVO.getPageSize());
+        listAlarmInfoLimitOneParamDTO.setPageNumber(paramVO.getPageNumber());
+        PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+        result.setTotal(Long.valueOf(pageInfo.getTotal()).intValue());
+        result.setPageNum(pageInfo.getPageNum());
+        result.setPageSize(pageInfo.getPageSize());
+        List<FaceRecognitionFaultResultVO> resultList = new ArrayList<>();
+        //
+        List<String> itemCodeList = pageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+        TblItem tblItem = new TblItem();
+//        tblItem.setSystemCode(paramVO.getSysCode());
+//        tblItem.setBuildingCodeList(Arrays.asList(paramVO.getBuildingCodes().split(",")));
+        tblItem.setCodeList(itemCodeList);
+//        tblItem.setAreaCodeList(Arrays.asList(paramVO.getAreaCodes().split(",")));
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+
+        for (TblAlarmRecordUnhandle alarm :  pageInfo.getList()) {
+            FaceRecognitionFaultResultVO faceRecognitionFaultResultVO = new FaceRecognitionFaultResultVO();
+            faceRecognitionFaultResultVO.setItemCode(alarm.getItemCode());
+            faceRecognitionFaultResultVO.setItemName(alarm.getItemName());
+            faceRecognitionFaultResultVO.setAreaCode(alarm.getBuildingAreaCode());
+            faceRecognitionFaultResultVO.setAreaName(alarm.getBuildingAreaName());
+            faceRecognitionFaultResultVO.setAlarmLevel(alarm.getAlarmLevel());
+            faceRecognitionFaultResultVO.setStayTime(getTimeGap(alarm.getAlarmTime(),LocalDateTime.now()));
+            List<TblVideoItem> data = itemAPI.getVideoItemListByItemCode(faceRecognitionFaultResultVO.getItemCode()).getBody().getData();
+            faceRecognitionFaultResultVO.setIpAddress(data.get(0).getIp());
+            resultList.add(faceRecognitionFaultResultVO);
+            // 配置模型信息
+            itemList.forEach(e->{
+                if(e.getCode().equals(alarm.getItemCode())){
+                    if(StringUtils.isNotBlank(e.getViewLongitude())){
+                        faceRecognitionFaultResultVO.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                    if(StringUtils.isNotBlank(e.getViewLatitude())){
+                        faceRecognitionFaultResultVO.setCenter(Arrays.stream(e.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                }
+            });
+        }
+        result.setList(resultList);
+        return result;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public MegviiPage<MegviiItemEventDTO> listItemEventByItemCode(String itemCode, Integer pageNumber, Integer pageSize) {
+        MegviiPage<MegviiItemEventDTO> result = new MegviiPage<>();
+        List<MegviiItemEventDTO> resultList = new ArrayList<>();
+        MegviiListEventRecordParamDTO megviiListEventRecordParamDTO = new MegviiListEventRecordParamDTO();
+        megviiListEventRecordParamDTO.setDeviceUuids(Collections.singletonList(itemCode));
+        Map<String, Object> map = this.listEventRecords(megviiListEventRecordParamDTO);
+        if(map == null){
+            return null;
+        }else {
+            // 数据结果
+            List<MegviiListEventRecordResultDTO> megviiListEventRecordResults = (List<MegviiListEventRecordResultDTO>)map.get("list");
+            result.setPageSize((Integer) map.get("pageSize"));
+            result.setPageNum((Integer) map.get("pageNum"));
+            result.setTotal((Integer) map.get("total"));
+            for (MegviiListEventRecordResultDTO recordResult : megviiListEventRecordResults) {
+                //
+                String ext = recordResult.getExt();
+                JSONObject jsonObject = JSONObject.parseObject(ext);
+                String personInfo = jsonObject.getString("personInfo");
+                String plateNumber = jsonObject.getString("plateNumber");
+                String personName = jsonObject.getString("personName");
+                if(null != plateNumber && null != personName){
+                    MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
+                    innerResult.setPersonName(personName);
+                    /* 车辆相关的事件 */
+
+                }else if(null == plateNumber && null != personName){
+                    //通行记录
+                    MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
+                    innerResult.setPersonName(personName);
+                } else if (null != personInfo){
+                    /* 智能分析相关事件 */
+                    // 获取事件中的用户信息
+                    MegviiUserInfoDTO userInfo = getUserInfoByUUId(recordResult.getUuid());
+                    MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
+                    innerResult.setIdentifyNum(userInfo.getIdentifyNum());
+                    innerResult.setPersonImageUri(userInfo.getImageUri());
+                    if(userInfo.getVisitedName() != null){
+                        innerResult.setPersonName(userInfo.getName());
+                    }
+                    if(userInfo.getName() != null){
+                        innerResult.setPersonName(userInfo.getName());
+                    }
+                    innerResult.setPersonType(MegviiPersonTypeEnum.getMegviiPersonTypeEnumById(userInfo.getType()));
+                    innerResult.setPhone(userInfo.getPhone());
+                    innerResult.setCaptureImageUrl(recordResult.getCaptureImageUrl());
+                    innerResult.setEventType(MegviiEventTypeEnum.getMegviiEventTypeDescByTypeId(recordResult.getEventTypeId()));
+                    // innerResult.setEventArea();
+                    innerResult.setEventName(recordResult.getEventTypeName());
+                    // 设备区域 innerResult.setEventArea();
+                    innerResult.setEventTime(covertTimeStampToLocalDateTime(recordResult.getDealTime()));
+                    resultList.add(innerResult);
+                }else {
+                    continue;
+                }
+
+            }
+
+//            megviiListEventRecordResults.forEach(e->{
+//
+//            });
+        }
+        result.setList(resultList);
+        return result;
+    }
 
     /**
      * 将MegviiListEvent转换为EventRecordResultDTO
@@ -124,7 +263,6 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
                 result.setItemDescription(item.getDescription());
                 result.setAreaName(item.getAreaName());
                 result.setIpAddress("");
-
                 // 配置模型视角
                 if(StringUtils.isNotBlank(item.getViewLongitude())){
                     result.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
@@ -149,12 +287,51 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
      * @Param paramDTO:
      * @Return: java.util.List<com.thtf.face_recognition.dto.MegviiListEventRecordResultDTO>
      */
-    public List<MegviiListEventRecordResultDTO> listEventRecords(MegviiListEventRecordParamDTO paramDTO){
+    public Map<String, Object> listEventRecords(MegviiListEventRecordParamDTO paramDTO){
         String uri = " /v1/api/event/record/list";
         String jsonParam = JSON.toJSONString(paramDTO);
         try {
             String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
-            return JSONArray.parseArray(String.valueOf(this.convertToJsonList(jsonResult).get("list")), MegviiListEventRecordResultDTO.class);
+            Map<String, Object> map = convertToJsonList(jsonResult);
+            if(null == map.get("list")){
+                return null;
+            }
+            map.put("list",JSONArray.parseArray(String.valueOf(map.get("list")), MegviiListEventRecordResultDTO.class));
+            return map;
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    /**
+     * 获取人员信息
+     */
+    MegviiUserInfoDTO getUserInfoByUUId(String  uuid){
+        MegviiUserInfoDTO result = new MegviiUserInfoDTO();
+        if(StringUtil.isEmpty(uuid))
+        {
+            return null;
+        }
+        String uri = "/v1/api/person/query";
+        Map<String, String> paramMap =  new HashMap<>();
+        paramMap.put("uuid",uuid);
+        String jsonParam = JSON.toJSONString(paramMap);
+        try {
+            String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
+            return JSON.parseObject(jsonResult, MegviiUserInfoDTO.class);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    Map<String, Object> listMegviiDeviceParamDTO(MegviiListDeviceParamDTO paramDTO){
+        String uri = "/v1/api/device/list";
+        String jsonParam = JSON.toJSONString(paramDTO);
+        try {
+            String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
+            Map<String, Object> map = convertToJsonList(jsonResult);
+            map.put("list",JSONArray.parseArray(String.valueOf(map.get("list")), MegviiListEventRecordResultDTO.class));
+            return map;
         }catch (Exception e){
             return null;
         }
