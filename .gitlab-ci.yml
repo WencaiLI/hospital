@@ -92,21 +92,21 @@ kl-environment-build:
     changes:
       - kl-environment/**/*
 
-kl-broadcast-package:
+kl-face-recognition-package:
   variables:
-    MODULE_NAME: kl-broadcast
-    ARTIFACTS_PATH: ./kl-broadcast/target/*.jar
+    MODULE_NAME: kl-face-recognition
+    ARTIFACTS_PATH: ./kl-face_recognition/target/*.jar
   extends: .package
   only:
     changes:
-      - kl-broadcast/**/*
+      - kl-face_recognition/**/*
 
-kl-broadcast-build:
+kl-face-recognition-build:
   variables:
-    CONTAINER_NAME: kl-broadcast
-    IMAGE_NAME: 10.10.49.220:35000/kl-broadcast:1.0
-    DOCKERFILE_PATH: ./kl-broadcast/Dockerfile
+    CONTAINER_NAME: kl-face-recognition
+    IMAGE_NAME: 10.10.49.220:35000/kl-face-recognition:1.0
+    DOCKERFILE_PATH: ./kl-face_recognition/Dockerfile
   extends: .build
   only:
     changes:
-      - kl-broadcast/**/*
+      - kl-face_recognition/**/*
