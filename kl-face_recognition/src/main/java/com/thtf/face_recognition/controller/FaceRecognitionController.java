@@ -110,7 +110,13 @@ public class FaceRecognitionController {
     }
 
     /**
-     * 单设备事件
+     * @Author: liwencai
+     * @Description: 单设备事件
+     * @Date: 2022/12/14
+     * @Param itemCode:
+     * @Param pageNumber:
+     * @Param pageSize:
+     * @Return: com.thtf.common.response.JsonResult<com.thtf.face_recognition.dto.MegviiPage<com.thtf.face_recognition.dto.MegviiItemEventDTO>>
      */
     @GetMapping("/item_event")
     public JsonResult<MegviiPage<MegviiItemEventDTO>> listItemEventByItemCode(@RequestParam("itemCode") String itemCode,
@@ -118,4 +124,5 @@ public class FaceRecognitionController {
                                                                               @RequestParam("pageSize") Integer pageSize){
         return JsonResult.querySuccess(manufacturerApiService.listItemEventByItemCode(itemCode,pageNumber,pageSize));
     }
+
 }
