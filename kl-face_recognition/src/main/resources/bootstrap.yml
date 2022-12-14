@@ -1,6 +1,6 @@
 spring:
   application:
-    name: ${APPLICATION_NAME:kl-face_recognition}
+    name: ${APPLICATION_NAME:kl-face-recognition}
   profiles:
     active: ${PROFILE:dev}
   cloud:
@@ -17,7 +17,7 @@ spring:
 init:
   nacos:
     source-server: ${SOURCE_SERVER:10.10.49.220}
-    data-id: ${DATA_ID:kl-face_recognition-dev.yml}
+    data-id: ${DATA_ID:kl-face-recognition-dev.yml}
     group: ${GROUP:hospital}
     content: "server:\n  port: 9001\n  servlet:\n    context-path: /kl-face_recognition  \nspring:\n  datasource:\n    url: jdbc:mysql://${MYSQL_URL:10.10.49.18:3306}/kl_hospital?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true\n    username: root  \n    password: root123\n    driver-class-name: com.mysql.cj.jdbc.Driver  \n  servlet:\n    multipart:\n      max-file-size: 10MB\n      max-request-size: 50MB \n\nmybatis-plus:\n  mapper-locations: classpath:mapper/*.xml\n  configuration:\n    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl\n  type-aliases-package: com.thtf.face_recognition.entity\n"
     common:
