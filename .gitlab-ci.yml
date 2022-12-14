@@ -94,7 +94,7 @@ kl-environment-build:
 
 kl-face-recognition-package:
   variables:
-    MODULE_NAME: kl-face-recognition
+    MODULE_NAME: kl-face_recognition
     ARTIFACTS_PATH: ./kl-face_recognition/target/*.jar
   extends: .package
   only:
