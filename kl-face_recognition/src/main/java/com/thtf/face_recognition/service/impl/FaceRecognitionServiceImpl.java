@@ -181,8 +181,31 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         if(null == itemNestedParametersResultList || itemNestedParametersResultList.size() == 0){
             return null;
         }
+
         ListItemNestedParametersResultDTO item = itemNestedParametersResultList.get(0);
         FaceRecognitionPointDTO result = new FaceRecognitionPointDTO();
+        List<TblItemParameter> resultParameterList = new ArrayList<>();
+        item.getParameterList().forEach(e->{
+            if(ParameterConstant.FACE_RECOGNITION_ONLINE.equals(e.getParameterType())){
+                result.setOnlineParameterCode(e.getCode());
+                result.setOnlineValue(e.getValue());
+                resultParameterList.add(e);
+            }
+            if(ParameterConstant.FACE_RECOGNITION_Position.equals(e.getParameterType())){
+                result.setPositionParameterCode(e.getCode());
+                result.setPositionValue(e.getValue());
+                resultParameterList.add(e);
+            }
+        });
+
+        // 模型点位信息
+        if(null != item.getEye()){
+            result.setEye(item.getEye());
+        }
+        if(null != item.getCenter()){
+            result.setCenter(item.getCenter());
+        }
+
         // 将item同名参数copy到result
         BeanUtils.copyProperties(item,result);
         // 参数信息
