@@ -1,6 +1,9 @@
 package com.thtf.face_recognition.dto;
 
+import com.thtf.common.entity.itemserver.TblItemParameter;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author: liwencai
@@ -72,4 +75,13 @@ public class FaceRecognitionPointDTO {
      * 通道号
      */
     private String channelNum;
+
+    /**
+     * 设备参数信息
+     */
+    private List<TblItemParameter> parameterList;
+
+    private List<Integer> eye;
+
+    private List<Integer> center;
 }
