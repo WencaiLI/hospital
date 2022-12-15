@@ -1012,14 +1012,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     public List<ParameterTemplateAndDetailDTO> getParameterInfo(){
         List<ItemTypeAndParameterTypeCodeDTO> itemTypeAndParameterTypeCodeList = parameterConfigNacos.getItemTypeAndParameterTypeCodeList();
-        List<ParameterTemplateAndDetailDTO> data = itemAPI.listParameterDetail(itemTypeAndParameterTypeCodeList).getData();
-        for (ParameterTemplateAndDetailDTO item : data) {
-            System.out.println(item.getItemTypeCode()+" "+item.getItemTypeName()+" "+item.getParameterType()+" "+item.getName());
-        }
-        return data;
+        return itemAPI.listParameterDetail(itemTypeAndParameterTypeCodeList).getData();
     }
 
-    String getParameterType(String itemTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
+    public String getParameterType(String itemTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
         List<String> collect = parameterInfo.stream().filter(e -> e.getItemTypeCode().equals(itemTypeCode)).map(ParameterTemplateAndDetailDTO::getParameterType).collect(Collectors.toList());
         if(collect.size() == 0){
             return null;
@@ -1028,7 +1024,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
     }
 
-    String getParameterName(String itemTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
+    public String getParameterName(String itemTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
         List<String> collect = parameterInfo.stream().filter(e -> e.getItemTypeCode().equals(itemTypeCode)).map(ParameterTemplateAndDetailDTO::getName).collect(Collectors.toList());
         if(collect.size() == 0){
             return null;
@@ -1037,11 +1033,11 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
     }
 
-    List<String> getParameterCodeList(List<ParameterTemplateAndDetailDTO> parameterInfo){
+    public List<String> getParameterCodeList(List<ParameterTemplateAndDetailDTO> parameterInfo){
         return parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getParameterType).collect(Collectors.toList());
     }
 
-    Map<String, String> getMinAndMaxValue(String parameterTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
+    public Map<String, String> getMinAndMaxValue(String parameterTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
         Map<String, String> resultMap = new HashMap<>();
         List<ParameterTemplateAndDetailDTO> collect = parameterInfo.stream().filter(e -> e.getParameterType().equals(parameterTypeCode)).collect(Collectors.toList());
         if(collect.size() == 0){
@@ -1054,7 +1050,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     }
 
-    String getParameterNameByParameterTypeCode(String parameterTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
+    public String getParameterNameByParameterTypeCode(String parameterTypeCode,List<ParameterTemplateAndDetailDTO> parameterInfo){
         List<String> collect = parameterInfo.stream().filter(e -> e.getParameterType().equals(parameterTypeCode)).map(ParameterTemplateAndDetailDTO::getName).collect(Collectors.toList());
         if(collect.size() == 0){
             return null;
