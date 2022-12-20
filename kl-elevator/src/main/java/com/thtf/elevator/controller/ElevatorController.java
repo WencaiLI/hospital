@@ -28,53 +28,11 @@ public class ElevatorController {
     @Resource
     ElevatorService elevatorService;
 
-//    @Resource
-//    AlarmAPI alarmAPI;
-
-//    /**
-//     * @Author: liwencai
-//     * @Description: 获取楼层信息
-//     * @Date: 2022/9/22
-//     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
-//     */
-//    @GetMapping("/getFloorInfo")
-//    public JsonResult<List<FloorInfoDTO>> getFloorInfo(@RequestParam("buildingCode") String buildingCode,
-//                                                       @RequestParam(value = "sysCode",required = false) String systemCode){
-//        try {
-//            return JsonResult.querySuccess(elevatorService.getFloorInfo(buildingCode,systemCode));
-//        }catch (Exception e){
-//            return JsonResult.error("服务器错误");
-//        }
-//    }
-
-//    /**
-//     * @Author: liwencai
-//     * @Description: 获取当前最新报警（当日）
-//     * @Date: 2022/9/5
-//     * @Param sysCode:
-//     * @Param pageNumber:
-//     * @Param pageSize:
-//     * @return: com.thtf.common.response.JsonResult
-//     */
-//    @GetMapping(value = "/getAlarmUnhandledToday")
-//    public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
-//                                          @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-//                                          @RequestParam(value = "pageSize",required = false) Integer pageSize){
-//
-//        try {
-//            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
-//        }catch (Exception e){
-//            log.error(e.getMessage());
-//            return JsonResult.error("服务器错误");
-//        }
-//    }
-
     /**
      * @Author: liwencai
      * @Description: 前端展示界面数据
      * @Date: 2022/9/2
-     * @Param sysCode:
-     * @Param itemType:
+     * @Param sysCode: 子系统编码
      * @return: com.thtf.common.response.JsonResult<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     @PostMapping("/displayInfo")
@@ -86,30 +44,13 @@ public class ElevatorController {
      * @Author: liwencai
      * @Description: 获取报警数量
      * @Date: 2022/9/5
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @return: com.thtf.common.response.JsonResult<com.thtf.elevator.dto.DisplayInfoDTO>
      */
-    @PostMapping("/alarmNumber")
+    // @PostMapping("/alarmNumber")
     JsonResult<Integer> alarmNumber(@RequestParam("sysCode")String sysCode){
         return JsonResult.querySuccess(elevatorService.alarmNumber(sysCode));
     }
-
-//    /**
-//     * @Author: liwencai
-//     * @Description: 报警处置
-//     * @Date: 2022/9/2
-//     * @Param param:
-//     * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
-//     */
-//    @PutMapping(value = "/disposalAlarm")
-//    public JsonResult<Boolean> alarmDisposal(@RequestBody TblAlarmRecord param){
-//        try {
-//            alarmAPI.handleAlarm(param);
-//            return JsonResult.success();
-//        }catch (Exception e){
-//            return JsonResult.error("操作失败");
-//        }
-//    }
 
     /**
      * @Author: liwencai
@@ -118,7 +59,7 @@ public class ElevatorController {
      * @Param itemCodeList:
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.elevator.dto.ElevatorSwitchParameterDTO>>
      */
-    @PostMapping(value = "/getParameterInfo")
+    // @PostMapping(value = "/getParameterInfo")
     public JsonResult<List<ElevatorInfoResultDTO>> getParameterInfo(@RequestParam("itemCodeList")List<String> itemCodeList,
                                                                     @RequestParam("isNeedAreaName" )Boolean isNeedAreaName){
         return JsonResult.querySuccess(elevatorService.itemCodeList(itemCodeList,isNeedAreaName));
@@ -133,7 +74,7 @@ public class ElevatorController {
      * @Param itemCode:
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.itemserver.TblItem>>
      */
-    @PostMapping(value = "/getItemRelInfo")
+    // @PostMapping(value = "/getItemRelInfo")
     public JsonResult<List<TblItem>> getItemRelInfo(@RequestParam("relationType") String relationType,
                                               @RequestParam("itemCode") String itemCode){
         return JsonResult.querySuccess(elevatorService.getItemRelInfo(relationType,itemCode));
