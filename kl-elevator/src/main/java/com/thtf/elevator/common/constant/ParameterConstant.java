@@ -27,22 +27,22 @@ public class ParameterConstant {
     /**
      * 电梯上行状态参数类别编码
      */
-    public static final String ELEVATOR_UP_GOING_STATUS = "isUpGoing";
+    public static final String ELEVATOR_UP_GOING_STATUS = "IsUpGoing";
 
     /**
      * 电梯下行状态参数类别编码
      */
-    public static final String ELEVATOR_DOWN_GOING_STATUS = "isDownGoing";
+    public static final String ELEVATOR_DOWN_GOING_STATUS = "IsDownGoing";
 
     /**
      * 电梯运行时长参数类别编码
      */
-    public static final String ELEVATOR_RUN_TIME = "accRunTime";
+    public static final String ELEVATOR_RUN_TIME = "AccRunTime";
 
     /**
      * 锁梯状态
      */
-    public static final String ELEVATOR_LOCK_STATUS = "lockStatus";
+    public static final String ELEVATOR_LOCK_STATUS = "LockStatus";
 
     /**
      * 报警状态

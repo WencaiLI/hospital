@@ -344,7 +344,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             // 当前楼层
             if(ParameterConstant.ELEVATOR_RUN_STATUS.equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setRunTimeParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                    elevatorInfoResultDTO.setRunParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
