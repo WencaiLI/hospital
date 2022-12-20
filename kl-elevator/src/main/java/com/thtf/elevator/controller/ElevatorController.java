@@ -59,7 +59,7 @@ public class ElevatorController {
      * @Param itemCodeList:
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.elevator.dto.ElevatorSwitchParameterDTO>>
      */
-    // @PostMapping(value = "/getParameterInfo")
+    @PostMapping(value = "/getParameterInfo")
     public JsonResult<List<ElevatorInfoResultDTO>> getParameterInfo(@RequestParam("itemCodeList")List<String> itemCodeList,
                                                                     @RequestParam("isNeedAreaName" )Boolean isNeedAreaName){
         return JsonResult.querySuccess(elevatorService.itemCodeList(itemCodeList,isNeedAreaName));
