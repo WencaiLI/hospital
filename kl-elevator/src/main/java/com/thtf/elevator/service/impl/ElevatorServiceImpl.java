@@ -287,23 +287,22 @@ public class ElevatorServiceImpl implements ElevatorService {
         for (TblItemParameter parameter : parameterList) {
             // 下行
             if(ParameterConstant.ELEVATOR_DOWN_GOING_STATUS.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setDownGoingParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setDownGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
+
             // 上行
             if(ParameterConstant.ELEVATOR_UP_GOING_STATUS.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setUpGoingParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setUpGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
+
             // 运行时长
             if(ParameterConstant.ELEVATOR_RUN_TIME.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setRunTimeParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setRunTimeParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -312,7 +311,6 @@ public class ElevatorServiceImpl implements ElevatorService {
 
             // 报警状态
             if(ParameterConstant.ELEVATOR_ALARM.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setAlarmParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setAlarmParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -321,7 +319,6 @@ public class ElevatorServiceImpl implements ElevatorService {
 
             // 故障状态
             if(ParameterConstant.ELEVATOR_FAULT.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setFaultParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setFaultParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -330,7 +327,6 @@ public class ElevatorServiceImpl implements ElevatorService {
 
             // 锁梯状态
             if(ParameterConstant.ELEVATOR_LOCK_STATUS.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setLockStatusParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setLockStatusParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -339,7 +335,6 @@ public class ElevatorServiceImpl implements ElevatorService {
 
             // 当前楼层
             if(ParameterConstant.ELEVATOR_CURRENT_FLOOR.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setCurrentFloorCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setCurrentFloorValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -348,15 +343,14 @@ public class ElevatorServiceImpl implements ElevatorService {
 
             // 当前楼层
             if(ParameterConstant.ELEVATOR_RUN_STATUS.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setRunParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setRunTimeParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
+
             // 是否超载
             if(ParameterConstant.ELEVATOR_OVERLOAD.equals(parameter.getParameterType())){
-                // elevatorInfoResultDTO.setOverLoadParameterCode(parameter.getCode());
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setOverLoadParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }

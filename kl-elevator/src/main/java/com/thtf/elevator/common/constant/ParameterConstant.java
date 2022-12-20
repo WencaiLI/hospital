@@ -22,7 +22,7 @@ public class ParameterConstant {
     /**
      * 电梯楼层
      */
-    public static final String ELEVATOR_CURRENT_FLOOR = "currentFloor";
+    public static final String ELEVATOR_CURRENT_FLOOR = "CurrentFloor";
 
     /**
      * 电梯上行状态参数类别编码
@@ -48,28 +48,10 @@ public class ParameterConstant {
      * 报警状态
      */
     public static final String ELEVATOR_ALARM = "Alarm";
-    /**
-     * 扶梯报警状态
-     */
-    public static final String ELEVATOR_F_ALARM = "LiftFaultAlarm";
-
-    /**
-     * 直梯报警状态
-     */
-    public static final String ELEVATOR_Z_ALARM = "faultStatus";
 
     /**
      * 故障状态
      */
     public static final String ELEVATOR_FAULT = "Fault";
 
-    /**
-     * 直梯运行状态编码
-     */
-    public static final String ELEVATOR_Z_RUN_STATUS = "PowerStatus";
-
-    /**
-     * 扶梯运行状态编码
-     */
-    public static final String ELEVATOR_F_RUN_STATUS = "FaultStatus";
 }
