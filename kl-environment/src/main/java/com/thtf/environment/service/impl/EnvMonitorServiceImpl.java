@@ -820,6 +820,13 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         heap1.setParameterValue(alarmValue);
         heapList.add(heap1);
         String alarmHeapKey = ParameterConstant.ENV_MONITOR_ALARM+"_"+alarmValue;
+        // 故障堆参数
+        ParameterTypeCodeAndValueDTO heap3 = new ParameterTypeCodeAndValueDTO();
+        heap3.setParameterTypeCode(ParameterConstant.ENV_MONITOR_FAULT);
+        String faultValue = "1";
+        heap3.setParameterValue(faultValue);
+        heapList.add(heap3);
+        String faultHeapKey = ParameterConstant.ENV_MONITOR_FAULT+"_"+faultValue;
         // 正常堆参数
         ParameterTypeCodeAndValueDTO heap2 = new ParameterTypeCodeAndValueDTO();
         heap2.setParameterTypeCode(ParameterConstant.ENV_MONITOR_ALARM);
@@ -830,6 +837,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         listParameterMapDTO.setParameterInfo(heapList);
         Map<String, Map<String, String>> data = itemAPI.listParameterMap(listParameterMapDTO).getData();
         resultMap.put("alarm",data.get(alarmHeapKey));
+        resultMap.put("fault",data.get(faultHeapKey));
         resultMap.put("normal",data.get(normalHeapKey));
         return resultMap;
     }
