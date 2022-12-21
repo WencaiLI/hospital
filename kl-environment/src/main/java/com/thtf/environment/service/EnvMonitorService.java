@@ -2,6 +2,7 @@ package com.thtf.environment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.common.dto.itemserver.ListParameterMapDTO;
 import com.thtf.common.dto.itemserver.ParameterInfoDTO;
 import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
@@ -139,4 +140,6 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Return: java.lang.Object
      */
     EnvItemMonitorDTO getMonitorPointInfo(String itemCode);
+
+    Object listParameterMap(ListParameterMapDTO listParameterMapDTO);
 }

@@ -1,6 +1,7 @@
 package com.thtf.environment.controller;
 
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
+import com.thtf.common.dto.itemserver.ListParameterMapDTO;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.PageInfoVO;
@@ -27,6 +28,18 @@ public class EnvMonitorController {
 
     @Autowired
     private EnvMonitorService envMonitorService;
+
+    /**
+     * @Author: liwencai
+     * @Description: 分堆（前端模型使用）
+     * @Date: 2022/12/21
+     * @Param listParameterMapDTO:
+     * @Return: com.thtf.common.response.JsonResult
+     */
+    @PostMapping("/listParameterMap")
+    public JsonResult listParameterMap(@RequestBody ListParameterMapDTO listParameterMapDTO){
+        return JsonResult.querySuccess(envMonitorService.listParameterMap(listParameterMapDTO));
+    }
 
     /**
      * @Author: liwencai

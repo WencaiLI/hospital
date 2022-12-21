@@ -808,6 +808,32 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         return result;
     }
 
+    @Override
+    public Object listParameterMap(ListParameterMapDTO listParameterMapDTO) {
+        Map<String, Object> resultMap = new HashMap<>();
+        List<ParameterTypeCodeAndValueDTO> heapList = new ArrayList<>();
+
+        // 报警堆参数
+        ParameterTypeCodeAndValueDTO heap1 = new ParameterTypeCodeAndValueDTO();
+        heap1.setParameterTypeCode(ParameterConstant.ENV_MONITOR_ALARM);
+        String alarmValue = "1";
+        heap1.setParameterValue(alarmValue);
+        heapList.add(heap1);
+        String alarmHeapKey = ParameterConstant.ENV_MONITOR_ALARM+"_"+alarmValue;
+        // 正常堆参数
+        ParameterTypeCodeAndValueDTO heap2 = new ParameterTypeCodeAndValueDTO();
+        heap2.setParameterTypeCode(ParameterConstant.ENV_MONITOR_ALARM);
+        String normalValue = "0";
+        heap2.setParameterValue(normalValue);
+        heapList.add(heap2);
+        String normalHeapKey = ParameterConstant.ENV_MONITOR_ALARM+"_"+normalValue;
+        listParameterMapDTO.setParameterInfo(heapList);
+        Map<String, Map<String, String>> data = itemAPI.listParameterMap(listParameterMapDTO).getData();
+        resultMap.put("alarm",data.get(alarmHeapKey));
+        resultMap.put("normal",data.get(normalHeapKey));
+        return resultMap;
+    }
+
 //    /**
 //     * @Author: liwencai
 //     * @Description:
