@@ -3,10 +3,7 @@ package com.thtf.elevator.service.impl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
-import com.thtf.common.dto.itemserver.CodeAndNameDTO;
-import com.thtf.common.dto.itemserver.CountItemByParameterListDTO;
-import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
-import com.thtf.common.dto.itemserver.TblItemDTO;
+import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
@@ -18,6 +15,7 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.elevator.common.constant.ItemTypeConstant;
 import com.thtf.elevator.common.constant.ParameterConstant;
 import com.thtf.elevator.dto.*;
+import com.thtf.elevator.dto.ParameterInfoDTO;
 import com.thtf.elevator.dto.convert.FloorConverter;
 import com.thtf.elevator.dto.convert.ItemConverter;
 import com.thtf.elevator.dto.convert.PageInfoConvert;
@@ -246,23 +244,42 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
     @Override
-    public PageInfoVO getAllElevatorPage(String sysCode,String itemTypeCode,Integer pageNum, Integer pageSize) {
-        // 设备信息
-        List<String> itemCodeList = new ArrayList<>();
-        PageInfo<ItemNestedParameterVO> itemInfosPage;
+    public PageInfoVO getAllElevatorPage(String sysCode,String itemTypeCode, Integer state, Integer pageNum, Integer pageSize) {
+        ListItemNestedParametersPageParamDTO listItemPage = new ListItemNestedParametersPageParamDTO();
+        listItemPage.setSysCode(sysCode);
+        listItemPage.setPageNumber(pageNum);
+        listItemPage.setPageSize(pageSize);
         if(StringUtils.isNotBlank(itemTypeCode)){
-            itemCodeList.add(itemTypeCode);
-            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,itemCodeList,pageNum,pageSize).getData();
-        }else {
-            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,null,pageNum,pageSize).getData();
+            listItemPage.setItemTypeCodeList(Collections.singletonList(itemTypeCode));
         }
+        if(null != state){
+            List<ParameterTypeCodeAndValueDTO> parameterList = new ArrayList<>();
+            ParameterTypeCodeAndValueDTO param = new ParameterTypeCodeAndValueDTO();
+            param.setParameterTypeCode(ParameterConstant.ELEVATOR_RUN_STATUS);
+            param.setParameterValue(String.valueOf(state));
+            parameterList.add(param);
+            listItemPage.setParameterList(parameterList);
+        }
+        PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(listItemPage).getData();
 
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemInfosPage);
+        if(null == pageInfo){
+            return null;
+        }
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
 
-        List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoList(itemInfosPage.getList());
+        List<ItemNestedParameterVO> itemNestedParameterList = pageInfo.getList();
+
+        List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoList(itemNestedParameterList);
 
         for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {
-            for (ItemNestedParameterVO item : itemInfosPage.getList()) {
+            for (ItemNestedParameterVO item : pageInfo.getList()) {
+                if (item.getCode().equals(elevatorInfoResultDTO.getItemCode())){
+                    convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
+                }
+            }
+        }
+        for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {
+            for (ItemNestedParameterVO item : pageInfo.getList()) {
                 if (item.getCode().equals(elevatorInfoResultDTO.getItemCode())){
                     convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
                 }
@@ -270,6 +287,56 @@ public class ElevatorServiceImpl implements ElevatorService {
         }
         pageInfoVO.setList(resultDTOList);
         return pageInfoVO;
+        // 根据设备编码和设备类别编码、是否在线筛选设备编码信息 不分页
+        // 根据设备编码集，获取分页设备信息 分页
+//
+//
+//        // 设备信息
+//
+//        ListItemCodeParamDTO listItemCodeParamDTO = new ListItemCodeParamDTO();
+//        listItemCodeParamDTO.setSysCode(sysCode);
+//        if(StringUtils.isNotBlank(itemTypeCode)){
+//            listItemCodeParamDTO.setItemTypeCodeList(Collections.singletonList(itemTypeCode));
+//        }
+//        // 所有该子系统的设备编码
+//        List<String> itemCodeList = itemAPI.listItemCode(listItemCodeParamDTO).getData();
+//        if(null != itemCodeList && itemCodeList.size() == 0){
+//            return null;
+//        }
+//
+//        ListItemNestedParametersParamDTO listItemNestedParametersParamDTO = new ListItemNestedParametersParamDTO();
+//        listItemNestedParametersParamDTO.setItemCodeList(itemCodeList);
+//        if(null != onlineStatus){
+//            List<ParameterTypeCodeAndValueDTO> parameterList = new ArrayList<>();
+//            ParameterTypeCodeAndValueDTO param = new ParameterTypeCodeAndValueDTO();
+//            param.setParameterTypeCode(ParameterConstant.ELEVATOR_RUN_STATUS);
+//            param.setParameterValue("1");
+//            parameterList.add(param);
+//            listItemNestedParametersParamDTO.setParameterList(parameterList);
+//        }
+//        itemAPI.listItemNestedParametersPage;
+//        List<String> itemCodeTypeList = new ArrayList<>();
+//        PageInfo<ItemNestedParameterVO> itemInfosPage;
+//        if(StringUtils.isNotBlank(itemTypeCode)){
+//            itemCodeTypeList.add(itemTypeCode);
+//            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,itemCodeTypeList,pageNum,pageSize).getData();
+//        }else {
+//            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,null,pageNum,pageSize).getData();
+//        }
+//
+//        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemInfosPage);
+//
+//        List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoList(itemInfosPage.getList());
+//
+//        for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {
+//            for (ItemNestedParameterVO item : itemInfosPage.getList()) {
+//                if (item.getCode().equals(elevatorInfoResultDTO.getItemCode())){
+//                    convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
+//                }
+//            }
+//        }
+//        pageInfoVO.setList(resultDTOList);
+//        return pageInfoVO;
     }
 
 
