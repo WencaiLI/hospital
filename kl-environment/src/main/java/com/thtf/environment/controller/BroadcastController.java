@@ -166,7 +166,7 @@ public class BroadcastController {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取报警信息
      * @Date: 2022/10/7
      * @Param keyword: 关键词
      * @Param sysCode: 子系统编码

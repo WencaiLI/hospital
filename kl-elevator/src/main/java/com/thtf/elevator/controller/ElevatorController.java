@@ -92,9 +92,10 @@ public class ElevatorController {
     @PostMapping("/getAllElevatorPage")
     public JsonResult<PageInfoVO> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
                                                      @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                     @RequestParam(value = "state",required = false) Integer state,
                                                      @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
                                                      @RequestParam(value = "pageSize",required = false)Integer pageSize){
-        return JsonResult.querySuccess(elevatorService.getAllElevatorPage(sysCode,itemTypeCode,pageNumber,pageSize));
+        return JsonResult.querySuccess(elevatorService.getAllElevatorPage(sysCode,itemTypeCode,state,pageNumber,pageSize));
     }
 
     /**

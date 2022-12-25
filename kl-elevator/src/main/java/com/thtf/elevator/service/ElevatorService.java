@@ -64,7 +64,7 @@ public interface ElevatorService {
      * @Param: pageSize: 页大小
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
-    PageInfoVO getAllElevatorPage(String sysCode, String itemTypeCode, Integer pageNum, Integer pageSize);
+    PageInfoVO getAllElevatorPage(String sysCode, String itemTypeCode, Integer onlineStatus, Integer pageNum, Integer pageSize);
 
     /**
      * @Author: liwencai
