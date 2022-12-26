@@ -1,6 +1,5 @@
 package com.thtf.environment.app;
 
-import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.AppEnvMonitorDisplayDTO;
 import com.thtf.environment.dto.AppListAlarmParamDTO;
