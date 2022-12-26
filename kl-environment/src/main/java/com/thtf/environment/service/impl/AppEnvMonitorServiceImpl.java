@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,10 +73,10 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
     @Override
     public Object listAlarmUnhandled(AppListAlarmParamDTO paramDTO){
         ListAlarmPageParamDTO listAlarmPageParamDTO = new ListAlarmPageParamDTO();
-        listAlarmPageParamDTO.setAlarmCategory(0); // 报警
+        listAlarmPageParamDTO.setAlarmCategoryList(Collections.singletonList(0)); // 报警
         listAlarmPageParamDTO.setSysCode(paramDTO.getSysCode());
         listAlarmPageParamDTO.setBuildingCodes(paramDTO.getBuildingCodes());
-        listAlarmPageParamDTO.setAreaCode(paramDTO.getAreaCodes());
+        listAlarmPageParamDTO.setAreaCodes(paramDTO.getAreaCodes());
         listAlarmPageParamDTO.setStartTime(paramDTO.getEndTime());
         listAlarmPageParamDTO.setEndTime(paramDTO.getEndTime());
         listAlarmPageParamDTO.setPageNumber(paramDTO.getPageNumber());
@@ -93,8 +94,8 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         if(null != paramDTO.getItemTypeCodeList() && paramDTO.getItemTypeCodeList().size() > 0){
             listAlarmPageParamDTO.setItemTypeCodeList(paramDTO.getItemTypeCodeList());
         }
-        PageInfo<AppAlarmRecordDTO> data = alarmAPI.listAlarmUnhandled(listAlarmPageParamDTO).getData();
-        return data;
+        // PageInfo<AppAlarmRecordDTO> data = alarmAPI.listAlarmUnhandled(listAlarmPageParamDTO).getData();
+        return alarmAPI.listAlarmUnhandled(listAlarmPageParamDTO).getData();
     }
 
     /**
