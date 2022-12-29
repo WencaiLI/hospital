@@ -24,6 +24,18 @@ public class FaceRecognitionItemResultVO {
     private String itemName;
 
     /**
+     * 建筑编码
+     */
+    private String buildingCode;
+
+    private String buildingAreaName;
+
+    /**
+     * 区域编码
+     */
+    private String areaCode;
+
+    /**
      * 设备描述
      */
     private String description;
