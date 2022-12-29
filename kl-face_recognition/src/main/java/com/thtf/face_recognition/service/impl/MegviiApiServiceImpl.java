@@ -12,7 +12,6 @@ import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
 import com.thtf.face_recognition.common.enums.MegviiEventLevelEnum;
 import com.thtf.face_recognition.common.enums.MegviiEventTypeEnum;
@@ -279,7 +278,6 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         return result;
     }
 
-
     /**
      * @Author: liwencai
      * @Description:
@@ -306,7 +304,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
     /**
      * 获取人员信息
      */
-    MegviiUserInfoDTO getUserInfoByUUId(String  uuid){
+    public MegviiUserInfoDTO getUserInfoByUUId(String  uuid){
         MegviiUserInfoDTO result = new MegviiUserInfoDTO();
         if(StringUtil.isEmpty(uuid))
         {
@@ -324,14 +322,25 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         }
     }
 
-    Map<String, Object> listMegviiDeviceParamDTO(MegviiListDeviceParamDTO paramDTO){
+    /**
+     * @Author: liwencai
+     * @Description: 查询设备
+     * @Date: 2022/12/29
+     * @Param paramDTO:
+     * @Return: java.util.Map<java.lang.String,java.lang.Object>
+     */
+    public MegviiPage<MegviiDeviceDTO> listMegviiDeviceDTO(MegviiListDeviceParamDTO paramDTO){
+        MegviiPage<MegviiDeviceDTO> result = new MegviiPage<>();
         String uri = "/v1/api/device/list";
         String jsonParam = JSON.toJSONString(paramDTO);
         try {
             String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
             Map<String, Object> map = convertToJsonList(jsonResult);
-            map.put("list",JSONArray.parseArray(String.valueOf(map.get("list")), MegviiListEventRecordResultDTO.class));
-            return map;
+            result.setList(JSONArray.parseArray(String.valueOf(map.get("list")), MegviiDeviceDTO.class));
+            result.setTotal(JSON.parseObject(String.valueOf(map.get("total")),Integer.class));
+            result.setPageNum(JSON.parseObject(String.valueOf(map.get("pageNum")),Integer.class));
+            result.setPageSize(JSON.parseObject(String.valueOf(map.get("pageSize")),Integer.class));
+            return result;
         }catch (Exception e){
             return null;
         }

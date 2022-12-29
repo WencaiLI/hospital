@@ -137,6 +137,9 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
                     result.setItemName(e.getName());
                     result.setItemTypeName(e.getItemTypeName());
                     result.setDescription(e.getDescription());
+                    result.setBuildingCode(e.getBuildingCode());
+                    result.setAreaCode(e.getAreaCode());
+                    result.setBuildingAreaName(e.getBuildingAreaName());
                     // 模型视角信息
                     if(StringUtils.isNotBlank(e.getViewLongitude())){
                         result.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
