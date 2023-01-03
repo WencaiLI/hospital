@@ -77,8 +77,10 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         listAlarmPageParamDTO.setSysCode(paramDTO.getSysCode());
         listAlarmPageParamDTO.setBuildingCodes(paramDTO.getBuildingCodes());
         listAlarmPageParamDTO.setAreaCodes(paramDTO.getAreaCodes());
-        listAlarmPageParamDTO.setStartTime(paramDTO.getEndTime());
-        listAlarmPageParamDTO.setEndTime(paramDTO.getEndTime());
+        if(null != paramDTO.getStartTime() && null != paramDTO.getEndTime()){
+            listAlarmPageParamDTO.setStartTime(paramDTO.getEndTime());
+            listAlarmPageParamDTO.setEndTime(paramDTO.getEndTime());
+        }
         listAlarmPageParamDTO.setPageNumber(paramDTO.getPageNumber());
         listAlarmPageParamDTO.setPageSize(paramDTO.getPageSize());
         //
