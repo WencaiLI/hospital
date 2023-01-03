@@ -8,14 +8,11 @@ import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
-import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
-
 import com.thtf.environment.config.ParameterConfigNacos;
 import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
