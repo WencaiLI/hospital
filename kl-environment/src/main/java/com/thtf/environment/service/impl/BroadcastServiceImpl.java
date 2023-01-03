@@ -153,6 +153,7 @@ public class BroadcastServiceImpl implements BroadcastService {
             itemInfoOfBroadcastDTO.setItemName(item.getName());
             itemInfoOfBroadcastDTO.setAreaCode(item.getAreaCode());
             itemInfoOfBroadcastDTO.setAreaName(item.getAreaName());
+            itemInfoOfBroadcastDTO.setBuildingCode(item.getBuildingCode());
             // todo 怎么获取IP地址存疑
             itemInfoOfBroadcastDTO.setIpAddress("10.10.82.146");
             // 配置模型视角
