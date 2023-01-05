@@ -1,5 +1,9 @@
 package com.thtf.face_recognition.job;
 
+import com.thtf.common.dto.itemserver.ItemParameterUpdateDTO;
+import com.thtf.common.feign.ItemAPI;
+import com.thtf.face_recognition.common.constant.ParameterConstant;
+import com.thtf.face_recognition.common.enums.MegviiItemStatus;
 import com.thtf.face_recognition.dto.MegviiDeviceDTO;
 import com.thtf.face_recognition.dto.MegviiListDeviceParamDTO;
 import com.thtf.face_recognition.dto.MegviiPage;
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -20,6 +25,8 @@ import java.util.List;
 @Component
 @Slf4j
 public class ItemStatusJob {
+    @Autowired
+    private ItemAPI itemAPI;
     @Resource
     MegviiApiServiceImpl megviiApiServiceImpl;
     // 更新设备状态
@@ -30,11 +37,25 @@ public class ItemStatusJob {
         // 取出全部设备信息
         listDeviceParamDTO.setPageSize(1);
         listDeviceParamDTO.setPageSize(9999);
-        MegviiPage<MegviiDeviceDTO> megviiDeviceDTOMegviiPage = megviiApiServiceImpl.listMegviiDeviceDTO(listDeviceParamDTO);
-        List<MegviiDeviceDTO> totalItems = megviiDeviceDTOMegviiPage.getList();
+        MegviiPage<MegviiDeviceDTO> megviiDevicePage = megviiApiServiceImpl.listMegviiDeviceDTO(listDeviceParamDTO);
+        List<MegviiDeviceDTO> totalItems = megviiDevicePage.getList();
+        if(null == totalItems || totalItems.size() == 0){
+            return;
+        }
         // 在线状态设备uuid
-        totalItems.stream().filter(e->e.getStatus().equals(""));
+        List<String> onlineItemCodeList = totalItems.stream().filter(e -> e.getStatus().equals(MegviiItemStatus.ONLINE.getId())).map(MegviiDeviceDTO::getUuid).collect(Collectors.toList());
+        List<String> offlineItemCodeList = totalItems.stream().filter(e -> e.getStatus().equals(MegviiItemStatus.OFFLINE.getId())).map(MegviiDeviceDTO::getUuid).collect(Collectors.toList());
         // 离线状态设备uuid
-
+        ItemParameterUpdateDTO onlineChange = new ItemParameterUpdateDTO();
+        onlineChange.setItemCodeList(onlineItemCodeList);
+        onlineChange.setParameterCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
+        onlineChange.setNewValue("1");
+        itemAPI.updateParameterValue(onlineChange);
+        ItemParameterUpdateDTO offlineChange = new ItemParameterUpdateDTO();
+        offlineChange.setItemCodeList(offlineItemCodeList);
+        offlineChange.setParameterCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
+        offlineChange.setNewValue("0");
+        itemAPI.updateParameterValue(offlineChange);
     }
+
 }
