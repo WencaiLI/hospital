@@ -279,6 +279,6 @@ public class VehicleInfoController {
     @GetMapping("/updateInfoStatus")
     @OperateLog(content = "修改公车状态",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> updateInfoStatus(){
-        return JsonResult.querySuccess(true);
+        return JsonResult.querySuccess(vehicleInfoService.updateInfoStatus());
     }
 }

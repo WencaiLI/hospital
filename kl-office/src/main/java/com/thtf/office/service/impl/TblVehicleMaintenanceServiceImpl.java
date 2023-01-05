@@ -3,6 +3,7 @@ package com.thtf.office.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.dto.converter.VehicleMaintenanceConverter;
@@ -126,6 +127,8 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }
+        /*String userName = SecurityContextHolder.getUserName();
+        System.out.println("XXXXXXX"+userName);*/
         return realName;
     }
 }

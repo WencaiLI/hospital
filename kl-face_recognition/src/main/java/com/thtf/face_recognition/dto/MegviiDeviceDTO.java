@@ -34,7 +34,7 @@ public class MegviiDeviceDTO {
     /**
      * 设备状态 3 在线 4离线
      */
-    private String status;
+    private Integer status;
 
     /**
      * 设备IP

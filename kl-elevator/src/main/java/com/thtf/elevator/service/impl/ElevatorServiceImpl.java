@@ -269,6 +269,7 @@ public class ElevatorServiceImpl implements ElevatorService {
 
         List<ItemNestedParameterVO> itemNestedParameterList = pageInfo.getList();
 
+        // 结果集
         List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoList(itemNestedParameterList);
 
         for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {

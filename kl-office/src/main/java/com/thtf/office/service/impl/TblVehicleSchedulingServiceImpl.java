@@ -6,6 +6,7 @@ import com.thtf.common.entity.adminserver.TblBasicData;
 import com.thtf.common.entity.adminserver.TblUser;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.response.JsonResult;
+import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.dto.converter.VehicleSchedulingConverter;
@@ -378,6 +379,8 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }
+        /*String userName = SecurityContextHolder.getUserName();
+        System.out.println("XXXXXXX"+userName);*/
         return realName;
     }
 

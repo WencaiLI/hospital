@@ -34,6 +34,10 @@ public class ElevatorInfoResultDTO extends ElevatorStatusVO {
      */
     private String areaName;
 
+    private String areaCode;
+
+    private String buildingCode;
+
 //    /**
 //     * 报警状态
 //     */

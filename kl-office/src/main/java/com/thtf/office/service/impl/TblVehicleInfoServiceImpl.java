@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.dto.adminserver.UserInfo;
 import com.thtf.common.feign.AdminAPI;
+import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
 import com.thtf.office.common.exportExcel.EasyExcelStyleUtils;
 import com.thtf.office.common.exportExcel.ExcelVehicleUtils;
@@ -617,6 +618,8 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         if(null !=  userInfo){
             realName = userInfo.getRealname();
         }
+        /*String userName = SecurityContextHolder.getUserName();
+        System.out.println("XXXXXXX"+userName);*/
         return realName;
     }
 }
