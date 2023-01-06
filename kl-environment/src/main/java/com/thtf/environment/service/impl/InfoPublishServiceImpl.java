@@ -1,6 +1,7 @@
 package com.thtf.environment.service.impl;
 
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
@@ -17,6 +18,7 @@ import com.thtf.environment.dto.convert.ParameterConverter;
 import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,7 +84,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
         List<ItemNestedParameterVO> list = itemPageInfo.getList();
         // 获取所有设备报警信息
-        List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
+        // List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
         List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
         for (ItemNestedParameterVO itemNestedParameterVO : list) {
             ItemInfoOfLargeScreenDTO innerResult = new ItemInfoOfLargeScreenDTO();
@@ -92,6 +94,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             innerResult.setAreaCode(itemNestedParameterVO.getAreaCode());
             innerResult.setAreaName(itemNestedParameterVO.getAreaName());
             innerResult.setBuildingCode(itemNestedParameterVO.getBuildingCode());
+            innerResult.setAlarmStatus(itemNestedParameterVO.getFault());
             // 匹配模型视角
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLongitude())){
                 innerResult.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
@@ -99,12 +102,12 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
                 innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
-            // 匹配报警信息
-            allAlarmRecordUnhandled.forEach(e->{
-                if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
-                    innerResult.setAlarmStatus(e.getAlarmCategory());
-                }
-            });
+//            // 匹配报警信息
+//            allAlarmRecordUnhandled.forEach(e->{
+//                if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
+//                    innerResult.setAlarmStatus(e.getAlarmCategory());
+//                }
+//            });
             this.convertToItemInfoOfLargeScreenDTO(innerResult,itemNestedParameterVO.getParameterList());
             resultList.add(innerResult);
         }
@@ -172,12 +175,39 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      * @return: java.util.List<com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO>
      */
     @Override
-    public PageInfoVO getLargeScreenAlarmInfo(String sysCode, String keyword, Integer pageNumber, Integer pageSize) {
-        PageInfo<TblAlarmRecordUnhandle> data = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
+    public PageInfoVO getLargeScreenAlarmInfo(String sysCode, String buildingCodes, String areaCode, String keyword, Integer pageNumber, Integer pageSize) {
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(buildingCodes)){
+            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                areaCodeList = Arrays.asList(areaCode.split(","));
+            }
+        }
+        TblItem tblItem = new TblItem();
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+        tblItem.setSystemCode(sysCode);
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
+
+        ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
+        listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
+        listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
+        listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
+        listAlarmInfoLimitOneParamDTO.setKeyword(keyword);
+        listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(keyword);
+        listAlarmInfoLimitOneParamDTO.setKeywordOfItemCode(keyword);
+        listAlarmInfoLimitOneParamDTO.setKeywordOfAlarmDesc(keyword);
+        listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
+        listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
+        PageInfo<TblAlarmRecordUnhandle> data = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+        // PageInfo<TblAlarmRecordUnhandle> data = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
         List<AlarmInfoOfLargeScreenDTO> alarmInfoOfLargeScreenDTOS = alarmConvert.toAlarmInfoOfLargeScreenDTOList(data.getList());
-        List<TblItem> itemList = itemAPI.searchItemByItemCodeList(data.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList())).getData();
-
+        List<String> collect = data.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+        itemList.removeIf(e->!collect.contains(e.getCode()));
         for (AlarmInfoOfLargeScreenDTO largeScreen : alarmInfoOfLargeScreenDTOS) {
             // 匹配eye和center确定视角
             itemList.forEach(e->{

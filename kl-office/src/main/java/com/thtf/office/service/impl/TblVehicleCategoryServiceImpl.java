@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.plugin.javascript.navig.LinkArray;
+
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,7 +104,16 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             queryWrapper_category.isNull("delete_time").eq("id",cid);
             int effortRow = vehicleCategoryMapper.update(category, queryWrapper_category);
             // 同时将所有相关公车的关联的类别id和类别名称置为null
-            vehicleInfoMapper.setCidToNull(cid);
+            List<TblVehicleInfo> tblVehicleInfos = vehicleInfoMapper.selectList(new QueryWrapper<TblVehicleInfo>().lambda().eq(TblVehicleInfo::getVehicleCategoryId, cid));
+
+            tblVehicleInfos.forEach(e->{
+                e.setVehicleCategoryId(null);
+                e.setDeleteTime(LocalDateTime.now());
+                e.setDeleteBy(getOperatorName());
+                vehicleInfoMapper.updateById(e);
+            });
+
+            // vehicleInfoMapper.setCidToNull(cid);
             return effortRow == 1;
         }else {
             return false;

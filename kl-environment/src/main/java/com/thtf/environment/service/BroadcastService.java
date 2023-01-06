@@ -53,7 +53,7 @@ public interface BroadcastService {
      * @Param pageSize:
      * @return: com.thtf.environment.dto.PageInfoVO 
      */
-    PageInfoVO getAlarmInfo(String keyword, String sysCode, Integer pageNumber, Integer pageSize);
+    PageInfoVO getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai

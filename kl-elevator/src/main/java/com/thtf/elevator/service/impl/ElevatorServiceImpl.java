@@ -437,13 +437,22 @@ public class ElevatorServiceImpl implements ElevatorService {
      */
     @Override
     public PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode,Integer pageNumber,Integer pageSize) {
+        // 查询故障设备信息
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(sysCode);
+        tblItem.setTypeCode(itemTypeCode);
+        tblItem.setFault(1);
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
         /* 获取故障报警信息 */
         PageInfo<TblAlarmRecordUnhandle> alarmPageInfo;
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
         listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
         // 设置筛选条件为故障报警
         listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
-        listAlarmInfoLimitOneParamDTO.setItemTypeCode(itemTypeCode);
+        if(null != itemCodeList && itemCodeList.size()>0){
+            listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
+        }
         listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
         listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
         alarmPageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();

@@ -22,6 +22,8 @@ public class AlarmInfoOfBroadcastDTO {
 
     private String itemCode; // 设备编码
 
+    private String buildingCode; // 建筑编码
+
     private String areaCode; // 区域编码
 
     private String areaName; // 区域名称

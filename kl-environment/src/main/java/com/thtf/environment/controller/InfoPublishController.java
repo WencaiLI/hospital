@@ -164,7 +164,7 @@ public class InfoPublishController {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 故障信息
      * @Date: 2022/9/22
      * @Param sysCode: 子系统编码
      * @Param keyword: 关键字
@@ -174,10 +174,12 @@ public class InfoPublishController {
      */
     @PostMapping("/getLargeScreenAlarmInfo")
     public JsonResult<PageInfoVO> getLargeScreenAlarmInfo(@RequestParam("sysCode") String sysCode,
+                                                          @RequestParam("buildingCodes") String buildingCodes,
+                                                          @RequestParam("areaCode") String areaCode,
                                                           @RequestParam(value = "keyword",required = false) String keyword,
                                                           @RequestParam(value = "pageNumber") Integer pageNumber,
                                                           @RequestParam(value = "pageSize") Integer pageSize){
-        return JsonResult.querySuccess(infoPublishService.getLargeScreenAlarmInfo(sysCode,keyword,pageNumber,pageSize));
+        return JsonResult.querySuccess(infoPublishService.getLargeScreenAlarmInfo(sysCode,buildingCodes,areaCode,keyword,pageNumber,pageSize));
     }
 
     /**
