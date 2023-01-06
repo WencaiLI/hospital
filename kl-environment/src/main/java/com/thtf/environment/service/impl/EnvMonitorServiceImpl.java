@@ -219,6 +219,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         tblItem.setAreaCodeList(areaCodeList);
         tblItem.setItemTypeCodeList(itemTypeCodeList);
         tblItem.setSystemCode(paramVO.getSysCode());
+        // 对设备名称、编码、区域名称进行模糊查询
+        tblItem.setKeyword(paramVO.getKeyword());
+        tblItem.setKeyName(paramVO.getKeyword());
+        tblItem.setKeyCode(paramVO.getKeyword());
+        tblItem.setKeyAreaName(paramVO.getKeyword());
+
         if(StringUtils.isNotBlank(paramVO.getItemTypeCode())){
             tblItem.setTypeCode(paramVO.getItemTypeCode());
         }
@@ -227,17 +233,20 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 tblItem.setFault(1);
             }
             if(paramVO.getAlarmCategory() == 0){
-                tblItem.setAlarm(0);
+                tblItem.setAlarm(1);
             }
         }
-        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        PageInfo<TblItem> itemData = itemAPI.queryAllItemsPage(tblItem).getData();
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemData);
+
+        List<TblItem> itemList = itemData.getList();
         if(itemList ==  null || itemList.size() == 0){
             return null;
         }
         List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
 
-
         // 查询报警信息
+        List<TblAlarmRecordUnhandle> alarmRecordList = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, paramVO.getAlarmCategory()).getData();
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
         listAlarmInfoLimitOneParamDTO.setSystemCode(paramVO.getSysCode());
         if(null != paramVO.getAlarmCategory()){
@@ -249,18 +258,13 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(paramVO.getKeyword());
         listAlarmInfoLimitOneParamDTO.setKeywordOfItemCode(paramVO.getKeyword());
         listAlarmInfoLimitOneParamDTO.setKeywordOfAlarmDesc(paramVO.getKeyword());
-        listAlarmInfoLimitOneParamDTO.setPageNumber(paramVO.getPageNumber());
-        listAlarmInfoLimitOneParamDTO.setPageSize(paramVO.getPageSize());
+//        listAlarmInfoLimitOneParamDTO.setPageNumber(paramVO.getPageNumber());
+//        listAlarmInfoLimitOneParamDTO.setPageSize(paramVO.getPageSize());
 
-        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
-        List<String> collect = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
-        itemList.removeIf(e->!collect.contains(e.getCode()));
-
-
-
-
-//
+//        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+//        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
+//        List<String> collect = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+//        itemList.removeIf(e->!collect.contains(e.getCode()));
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
 //        List<String> itemCodeList;
 
@@ -279,7 +283,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         if(groupIdStringList.size()>0){
             groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
         }
-        for (TblAlarmRecordUnhandle alarmRecord: tblAlarmRecordUnhandlePageInfo.getList()) {
+        for (TblAlarmRecordUnhandle alarmRecord: alarmRecordList) {
             EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
             // 匹配设备信息
             List<TblGroup> finalGroupList = groupList;
