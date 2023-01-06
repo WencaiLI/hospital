@@ -1,6 +1,9 @@
 package com.thtf.environment.service.impl;
 
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.*;
@@ -19,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -302,6 +307,8 @@ public class BroadcastServiceImpl implements BroadcastService {
                     alarmInfoOfBroadcastDTO.setItemName(tblItemDTO.getName());
                     alarmInfoOfBroadcastDTO.setAreaCode(tblItemDTO.getAreaCode());
                     alarmInfoOfBroadcastDTO.setAreaName(tblItemDTO.getAreaName());
+                    long duration = LocalDateTimeUtil.between(alarmInfoOfBroadcastDTO.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
+                    alarmInfoOfBroadcastDTO.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
                     alarmInfoOfBroadcastDTO.setBuildingCode(tblItemDTO.getBuildingCode());
                 }
             }

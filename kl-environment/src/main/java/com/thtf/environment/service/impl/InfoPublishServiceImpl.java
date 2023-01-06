@@ -1,5 +1,8 @@
 package com.thtf.environment.service.impl;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
@@ -224,7 +227,9 @@ public class InfoPublishServiceImpl implements InfoPublishService {
                 }
             });
             largeScreen.setAreaName(this.getAreaNameByAreaCode(largeScreen.getAreaCode()));
-            largeScreen.setStayTime(getTimeGap(largeScreen.getAlarmTime(),LocalDateTime.now()));
+            long duration = LocalDateTimeUtil.between(largeScreen.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
+            largeScreen.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
+            // largeScreen.setStayTime(getTimeGap(largeScreen.getAlarmTime(),LocalDateTime.now()));
             // todo 对接高博医院自身的信息发布系统后再写 largeScreen.setPublishContent();
         }
         pageInfoVO.setList(alarmInfoOfLargeScreenDTOS);

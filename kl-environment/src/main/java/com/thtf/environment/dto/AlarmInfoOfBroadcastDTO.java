@@ -41,5 +41,5 @@ public class AlarmInfoOfBroadcastDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime alarmTime; // 数据报送时间
 
-    private Long stayTime; // 滞留时长
+    private String stayTime; // 滞留时长
 }

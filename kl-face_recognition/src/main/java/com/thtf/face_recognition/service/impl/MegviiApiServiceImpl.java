@@ -1,5 +1,8 @@
 package com.thtf.face_recognition.service.impl;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -33,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -156,7 +160,9 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             faceRecognitionFaultResultVO.setAreaCode(alarm.getBuildingAreaCode());
             faceRecognitionFaultResultVO.setAreaName(alarm.getBuildingAreaName());
             faceRecognitionFaultResultVO.setAlarmLevel(alarm.getAlarmLevel());
-            faceRecognitionFaultResultVO.setStayTime(getTimeGap(alarm.getAlarmTime(),LocalDateTime.now()));
+            long duration = LocalDateTimeUtil.between(alarm.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
+            faceRecognitionFaultResultVO.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
+            // faceRecognitionFaultResultVO.setStayTime(getTimeGap(alarm.getAlarmTime(),LocalDateTime.now()));
             List<TblVideoItem> data = itemAPI.getVideoItemListByItemCode(faceRecognitionFaultResultVO.getItemCode()).getBody().getData();
             faceRecognitionFaultResultVO.setIpAddress(data.get(0).getIp());
             resultList.add(faceRecognitionFaultResultVO);
@@ -272,7 +278,9 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
                 LocalDateTime alarmDateTime = this.covertTimeStampToLocalDateTime(param.getTimestamp());
                 result.setAlarmTime(alarmDateTime);
                 result.setAlarmType(MegviiEventLevelEnum.getMegviiEventLevelDescByTypeId(param.getEventLevelId()));
-                result.setStayTime(getTimeGap(alarmDateTime,LocalDateTime.now()));
+                long duration = LocalDateTimeUtil.between(alarmDateTime, LocalDateTime.now(), ChronoUnit.MILLIS);
+                result.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
+                //result.setStayTime(getTimeGap(alarmDateTime,LocalDateTime.now()));
             }
         }
         return result;
