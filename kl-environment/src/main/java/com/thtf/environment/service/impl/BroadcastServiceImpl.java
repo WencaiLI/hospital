@@ -263,7 +263,11 @@ public class BroadcastServiceImpl implements BroadcastService {
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
         tblItem.setSystemCode(sysCode);
+        tblItem.setFault(1);
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        if(itemList ==  null || itemList.size() == 0){
+            return null;
+        }
         List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
 
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
@@ -276,7 +280,9 @@ public class BroadcastServiceImpl implements BroadcastService {
         listAlarmInfoLimitOneParamDTO.setKeywordOfAlarmDesc(keyword);
         listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
         listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
+
         PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+        System.out.println(tblAlarmRecordUnhandlePageInfo);
         // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
 
 

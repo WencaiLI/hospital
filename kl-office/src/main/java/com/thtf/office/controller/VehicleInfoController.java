@@ -68,7 +68,7 @@ public class VehicleInfoController {
      */
     @PostMapping("/insert")
     @OperateLog(content = "新增维保信息",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
-    public JsonResult<Boolean> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
+    public JsonResult<String> insert(@Validated(VehicleParamValid.Insert.class) VehicleInfoParamVO paramVO,
                                       @ModelAttribute List<MultipartFile> carImageFile,
                                       @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
@@ -81,12 +81,12 @@ public class VehicleInfoController {
         paramVO.setDrivingBookImageUrl(bookImageFileNameAndUrl[1]);
         TblVehicleInfo vehicleInfo = vehicleInfoConverter.toVehicleInfo(paramVO);
 
-        Map<String, Object> result = vehicleInfoService.insert(vehicleInfo);
-        if(result.get("status").equals("success")){
-            return JsonResult.success(true);
-        }else {
-            return JsonResult.error(result.get("errorCause").toString());
-        }
+        return JsonResult.success(vehicleInfoService.insert(vehicleInfo));
+//        if(result.get("status").equals("success")){
+//            return JsonResult.success("");
+//        }else {
+//            return JsonResult.error(result.get("errorCause").toString());
+//        }
     }
 
     /**

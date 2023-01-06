@@ -2,8 +2,10 @@ package com.thtf.face_recognition.job;
 
 import com.thtf.common.dto.itemserver.ItemParameterUpdateDTO;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.face_recognition.common.constant.MegviiConfig;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
 import com.thtf.face_recognition.common.enums.MegviiItemStatus;
+import com.thtf.face_recognition.common.util.HttpUtil;
 import com.thtf.face_recognition.dto.MegviiDeviceDTO;
 import com.thtf.face_recognition.dto.MegviiListDeviceParamDTO;
 import com.thtf.face_recognition.dto.MegviiPage;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 public class ItemStatusJob {
     @Autowired
     private ItemAPI itemAPI;
+    @Autowired
+    MegviiConfig megviiConfig;
     @Resource
     MegviiApiServiceImpl megviiApiServiceImpl;
     // 更新设备状态
@@ -57,5 +61,9 @@ public class ItemStatusJob {
         offlineChange.setNewValue("0");
         itemAPI.updateParameterValue(offlineChange);
     }
-
+    // @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+    public void pullMegviiAlarm(){
+        String uri = "/v1/api/device/list";
+        // String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
+    }
 }
