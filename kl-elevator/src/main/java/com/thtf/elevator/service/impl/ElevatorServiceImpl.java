@@ -1,5 +1,8 @@
 package com.thtf.elevator.service.impl;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -478,7 +482,9 @@ public class ElevatorServiceImpl implements ElevatorService {
             // 匹配报警信息
             for (TblAlarmRecordUnhandle alarmRecordUnhandle : recordUnhandles) {
                 if(item.getCode().equals(alarmRecordUnhandle.getItemCode())){
-                    elevatorInfoResult.setStayTime(getTimeGap(alarmRecordUnhandle.getAlarmTime(),LocalDateTime.now()));
+                    long duration = LocalDateTimeUtil.between(alarmRecordUnhandle.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
+                    elevatorInfoResult.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
+                    // elevatorInfoResult.setStayTime(getTimeGap(alarmRecordUnhandle.getAlarmTime(),LocalDateTime.now()));
                     elevatorInfoResult.setAlarmLevel(alarmRecordUnhandle.getAlarmLevel());
                     elevatorInfoResult.setAlarmTime(alarmRecordUnhandle.getAlarmTime());
                     elevatorInfoResult.setAlarmCategory(alarmRecordUnhandle.getAlarmCategory());

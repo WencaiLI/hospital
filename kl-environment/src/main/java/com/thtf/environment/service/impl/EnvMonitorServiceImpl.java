@@ -3,6 +3,7 @@ package com.thtf.environment.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
+import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
@@ -196,30 +197,86 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     public PageInfoVO listAlarmItem(EnvMonitorItemParamVO paramVO){
+
+        // 查询指定的监测设备类型
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         if(null == parameterInfo || parameterInfo.size() == 0){
             return null;
         }
         List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+        // 查询处于报警或故障的设备编码
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
+            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
+        }else {
+            if(StringUtils.isNotBlank(paramVO.getAreaCode())){
+                areaCodeList = Arrays.asList(paramVO.getAreaCode().split(","));
+            }
+        }
+        TblItem tblItem = new TblItem();
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+        tblItem.setItemTypeCodeList(itemTypeCodeList);
+        tblItem.setSystemCode(paramVO.getSysCode());
+        if(null != paramVO.getAlarmCategory()){
+            if(paramVO.getAlarmCategory() == 1){
+                tblItem.setFault(1);
+            }
+            if(paramVO.getAlarmCategory() == 0){
+                tblItem.setAlarm(0);
+            }
+        }
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        if(itemList ==  null || itemList.size() == 0){
+            return null;
+        }
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
 
+
+        // 查询报警信息
+        ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
+        listAlarmInfoLimitOneParamDTO.setSystemCode(paramVO.getSysCode());
+        if(null != paramVO.getAlarmCategory()){
+            listAlarmInfoLimitOneParamDTO.setAlarmCategory(String.valueOf(paramVO.getAlarmCategory()));
+        }
+
+        listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
+        listAlarmInfoLimitOneParamDTO.setKeyword(paramVO.getKeyword());
+        listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(paramVO.getKeyword());
+        listAlarmInfoLimitOneParamDTO.setKeywordOfItemCode(paramVO.getKeyword());
+        listAlarmInfoLimitOneParamDTO.setKeywordOfAlarmDesc(paramVO.getKeyword());
+        listAlarmInfoLimitOneParamDTO.setPageNumber(paramVO.getPageNumber());
+        listAlarmInfoLimitOneParamDTO.setPageSize(paramVO.getPageSize());
+
+        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
+        List<String> collect = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+        itemList.removeIf(e->!collect.contains(e.getCode()));
+
+
+
+
+//
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
-        List<String> itemCodeList;
-        List<String> groupIdStringList;
-        PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.getAlarmInfoBySysCodeAndCategoryLimitOneByKeywordPage(paramVO.getKeyword(), paramVO.getAlarmCategory(), paramVO.getSysCode(), paramVO.getPageNumber(), paramVO.getPageSize()).getData();
-        // 设备编码集
-        itemCodeList = pageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
-        // 设备参数集
+//        List<String> itemCodeList;
+
+//        PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.getAlarmInfoBySysCodeAndCategoryLimitOneByKeywordPage(paramVO.getKeyword(), paramVO.getAlarmCategory(), paramVO.getSysCode(), paramVO.getPageNumber(), paramVO.getPageSize()).getData();
+//        // 设备编码集
+//        itemCodeList = pageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+//        // 设备参数集
         List<TblItemParameter> itemParameterList = itemAPI.searchParameterByItemCodes(itemCodeList).getData();
-        // 设备信息集
-        List<TblItem> itemList = itemAPI.searchItemByItemCodeList(itemCodeList).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
-        // 分组id集
+//        // 设备信息集
+//        List<TblItem> itemList = itemAPI.searchItemByItemCodeList(itemCodeList).getData();
+//        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+//        // 分组id集
+        List<String> groupIdStringList;
         groupIdStringList = itemList.stream().filter(e->null != e.getGroupId()).map(TblItem::getGroupId).map(String::valueOf).collect(Collectors.toList());
         List<TblGroup> groupList = null;
         if(groupIdStringList.size()>0){
             groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
         }
-        for (TblAlarmRecordUnhandle alarmRecord: pageInfo.getList()) {
+        for (TblAlarmRecordUnhandle alarmRecord: tblAlarmRecordUnhandlePageInfo.getList()) {
             EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
             // 匹配设备信息
             List<TblGroup> finalGroupList = groupList;
