@@ -253,24 +253,31 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,getOperatorName(),null));
         }
 
-        /* 查询应处于待命中的出车中或维修中的车辆 */
+        /* 查询应调度目的待命中的出车中或维修中的车辆 */
         QueryWrapper<TblVehicleScheduling> queryWrapper_1 = new QueryWrapper<>();
-        queryWrapper_1.isNull("delete_time").eq("status",0).le("end_time",now).and(e->e.eq("purpose",0).or().eq("purpose",1));
+        queryWrapper_1.isNull("delete_time").eq("status",0).le("end_time",now)
+                .and(e->e.eq("purpose",0).or().eq("purpose",1).or()
+                .eq("purpose",2));
         List<TblVehicleScheduling> tblVehicleSchedulingList = vehicleSchedulingMapper.selectList(queryWrapper_1);
 
         for (TblVehicleScheduling tblVehicleScheduling : tblVehicleSchedulingList) {
+            // 只有调度用途为出车状态的调度
             if(tblVehicleScheduling.getPurpose() == 0){
-                // 修改为待命中状态
+                // 修改公车为待命中状态
                 vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),tblVehicleScheduling.getWorkingDuration()));
-                // todo 修改状态为已调度状态
+                // 修改公车个调度状态为结束调度状态
                 UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
                 tblVehicleScheduling.setStatus(1);
                 updateWrapper.isNull("delete_time").eq("id",tblVehicleScheduling.getId());
                 vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
-
-            }else if (tblVehicleScheduling.getPurpose() == 1){
+            }else if (tblVehicleScheduling.getPurpose() == 1 || tblVehicleScheduling.getPurpose() == 2){
                 // 修改为待命中状态
                 vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),null));
+                // 修改公车个调度状态为结束调度状态
+                UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
+                tblVehicleScheduling.setStatus(1);
+                updateWrapper.isNull("delete_time").eq("id",tblVehicleScheduling.getId());
+                vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
             }else {
                 log.error("报废车车辆的调度状态存在问题！");
             }

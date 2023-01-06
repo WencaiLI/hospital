@@ -176,10 +176,12 @@ public class BroadcastController {
      */
     @PostMapping("/getAlarmInfo")
     JsonResult<PageInfoVO> getAlarmInfo(@RequestParam(value = "sysCode") String sysCode,
+                                        @RequestParam(value = "areaCode",required = false) String areaCode,
+                                        @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
                                         @RequestParam(value = "keyword",required = false) String keyword,
                                         @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                         @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.querySuccess(broadcastService.getAlarmInfo(keyword,sysCode,pageNumber,pageSize));
+        return JsonResult.querySuccess(broadcastService.getAlarmInfo(keyword,sysCode,buildingCodes,areaCode,pageNumber,pageSize));
     }
 
     /**

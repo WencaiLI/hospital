@@ -82,6 +82,18 @@ public class FaceRecognitionController {
         faceRecognitionAlarmResultVO.setEye(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
         faceRecognitionAlarmResultVO.setCenter(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
         list.add(faceRecognitionAlarmResultVO);
+
+        faceRecognitionAlarmResultVO.setAreaName("二楼");
+        list.add(faceRecognitionAlarmResultVO);
+        faceRecognitionAlarmResultVO.setAlarmType("喝酒");
+        faceRecognitionAlarmResultVO.setAreaName("二楼");
+        list.add(faceRecognitionAlarmResultVO);
+        faceRecognitionAlarmResultVO.setAlarmType("打架");
+        faceRecognitionAlarmResultVO.setAreaName("一楼");
+        list.add(faceRecognitionAlarmResultVO);
+        faceRecognitionAlarmResultVO.setAlarmType("滋事");
+        faceRecognitionAlarmResultVO.setAreaName("一楼");
+        list.add(faceRecognitionAlarmResultVO);
         result.setList(list);
         result.setTotal(1);
         result.setPageSize(paramVO.getPageSize());

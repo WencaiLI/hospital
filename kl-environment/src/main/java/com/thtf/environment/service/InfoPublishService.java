@@ -36,7 +36,7 @@ public interface InfoPublishService {
      * @Param pageSize: 页大小
      * @return: java.util.List<com.thtf.environment.dto.AlarmInfoOfLargeScreenDTO>
      */
-    PageInfoVO getLargeScreenAlarmInfo(String sysCode, String keyword, Integer pageNumber, Integer pageSize);
+    PageInfoVO getLargeScreenAlarmInfo(String sysCode,String buildingCodes, String areaCode, String keyword, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai

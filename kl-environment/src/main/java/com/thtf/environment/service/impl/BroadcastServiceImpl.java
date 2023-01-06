@@ -2,8 +2,10 @@ package com.thtf.environment.service.impl;
 
 
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
+import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
@@ -128,7 +130,6 @@ public class BroadcastServiceImpl implements BroadcastService {
      */
     @Override
     public PageInfoVO getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize) {
-
         String parameterCode = null;
         String parameterValue = null;
         if(StringUtils.isNotBlank(runVale)){
@@ -139,8 +140,6 @@ public class BroadcastServiceImpl implements BroadcastService {
                 sysCode, null, buildingCodes ,areaCode,parameterCode, parameterValue, keyword,pageNumber,pageSize).getData();
 
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
-//        List<ItemNestedParameterVO> list = itemPageInfo.getList();
-
         // 获取设备报警信息
         // List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
 
@@ -249,14 +248,48 @@ public class BroadcastServiceImpl implements BroadcastService {
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     @Override
-    public PageInfoVO getAlarmInfo(String keyword, String sysCode, Integer pageNumber, Integer pageSize) {
-        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
+    public PageInfoVO getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize) {
 
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(buildingCodes)){
+            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                areaCodeList = Arrays.asList(areaCode.split(","));
+            }
+        }
+        TblItem tblItem = new TblItem();
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+        tblItem.setSystemCode(sysCode);
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
+
+        ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
+        listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
+        listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
+        listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
+        listAlarmInfoLimitOneParamDTO.setKeyword(keyword);
+        listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(keyword);
+        listAlarmInfoLimitOneParamDTO.setKeywordOfItemCode(keyword);
+        listAlarmInfoLimitOneParamDTO.setKeywordOfAlarmDesc(keyword);
+        listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
+        listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
+        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
+
+
+//        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
+//
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
-
-        List<String> itemCodeList = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
-
-        List<TblItemDTO> items = itemAPI.searchItemByItemCodes(itemCodeList).getData();
+//
+//        List<String> itemCodeList = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+//
+//        List<TblItemDTO> items = itemAPI.searchItemByItemCodes(itemCodeList).getData();
+        // List<AlarmInfoOfLargeScreenDTO> alarmInfoOfLargeScreenDTOS = alarmConvert.toAlarmInfoOfLargeScreenDTOList(data.getList());
+        List<String> collect = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
+        itemList.removeIf(e->!collect.contains(e.getCode()));
         List<AlarmInfoOfBroadcastDTO> resultList = new ArrayList<>();
 
         // todo 怎么获取IP地址存疑
@@ -267,13 +300,14 @@ public class BroadcastServiceImpl implements BroadcastService {
             alarmInfoOfBroadcastDTO.setAlarmLevel(alarm.getAlarmLevel());
             alarmInfoOfBroadcastDTO.setAlarmTime(alarm.getAlarmTime());
 
-            for (TblItemDTO tblItemDTO : items) {
+            for (TblItem tblItemDTO : itemList) {
                 if(tblItemDTO.getCode().equals(alarm.getItemCode())){
                     alarmInfoOfBroadcastDTO.setItemId(tblItemDTO.getId());
                     alarmInfoOfBroadcastDTO.setItemCode(tblItemDTO.getCode());
                     alarmInfoOfBroadcastDTO.setItemName(tblItemDTO.getName());
                     alarmInfoOfBroadcastDTO.setAreaCode(tblItemDTO.getAreaCode());
-                    alarmInfoOfBroadcastDTO.setAreaName(redisOperationService.getBuildAreaNameByCode(tblItemDTO.getAreaCode()));
+                    alarmInfoOfBroadcastDTO.setAreaName(tblItemDTO.getAreaName());
+                    alarmInfoOfBroadcastDTO.setBuildingCode(tblItemDTO.getBuildingCode());
                 }
             }
             resultList.add(alarmInfoOfBroadcastDTO);
