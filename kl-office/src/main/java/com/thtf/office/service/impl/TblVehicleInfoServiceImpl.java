@@ -106,20 +106,21 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         queryWrapper.isNull("delete_time").eq("car_number",vehicleInfo.getCarNumber());
         List<TblVehicleInfo> infoList = vehicleInfoMapper.selectList(queryWrapper);
         if (infoList.size() == 1){
-            throw new Exception("车牌号不能为null");
+            throw new Exception("车牌号重复");
         }
         /* 设置初始值: 状态设置为待命中，创建日期设置为当前日期，使用时长为0 */
-        long l = this.idGeneratorSnowflake.snowflakeId();
-        vehicleInfo.setId(l);
+        long id = this.idGeneratorSnowflake.snowflakeId();
+        vehicleInfo.setId(id);
         vehicleInfo.setStatus(0);
         vehicleInfo.setWorkingDuration(0L);
         vehicleInfo.setCreateTime(LocalDateTime.now());
         vehicleInfo.setCreateBy(getOperatorName());
         if(vehicleInfoMapper.insert(vehicleInfo) == 1){
             // return getServiceResultMap("success",null,null);
-            throw new Exception("车牌号不能为null");
+            return String.valueOf(id);
+        }else {
+            throw new Exception("新增失败");
         }
-        return String.valueOf(l);
         // return getServiceResultMap("error","车辆新增失败",null);
     }
 

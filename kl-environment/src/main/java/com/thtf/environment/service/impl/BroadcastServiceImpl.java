@@ -282,18 +282,7 @@ public class BroadcastServiceImpl implements BroadcastService {
         listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
 
         PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-        System.out.println(tblAlarmRecordUnhandlePageInfo);
-        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
-
-
-//        PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
-//
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
-//
-//        List<String> itemCodeList = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
-//
-//        List<TblItemDTO> items = itemAPI.searchItemByItemCodes(itemCodeList).getData();
-        // List<AlarmInfoOfLargeScreenDTO> alarmInfoOfLargeScreenDTOS = alarmConvert.toAlarmInfoOfLargeScreenDTOList(data.getList());
         List<String> collect = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
         itemList.removeIf(e->!collect.contains(e.getCode()));
         List<AlarmInfoOfBroadcastDTO> resultList = new ArrayList<>();
@@ -319,7 +308,6 @@ public class BroadcastServiceImpl implements BroadcastService {
             resultList.add(alarmInfoOfBroadcastDTO);
         }
         pageInfoVO.setList(resultList);
-
         return pageInfoVO;
     }
 
