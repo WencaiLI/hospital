@@ -219,6 +219,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         tblItem.setAreaCodeList(areaCodeList);
         tblItem.setItemTypeCodeList(itemTypeCodeList);
         tblItem.setSystemCode(paramVO.getSysCode());
+        if(StringUtils.isNotBlank(paramVO.getItemTypeCode())){
+            tblItem.setTypeCode(paramVO.getItemTypeCode());
+        }
         if(null != paramVO.getAlarmCategory()){
             if(paramVO.getAlarmCategory() == 1){
                 tblItem.setFault(1);
