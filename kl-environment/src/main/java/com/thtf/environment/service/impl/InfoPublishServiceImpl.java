@@ -207,7 +207,6 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
         listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
         PageInfo<TblAlarmRecordUnhandle> data = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-        // PageInfo<TblAlarmRecordUnhandle> data = alarmAPI.getAlarmInfoBySysCodeLimitOneByKeywordPage(keyword, sysCode, pageNumber, pageSize).getData();
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
         List<AlarmInfoOfLargeScreenDTO> alarmInfoOfLargeScreenDTOS = alarmConvert.toAlarmInfoOfLargeScreenDTOList(data.getList());
         List<String> collect = data.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
