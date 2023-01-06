@@ -26,7 +26,7 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
 
     boolean deleteById(Long vid);
 
-    Map<String,Object> insert(TblVehicleInfo paramVO);
+    String insert(TblVehicleInfo paramVO) throws Exception;
 
     Map<String,Object> insertBatch(List<VehicleInfoExcelImportDTO> list);
 

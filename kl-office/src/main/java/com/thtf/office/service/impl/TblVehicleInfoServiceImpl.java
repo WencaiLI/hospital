@@ -100,24 +100,27 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
      */
     @Override
     @Transactional
-    public Map<String,Object> insert(TblVehicleInfo vehicleInfo) {
+    public String insert(TblVehicleInfo vehicleInfo) throws Exception {
         /* 车牌号不能相同 */
         QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("delete_time").eq("car_number",vehicleInfo.getCarNumber());
         List<TblVehicleInfo> infoList = vehicleInfoMapper.selectList(queryWrapper);
         if (infoList.size() == 1){
-            return getServiceResultMap("error","车牌号不能相同",null);
+            throw new Exception("车牌号不能为null");
         }
         /* 设置初始值: 状态设置为待命中，创建日期设置为当前日期，使用时长为0 */
-        vehicleInfo.setId(this.idGeneratorSnowflake.snowflakeId());
+        long l = this.idGeneratorSnowflake.snowflakeId();
+        vehicleInfo.setId(l);
         vehicleInfo.setStatus(0);
         vehicleInfo.setWorkingDuration(0L);
         vehicleInfo.setCreateTime(LocalDateTime.now());
         vehicleInfo.setCreateBy(getOperatorName());
         if(vehicleInfoMapper.insert(vehicleInfo) == 1){
-            return getServiceResultMap("success",null,null);
+            // return getServiceResultMap("success",null,null);
+            throw new Exception("车牌号不能为null");
         }
-        return getServiceResultMap("error","车辆新增失败",null);
+        return String.valueOf(l);
+        // return getServiceResultMap("error","车辆新增失败",null);
     }
 
     /**
