@@ -3,6 +3,7 @@ package com.thtf.face_recognition.job;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.thtf.common.dto.itemserver.ItemParameterUpdateDTO;
+import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
@@ -53,20 +54,31 @@ public class ItemStatusJob {
         List<String> onlineItemCodeList = totalItems.stream().filter(e -> e.getStatus().equals(MegviiItemStatus.ONLINE.getId())).map(MegviiDeviceDTO::getUuid).collect(Collectors.toList());
         List<String> offlineItemCodeList = totalItems.stream().filter(e -> e.getStatus().equals(MegviiItemStatus.OFFLINE.getId())).map(MegviiDeviceDTO::getUuid).collect(Collectors.toList());
         // 离线状态设备uuid
-        ItemParameterUpdateDTO onlineChange = new ItemParameterUpdateDTO();
-        onlineChange.setItemCodeList(onlineItemCodeList);
-        onlineChange.setParameterCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
-        onlineChange.setNewValue("1");
-        itemAPI.updateParameterValue(onlineChange);
-        ItemParameterUpdateDTO offlineChange = new ItemParameterUpdateDTO();
-        offlineChange.setItemCodeList(offlineItemCodeList);
-        offlineChange.setParameterCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
-        offlineChange.setNewValue("0");
-        itemAPI.updateParameterValue(offlineChange);
+        if(onlineItemCodeList.size()>0){
+            String onlineItemCodeLists = String.join(",", onlineItemCodeList);
+            itemAPI.updateAlarmOrFaultStatus(onlineItemCodeLists,null,0);
+        }
+        if(offlineItemCodeList.size()>0){
+            String offlineItemCodeLists = String.join(",",offlineItemCodeList);
+            itemAPI.updateAlarmOrFaultStatus(offlineItemCodeLists,null,1);
+        }
     }
 
     @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
     public void pullMegviiAlarm() throws Exception {
         megviiApiServiceImpl.listPushIntelligentData();
+    }
+    /**
+     * @Author: liwencai
+     * @Description: 测试修改状态
+     * @Date: 2023/1/7
+     * @Return: void
+     */
+    @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+    public void test(){
+        List<TblItem> sub_face_recognition = itemAPI.searchItemBySysCodeAndAreaCode("sub_face_recognition", null).getData();
+        if (null != sub_face_recognition){
+            itemAPI.updateAlarmOrFaultStatus(sub_face_recognition.get(0).getCode(),0,null);
+        }
     }
 }

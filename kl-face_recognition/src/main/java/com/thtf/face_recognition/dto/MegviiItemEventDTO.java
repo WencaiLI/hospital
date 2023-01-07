@@ -51,9 +51,16 @@ public class MegviiItemEventDTO {
     private String captureImageUrl;
 
     /**
+     * 抓拍图
+     */
+    private String captureImageRect;
+
+    /**
      * 用户url
      */
     private String personImageUri;
+
+    private String personImageFaceRect;
 
     /**
      * 事件id
@@ -64,5 +71,7 @@ public class MegviiItemEventDTO {
      * 事件id
      */
     private String eventType;
+
+    private String faceRect;
 
 }
