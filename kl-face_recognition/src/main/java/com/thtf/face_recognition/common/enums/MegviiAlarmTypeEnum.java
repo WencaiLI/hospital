@@ -84,7 +84,7 @@ public enum  MegviiAlarmTypeEnum {
                 return megviiAlarmTypeEnum.getDesc();
             }
         }
-        throw new IllegalArgumentException("name is invalid");
+        return null;
     }
 
 
