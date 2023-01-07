@@ -381,7 +381,8 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
 
                     if (StringUtils.isNoneBlank(uuid)) {
                         MegviiUserInfoDTO userInfo = getUserInfoByUUId(uuid);
-                        if(null == userInfo){
+                        System.out.println(userInfo);
+                        if(null != userInfo){
                             innerResult.setIdentifyNum(userInfo.getIdentifyNum());
                             // todo 正式环境
                             innerResult.setPersonImageUri(userInfo.getImageUri());
@@ -627,12 +628,12 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         String jsonResult =  "{\"alarmControlType\":1,\n" +
                 "\"alarmEndTime\":"+alarmTime+",\n" +
                 "\"alarmRecordUuId\":\"5ce33c9accb94a978976b232958bdc88\",\n" +
-                "\"alarmTime\":1621497491318,\n" +
+                "\"alarmTime\":"+alarmTime+",\n" +
                 "\"alarmType\":+"+alarmType+"+,\n" +
                 "\"areaId\":0,\n" +
                 "\"continueTime\":\"3.0\",\n" +
                 "\"deviceName\":\"警ᡂ㇇⌅仓-车辆虚拟\",\n" +
-                "\"deviceUuid\":\"RLSB_TYPE_1\",\n" +
+                "\"deviceUuid\":\"RLSB_TYPE_"+alarmType+"+\",\n" +
                 "\"targetRect\":[{\"bottom\":82.376396,\"left\":46.54868,\"right\":51.40949,\"top\":12}],\n" +
                 "\"wholeImageUrl\":\"https://ts1.cn.mm.bing.net/th/id/R-C.d012fa027bb8ceffe790b2ea785ba69e?rik=34mJMkl6ADGSyw&riu=http%3a%2f%2f9.pic.paopaoche.net%2fthumb%2fup%2f2017-5%2f201705230909503371641_600_0.jpg&ehk=w%2b948Sa8mw8kU7HReJnWr9mni6KU1u1enn%2fZ8T7AV78%3d&risl=&pid=ImgRaw&r=0\",\n" +
                 "\"arithmeticPackageType\":1,\n" +

@@ -64,7 +64,7 @@ public class ItemStatusJob {
         }
     }
 
-    @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+    @Scheduled(cron = "*/10 * * * * ?")  // 十分钟执行一次
     public void pullMegviiAlarm() throws Exception {
         megviiApiServiceImpl.listPushIntelligentData();
     }
