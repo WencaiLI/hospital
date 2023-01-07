@@ -154,27 +154,27 @@ public class FaceRecognitionController {
     public JsonResult<MegviiPage<MegviiItemEventDTO>> listItemEventByItemCode(@RequestParam("itemCode") String itemCode,
                                                                               @RequestParam("pageNumber") Integer pageNumber,
                                                                               @RequestParam("pageSize") Integer pageSize){
-        MegviiPage<MegviiItemEventDTO> result = new MegviiPage();
 
-        List<MegviiItemEventDTO> list = new ArrayList<>();
-        MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
-        innerResult.setPersonName("张三");
-        innerResult.setEventType("越界事件");
-        innerResult.setEventArea("三层");
-        innerResult.setPhone("18822046556");
-        innerResult.setPersonType("游客");
-        innerResult.setIdentifyNum("110004198001021257");
-        innerResult.setEventTime(LocalDateTime.now());
-        innerResult.setEventName("越界入侵");
-        innerResult.setPersonImageUri("https://tse4-mm.cn.bing.net/th/id/OIP-C.qpO2TkjaOknpGuarkDmt_QHaHa?pid=ImgDet&rs=1");
-        innerResult.setCaptureImageUrl("https://tse3-mm.cn.bing.net/th/id/OIP-C.Ah9pBmriGIffYSoJi4_wlAHaFY?pid=ImgDet&rs=1");
-        list.add(innerResult);
-        result.setList(list);
-        result.setTotal(1L);
-        result.setPageSize(pageSize);
-        result.setPageNum(pageNumber);
-        return JsonResult.querySuccess(result);
-        // return JsonResult.querySuccess(manufacturerApiService.listItemEventByItemCode(itemCode,pageNumber,pageSize));
+//        MegviiPage<MegviiItemEventDTO> result = new MegviiPage();
+//        List<MegviiItemEventDTO> list = new ArrayList<>();
+//        MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
+//        innerResult.setPersonName("张三");
+//        innerResult.setEventType("越界事件");
+//        innerResult.setEventArea("三层");
+//        innerResult.setPhone("18822046556");
+//        innerResult.setPersonType("游客");
+//        innerResult.setIdentifyNum("110004198001021257");
+//        innerResult.setEventTime(LocalDateTime.now());
+//        innerResult.setEventName("越界入侵");
+//        innerResult.setPersonImageUri("https://tse4-mm.cn.bing.net/th/id/OIP-C.qpO2TkjaOknpGuarkDmt_QHaHa?pid=ImgDet&rs=1");
+//        innerResult.setCaptureImageUrl("https://tse3-mm.cn.bing.net/th/id/OIP-C.Ah9pBmriGIffYSoJi4_wlAHaFY?pid=ImgDet&rs=1");
+//        list.add(innerResult);
+//        result.setList(list);
+//        result.setTotal(1L);
+//        result.setPageSize(pageSize);
+//        result.setPageNum(pageNumber);
+//        return JsonResult.querySuccess(result);
+         return JsonResult.querySuccess(manufacturerApiService.listItemEventByItemCode(itemCode,pageNumber,pageSize));
     }
 
 }

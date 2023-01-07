@@ -28,24 +28,7 @@ public class MegviiPersonInfo {
     /**
      * 人脸坐标
      */
-    private String faceRect;
+    private FaceRectDTO faceRect;
 
-    /**
-     * 目标在图片中的距离，左
-     */
-    private String left;
 
-    /**
-     * 目标在图片中的距离，上
-     */
-    private String top;
-
-    /**
-     * 目标在图片中的距离，右
-     */
-    private String right;
-    /**
-     * 目标在图片中的距离，下
-     */
-    private String bottom;
 }
