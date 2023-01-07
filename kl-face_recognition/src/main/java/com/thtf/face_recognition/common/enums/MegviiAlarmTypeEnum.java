@@ -10,6 +10,7 @@ public enum  MegviiAlarmTypeEnum {
     ALARM_1(1,"人员越界"),
     ALARM_2(2,"人员入侵"),
     ALARM_31(31,"非机动车越界"),
+    Alarm_32(32,"机动车越界"),
     ALARM_33(33,"机动车和非机动车越界"),
     ALARM_4(4,"车辆禁停"),
     ALARM_41(41,"机动车禁停"),
@@ -77,7 +78,7 @@ public enum  MegviiAlarmTypeEnum {
      * @Param eventTypeId:
      * @Return: java.lang.String
      */
-    public static String getMegviiEventLevelDescByTypeId(Long alarmTypeId){
+    public static String getMegviiEventLevelDescByTypeId(Integer alarmTypeId){
         for (MegviiAlarmTypeEnum megviiAlarmTypeEnum : MegviiAlarmTypeEnum.values()) {
             if(megviiAlarmTypeEnum.getId().equals(alarmTypeId)){
                 return megviiAlarmTypeEnum.getDesc();

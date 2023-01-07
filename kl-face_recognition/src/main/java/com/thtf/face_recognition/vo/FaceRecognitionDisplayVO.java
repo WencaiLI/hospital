@@ -25,6 +25,11 @@ public class FaceRecognitionDisplayVO {
     private Integer alarmNum;
 
     /**
+     * 报警总数
+     */
+    private Integer faultNum;
+
+    /**
      * 离线设备总数
      */
     private Integer offlineNum;

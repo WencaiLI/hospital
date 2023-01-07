@@ -6,38 +6,54 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageInfo;
+
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.ListItemByKeywordPageParamDTO;
 import com.thtf.common.dto.itemserver.ListItemByKeywordPageResultDTO;
+
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.face_recognition.common.config.IdGeneratorSnowflake;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
+import com.thtf.face_recognition.common.enums.MegviiAlarmTypeEnum;
 import com.thtf.face_recognition.common.enums.MegviiEventLevelEnum;
 import com.thtf.face_recognition.common.enums.MegviiEventTypeEnum;
 import com.thtf.face_recognition.common.enums.MegviiPersonTypeEnum;
 import com.thtf.face_recognition.common.util.HttpUtil;
 import com.thtf.face_recognition.common.util.megvii.StringUtil;
 import com.thtf.face_recognition.dto.*;
+
+import com.thtf.face_recognition.entity.faceServer.MegviiAlarmData;
+import com.thtf.face_recognition.mapper.MegviiAlarmDataMapper;
 import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.service.ManufacturerApiService;
+import com.thtf.face_recognition.service.MegviiAlarmDataService;
 import com.thtf.face_recognition.vo.FaceRecognitionAlarmParamVO;
 import com.thtf.face_recognition.vo.FaceRecognitionAlarmResultVO;
 import com.thtf.face_recognition.vo.FaceRecognitionFaultResultVO;
 import com.thtf.face_recognition.vo.MegviiUserInfoDTO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -47,9 +63,14 @@ import java.util.stream.Collectors;
  */
 @Service("Megvii")
 public class MegviiApiServiceImpl implements ManufacturerApiService {
+    @Resource(name = "megvii")
+    IdGeneratorSnowflake idGeneratorSnowflake;
 
     @Autowired
     private FaceRecognitionService faceRecognitionService;
+
+    @Autowired
+    private MegviiAlarmDataService megviiAlarmDataService;
 
     @Autowired
     private ItemAPI itemAPI;
@@ -60,13 +81,14 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
     @Autowired
     MegviiConfig megviiConfig;
 
+    @Autowired
+    private MegviiAlarmDataMapper megviiAlarmDataMapper;
 
     //private  static final String BASE_API = "";
     /**
      * 事件开始查询的时间
      */
     private static final String EVENT_START_TIME = "2020-01-01 00:00:00";
-
 
     /**
      * @Author: liwencai
@@ -77,6 +99,144 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
      */
     @Override
     public MegviiPage<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO) {
+        MegviiPage<FaceRecognitionAlarmResultVO> result = new MegviiPage<>();
+
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+
+        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
+            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
+        }else {
+            if(StringUtils.isNotBlank(paramVO.getAreaCodes())){
+                areaCodeList = Arrays.asList(paramVO.getAreaCodes().split(","));
+            }
+        }
+
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(paramVO.getSysCode());
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+        tblItem.setAlarm(1);
+        if(StringUtils.isNoneBlank(paramVO.getKeyword())){
+            tblItem.setKeyword(paramVO.getKeyword());
+            tblItem.setKeyName(paramVO.getKeyword());
+            tblItem.setKeyCode(paramVO.getKeyword());
+            tblItem.setKeyAreaName(paramVO.getKeyword());
+        }
+        tblItem.setPageNumber(paramVO.getPageNumber());
+        tblItem.setPageSize(paramVO.getPageSize());
+
+        PageInfo<TblItem> pageInfo = itemAPI.queryAllItemsPage(tblItem).getData();
+
+        result.setTotal(pageInfo.getTotal());
+        result.setPageNum(pageInfo.getPageNum());
+        result.setPageSize(pageInfo.getPageSize());
+
+        List<TblItem> itemList = pageInfo.getList();
+
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
+        if(itemCodeList.size() == 0){
+            return null;
+        }
+        // 匹配报警信息
+        List<TblAlarmRecordUnhandle> data = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, 0).getData();
+        // 匹配报警信息
+        List<String> detailAlarmIdList = data.stream().map(TblAlarmRecordUnhandle::getAlarmDescription).collect(Collectors.toList());
+        List<String> newDetailAlarmIdList = detailAlarmIdList.stream().filter(StringUtils::isNumeric).collect(Collectors.toList());
+        List<Long> alarmIdList = newDetailAlarmIdList.stream().map(Long::parseLong).collect(Collectors.toList());
+
+        List<MegviiAlarmData> megviiAlarmData = new ArrayList<>();
+        if(alarmIdList.size()>0){
+            megviiAlarmData  = megviiAlarmDataMapper.selectList(new QueryWrapper<MegviiAlarmData>().lambda().in(MegviiAlarmData::getId, alarmIdList));
+        }
+
+        List<FaceRecognitionAlarmResultVO> resultVOList = new ArrayList<>();
+        for (TblItem item : itemList) {
+            FaceRecognitionAlarmResultVO innerResult = new FaceRecognitionAlarmResultVO();
+            innerResult.setItemId(item.getId());
+            innerResult.setItemCode(item.getCode());
+            innerResult.setItemName(item.getName());
+            innerResult.setItemDescription(item.getDescription());
+            innerResult.setAreaName(item.getAreaName());
+            innerResult.setIpAddress("127.0.0.1");
+            megviiAlarmData.forEach(e->{
+                if(e.getItemCode().equals(item.getCode())){
+                    innerResult.setAlarmTime(e.getAlarmTime());
+                    System.out.println(e.getAlarmType());
+                    innerResult.setAlarmType(MegviiAlarmTypeEnum.getMegviiEventLevelDescByTypeId(e.getAlarmType()));
+                    innerResult.setCatchImageUrl(e.getImageUrl());
+                    innerResult.setCatchImageTarget(e.getTargetRect());
+                    // innerResult.setAlarmLevel("2");
+                }
+            });
+            if(StringUtils.isNotBlank(item.getViewLongitude())){
+                innerResult.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            if(StringUtils.isNotBlank(item.getViewLatitude())){
+                innerResult.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            resultVOList.add(innerResult);
+        }
+        result.setList(resultVOList);
+        return result;
+
+
+//        return null;
+//        MegviiPage<FaceRecognitionAlarmResultVO> megviiPage = new MegviiPage<FaceRecognitionAlarmResultVO>();
+//        List<FaceRecognitionAlarmResultVO> resultVOList = new ArrayList<>();
+//
+//        ListItemByKeywordPageParamDTO listItemByKeywordPageParamDTO = new ListItemByKeywordPageParamDTO();
+//        // 关键词搜索
+//        if(StringUtils.isNoneBlank(paramVO.getKeyword())){
+//            listItemByKeywordPageParamDTO.setKeywordOfDesc(paramVO.getKeyword());
+//            listItemByKeywordPageParamDTO.setKeywordOfCode(paramVO.getKeyword());
+//            listItemByKeywordPageParamDTO.setKeywordOfName(paramVO.getKeyword());
+//        }
+//
+//        listItemByKeywordPageParamDTO.setAreaCodes(paramVO.getAreaCodes());
+//        listItemByKeywordPageParamDTO.setBuildingCodes(paramVO.getBuildingCodes());
+//
+//        // 获取设备信息
+//        List<ListItemByKeywordPageResultDTO> allItems = itemAPI.listItemByKeywordPage(listItemByKeywordPageParamDTO).getData().getList();
+//        // 所有设备编码
+//        List<String> allItemCodeList = allItems.stream().map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
+//
+//        MegviiListEventRecordParamDTO paramDTO = new MegviiListEventRecordParamDTO();
+//        paramDTO.setPageNum(paramVO.getPageNumber());
+//        paramDTO.setPageSize(paramVO.getPageSize());
+//        // 设置设备编码
+//        paramDTO.setDeviceUuids(allItemCodeList);
+//        paramDTO.setStatus(0);
+//        paramDTO.setStartTime(this.convertLocalDateTimeToTimeStamp(EVENT_START_TIME));
+//        paramDTO.setEndTime(this.convertLocalDateTimeToTimeStamp(LocalDateTime.now()));
+//
+//        List<MegviiListEventRecordResultDTO> megviiListEventRecordResultDTOS = null;
+//        Map<String, Object> map = listEventRecords(paramDTO);
+//        megviiListEventRecordResultDTOS = (List<MegviiListEventRecordResultDTO>) map.get("list");
+//        megviiPage.setPageNum(Integer.valueOf((String)map.get("pageNum")));
+//        megviiPage.setPageSize(Integer.valueOf((String)map.get("pageSize")));
+//        megviiPage.setTotal(Integer.valueOf((String)map.get("total")));
+//        if (null == megviiListEventRecordResultDTOS){
+//            return null;
+//        }
+//        // List<MegviiListEventRecordResultDTO> megviiListEventRecordResultDTOS = listEventRecords(paramDTO);
+//        for (MegviiListEventRecordResultDTO item : megviiListEventRecordResultDTOS) {
+//            resultVOList.add(convertToMegviiListEventRecordResultDTO(item,allItems));
+//        }
+//        megviiPage.setList(resultVOList);
+//        return megviiPage;
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 对应文档721页
+     * @Date: 2022/12/6
+     * @Param paramVO:
+     * @Return: java.util.List<com.thtf.face_recognition.vo.FaceRecognitionAlarmResultVO>
+     */
+//    @Override
+    public MegviiPage<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarmOld(FaceRecognitionAlarmParamVO paramVO) {
         MegviiPage<FaceRecognitionAlarmResultVO> megviiPage = new MegviiPage<FaceRecognitionAlarmResultVO>();
         List<FaceRecognitionAlarmResultVO> resultVOList = new ArrayList<>();
 
@@ -110,7 +270,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         megviiListEventRecordResultDTOS = (List<MegviiListEventRecordResultDTO>) map.get("list");
         megviiPage.setPageNum(Integer.valueOf((String)map.get("pageNum")));
         megviiPage.setPageSize(Integer.valueOf((String)map.get("pageSize")));
-        megviiPage.setTotal(Integer.valueOf((String)map.get("total")));
+        megviiPage.setTotal(Long.valueOf((String)map.get("total")));
         if (null == megviiListEventRecordResultDTOS){
             return null;
         }
@@ -140,7 +300,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         listAlarmInfoLimitOneParamDTO.setPageSize(paramVO.getPageSize());
         listAlarmInfoLimitOneParamDTO.setPageNumber(paramVO.getPageNumber());
         PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-        result.setTotal(Long.valueOf(pageInfo.getTotal()).intValue());
+        result.setTotal(Long.valueOf(pageInfo.getTotal()));
         result.setPageNum(pageInfo.getPageNum());
         result.setPageSize(pageInfo.getPageSize());
         List<FaceRecognitionFaultResultVO> resultList = new ArrayList<>();
@@ -199,7 +359,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             List<MegviiListEventRecordResultDTO> megviiListEventRecordResults = (List<MegviiListEventRecordResultDTO>)map.get("list");
             result.setPageSize((Integer) map.get("pageSize"));
             result.setPageNum((Integer) map.get("pageNum"));
-            result.setTotal((Integer) map.get("total"));
+            result.setTotal((Long) map.get("total"));
             for (MegviiListEventRecordResultDTO recordResult : megviiListEventRecordResults) {
                 //
                 String ext = recordResult.getExt();
@@ -345,7 +505,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
             Map<String, Object> map = convertToJsonList(jsonResult);
             result.setList(JSONArray.parseArray(String.valueOf(map.get("list")), MegviiDeviceDTO.class));
-            result.setTotal(JSON.parseObject(String.valueOf(map.get("total")),Integer.class));
+            result.setTotal(JSON.parseObject(String.valueOf(map.get("total")),Long.class));
             result.setPageNum(JSON.parseObject(String.valueOf(map.get("pageNum")),Integer.class));
             result.setPageSize(JSON.parseObject(String.valueOf(map.get("pageSize")),Integer.class));
             return result;
@@ -354,8 +514,155 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         }
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 向数据库写入智能分析事件
+     * @Date: 2023/1/7
+     * @Return: com.thtf.face_recognition.dto.MegviiPage<com.thtf.face_recognition.dto.MegviiPushDataIntelligentDTO>
+     */
+    @Transactional
+    public MegviiPage<MegviiPushDataIntelligentDTO> listPushIntelligentData() throws Exception {
+        String uri = "/v1/api/device/list";
+        // String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, null);
+        Random random = new Random();
+        int max= 0 ;
+        int min = 20;
+        int alarmType = random.nextInt(min+max)+min;
 
-    
+
+        int  min_1 = 1673058;
+        int max_1= (int) (System.currentTimeMillis()/1000000);
+
+        long alarmTime = (random.nextInt(max_1+min_1)+min_1)*1000000;
+
+        String jsonResult =  "{\"alarmControlType\":1,\n" +
+                "\"alarmEndTime\":"+alarmTime+",\n" +
+                "\"alarmRecordUuId\":\"5ce33c9accb94a978976b232958bdc88\",\n" +
+                "\"alarmTime\":1621497491318,\n" +
+                "\"alarmType\":+"+alarmType+"+,\n" +
+                "\"areaId\":0,\n" +
+                "\"continueTime\":\"3.0\",\n" +
+                "\"deviceName\":\"警ᡂ㇇⌅仓-车辆虚拟\",\n" +
+                "\"deviceUuid\":\"RLSB_TYPE_1\",\n" +
+                "\"targetRect\":[{\"bottom\":82.376396,\"left\":46.54868,\"right\":51.40949,\"top\":12}],\n" +
+                "\"wholeImageUrl\":\"_ZzEwMF8zbQ==_455a8508b17b4683b49e3c78ba15ea26\",\n" +
+                "\"arithmeticPackageType\":1,\n" +
+                "\"color\":1,\n" +
+                "\"fireEquipmentNumber\":3,\n" +
+                "\"gasCylinderFunction\":2,\n" +
+                "\"indicatorStatusColor\":\"㓒灯亮\",\n" +
+                "\"personInfo\":[{\"uuid\":\"xssddss\",\"name\":\"李文彩\"}]\n" +
+                "}";
+        MegviiPushDataIntelligentDTO megviiPushDataIntelligentDTO = jsonToMegviiPushDataIntelligentDTO(jsonResult);
+        MegviiApiServiceImpl megviiApiService = new MegviiApiServiceImpl();
+        MegviiAlarmData megviiAlarmData = new MegviiAlarmData();
+
+        String deviceUuid = megviiPushDataIntelligentDTO.getDeviceUuid();
+        // 生成id
+        Long id = idGeneratorSnowflake.getId();
+        megviiAlarmData.setId(id);
+        megviiAlarmData.setAlarmType(megviiPushDataIntelligentDTO.getAlarmType());
+        // 时间戳 转 时间
+        megviiAlarmData.setAlarmTime(megviiApiService.toLocalDateTimeMilliseconds(megviiPushDataIntelligentDTO.getAlarmTime()));
+        if(StringUtils.isNotBlank(megviiPushDataIntelligentDTO.getWholeImageUrl())){
+            megviiAlarmData.setImageUrl(megviiPushDataIntelligentDTO.getWholeImageUrl());
+            megviiAlarmData.setImageType(1);
+            megviiAlarmData.setTargetRect(megviiPushDataIntelligentDTO.getTargetRect());
+            String jsonString = JSON.toJSONString(megviiPushDataIntelligentDTO.getPersonInfo());
+            megviiAlarmData.setPersonInfo(jsonString);
+            megviiAlarmData.setItemCode(deviceUuid);
+        }
+        megviiAlarmDataMapper.insert(megviiAlarmData);
+        //
+
+        TblItem item = itemAPI.searchItemByItemCode(deviceUuid).getData();
+        if(null == item){
+            return null;
+        }
+        TblAlarmRecordUnhandle tblAlarmRecordUnhandle = new TblAlarmRecordUnhandle();
+        tblAlarmRecordUnhandle.setAlarmTime(megviiAlarmData.getAlarmTime());
+        tblAlarmRecordUnhandle.setItemId(String.valueOf(item.getId()));
+        tblAlarmRecordUnhandle.setItemCode(item.getCode());
+        tblAlarmRecordUnhandle.setItemTypeCode(item.getTypeCode());
+        tblAlarmRecordUnhandle.setParameterCode("旷世数据推送");
+        tblAlarmRecordUnhandle.setSystemCode("sub_face_recognition");
+        tblAlarmRecordUnhandle.setSystemName("人脸识别系统");
+        tblAlarmRecordUnhandle.setBuildingAreaCode(item.getAreaCode());
+        tblAlarmRecordUnhandle.setBuildingAreaName(item.getAreaName());
+        tblAlarmRecordUnhandle.setBuildingArea(item.getBuildingCode());
+        tblAlarmRecordUnhandle.setAlarmDescription(String.valueOf(id));
+        tblAlarmRecordUnhandle.setAlarmLevel(2);
+        tblAlarmRecordUnhandle.setAlarmType(4);
+        tblAlarmRecordUnhandle.setAlarmCategory(0);
+        // tblAlarmRecordUnhandle.setAlarmPlanId();
+        alarmAPI.insertAlarmUnhandled(tblAlarmRecordUnhandle);
+        return null;
+    }
+
+    public MegviiPushDataIntelligentDTO jsonToMegviiPushDataIntelligentDTO(String jsonString){
+        MegviiPushDataIntelligentDTO megviiPushDataIntelligentDTO = JSON.parseObject(jsonString, MegviiPushDataIntelligentDTO.class);
+
+        return megviiPushDataIntelligentDTO;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 推送数据格式转换测试
+     * @Date: 2023/1/7
+     * @Param args:
+     * @Return: void
+     */
+    public static void main(String[] args) {
+       String jsonString =  "{\"alarmControlType\":1,\n" +
+               "\"alarmEndTime\":1621497491318,\n" +
+               "\"alarmRecordUuId\":\"5ce33c9accb94a978976b232958bdc88\",\n" +
+               "\"alarmTime\":1621497491318,\n" +
+               "\"alarmType\":1,\n" +
+               "\"areaId\":0,\n" +
+               "\"continueTime\":\"3.0\",\n" +
+               "\"deviceName\":\"警ᡂ㇇⌅仓-车辆虚拟\",\n" +
+               "\"deviceUuid\":\"5ce33c9accb94a978976b232958bdc88\",\n" +
+               "\"targetRect\":[{\"bottom\":82.376396,\"left\":46.54868,\"right\":51.40949,\"top\":12}],\n" +
+               "\"wholeImageUrl\":\"_ZzEwMF8zbQ==_455a8508b17b4683b49e3c78ba15ea26\",\n" +
+               "\"arithmeticPackageType\":1,\n" +
+               "\"color\":1,\n" +
+               "\"fireEquipmentNumber\":3,\n" +
+               "\"gasCylinderFunction\":2,\n" +
+               "\"indicatorStatusColor\":\"㓒灯亮\",\n" +
+               "\"personInfo\":[{\"uuid\":\"xssddss\",\"name\":\"李文彩\"}]\n" +
+               "}";
+        MegviiApiServiceImpl megviiApiService = new MegviiApiServiceImpl();
+        MegviiPushDataIntelligentDTO megviiPushDataIntelligentDTO = megviiApiService.jsonToMegviiPushDataIntelligentDTO(jsonString);
+
+        MegviiAlarmData megviiAlarmData = new MegviiAlarmData();
+        // 生成id
+        // Long id = idGeneratorSnowflake.getId();
+        Long id = 2L;
+        megviiAlarmData.setId(id);
+        // 时间戳 转 时间
+        megviiAlarmData.setAlarmTime(megviiApiService.toLocalDateTimeMilliseconds(megviiPushDataIntelligentDTO.getAlarmTime()));
+        if(StringUtils.isNotBlank(megviiPushDataIntelligentDTO.getWholeImageUrl())){
+            megviiAlarmData.setImageUrl(megviiPushDataIntelligentDTO.getWholeImageUrl());
+            megviiAlarmData.setImageType(1);
+            megviiAlarmData.setTargetRect(megviiPushDataIntelligentDTO.getTargetRect());
+            megviiAlarmData.setPersonInfo(JSON.toJSONString(megviiPushDataIntelligentDTO.getPersonInfo()));
+            // megviiAlarmData.setPersonInfo(personInfo);
+        }
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 转换为LocalDateTime
+     * @Date: 2023/1/7
+     * @Param timestamp: 毫秒时间戳
+     * @Return: java.time.LocalDateTime
+     */
+    public LocalDateTime toLocalDateTimeMilliseconds(Long timestamp){
+        if(null == timestamp){
+            return null;
+        }
+        return Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
+    }
 
     /**
      * @Author: liwencai
