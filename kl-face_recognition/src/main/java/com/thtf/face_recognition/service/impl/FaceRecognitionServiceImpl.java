@@ -2,9 +2,11 @@ package com.thtf.face_recognition.service.impl;
 
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.itemserver.*;
+import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.entity.itemserver.TblVideoItem;
+import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
 import com.thtf.face_recognition.dto.DisplayParamDTO;
@@ -40,6 +42,9 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
     private ItemAPI itemAPI;
 
     @Resource
+    private AlarmAPI alarmAPI;
+
+    @Resource
     private PageInfoConvert pageInfoConvert;
 
 
@@ -68,6 +73,17 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
             }
 
         }
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(displayParamDTO.getSysCode());
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(Collections.singletonList(areaCode));
+        Integer allItemCount = itemAPI.queryAllItemsCount(tblItem).getData();
+        tblItem.setAlarm(1);
+        Integer alarm = itemAPI.queryAllItemsCount(tblItem).getData();
+        tblItem.setAlarm(null);
+        tblItem.setFault(1);
+        Integer fault = itemAPI.queryAllItemsCount(tblItem).getData();
+
         // 查询在线数量
         countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
         countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_ONLINE_VALUE);
@@ -76,18 +92,9 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
         countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_OFFLINE_VALUE);
         Integer offlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
-        // 报警数量
-        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ALARM);
-        countItemByParameterListDTO.setParameterValue("1");
-        Integer alarmCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
-        // 设备总数
-        TblItem tblItem = new TblItem();
-        tblItem.setSystemCode(displayParamDTO.getSysCode());
-        tblItem.setBuildingCodeList(buildingCodeList);
-        tblItem.setAreaCode(areaCode);
-        Integer allItemCount = itemAPI.queryAllItemsCount(tblItem).getData();
         result.setItemNum(allItemCount);
-        result.setAlarmNum(alarmCount);
+        result.setFaultNum(fault);
+        result.setAlarmNum(alarm);
         result.setOnlineNum(onlineCount);
         result.setOfflineNum(offlineCount);
         return result;
@@ -116,6 +123,21 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         }
         // 设备编码集
         List<String> itemCodeList = pageInfo.getList().stream().map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
+
+        // 故障
+        List<String> faultItemCodeList = pageInfo.getList().stream().filter(e -> e.getFault() == 1).map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
+
+        // 报警
+        List<String> alarmItemCodeList = pageInfo.getList().stream().filter(e -> e.getAlarm() == 1).map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
+        List<TblAlarmRecordUnhandle> alarmRecordUnhandleList = new ArrayList<>();
+        if(faultItemCodeList.size() > 0){
+            alarmRecordUnhandleList.addAll(alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(faultItemCodeList,1).getData());
+        }
+        if(alarmItemCodeList.size() > 0){
+            alarmRecordUnhandleList.addAll(alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(alarmItemCodeList,0).getData());
+        }
+
+
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         // 集中查询摄像机信息
         ListVideoItemParamDTO listVideoItemParamDTO = new ListVideoItemParamDTO();
@@ -128,6 +150,8 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         param.setItemCodeList(itemCodeList);
         param.setParameterTypeCodeList(parameterCode);
         List<ListItemNestedParametersResultDTO> itemNestedParametersResultList = itemAPI.listItemNestedParameters(param).getData();
+        // 查询报警信息
+
         // 结果集
         pageInfo.getList().forEach(e->{
             itemNestedParametersResultList.forEach(item->{
@@ -154,6 +178,13 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
                             result.setVideoPassword(video.getPassword());
                             result.setIpAddress(video.getIp());
                             result.setChannelNum(video.getItemChannelNum());
+                        }
+                    });
+                    // 匹配报警信息
+
+                    alarmRecordUnhandleList.forEach(alarm->{
+                        if(alarm.getItemCode().equals(e.getCode())){
+                            result.setAlarmCategory(alarm.getAlarmCategory());
                         }
                     });
                     resultList.add(result);

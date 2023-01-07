@@ -25,7 +25,7 @@ public class MegviiPage<T> {
     /**
      * 总数
      */
-    private Integer total;
+    private Long total;
 
     /**
      * 数据

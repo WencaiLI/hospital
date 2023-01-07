@@ -68,38 +68,38 @@ public class FaceRecognitionController {
      */
     @PostMapping("/listFaceRecognitionAlarm")
     public JsonResult<MegviiPage<FaceRecognitionAlarmResultVO>> listFaceRecognitionAlarm(@RequestBody FaceRecognitionAlarmParamVO paramVO){
-        MegviiPage<FaceRecognitionAlarmResultVO> result = new MegviiPage();
-
-        List<FaceRecognitionAlarmResultVO> list  = new ArrayList<>();
-        FaceRecognitionAlarmResultVO faceRecognitionAlarmResultVO = new FaceRecognitionAlarmResultVO();
-        faceRecognitionAlarmResultVO.setStayTime("0天1时");
-        faceRecognitionAlarmResultVO.setAreaName("三楼");
-        faceRecognitionAlarmResultVO.setAlarmType("抽烟");
-        faceRecognitionAlarmResultVO.setIpAddress("127.0.0.1");
-        faceRecognitionAlarmResultVO.setItemId(1965454554225L);
-        faceRecognitionAlarmResultVO.setItemCode("RLSB_TYPE_1");
-        faceRecognitionAlarmResultVO.setItemName("人脸识别设备_1");
-        faceRecognitionAlarmResultVO.setEye(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
-        faceRecognitionAlarmResultVO.setCenter(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
-        list.add(faceRecognitionAlarmResultVO);
-
-        faceRecognitionAlarmResultVO.setAreaName("二楼");
-        list.add(faceRecognitionAlarmResultVO);
-        faceRecognitionAlarmResultVO.setAlarmType("喝酒");
-        faceRecognitionAlarmResultVO.setAreaName("二楼");
-        list.add(faceRecognitionAlarmResultVO);
-        faceRecognitionAlarmResultVO.setAlarmType("打架");
-        faceRecognitionAlarmResultVO.setAreaName("一楼");
-        list.add(faceRecognitionAlarmResultVO);
-        faceRecognitionAlarmResultVO.setAlarmType("滋事");
-        faceRecognitionAlarmResultVO.setAreaName("一楼");
-        list.add(faceRecognitionAlarmResultVO);
-        result.setList(list);
-        result.setTotal(1);
-        result.setPageSize(paramVO.getPageSize());
-        result.setPageNum(paramVO.getPageNumber());
-        return JsonResult.querySuccess(result);
-        // return JsonResult.querySuccess(manufacturerApiService.listFaceRecognitionAlarm(paramVO));
+//        MegviiPage<FaceRecognitionAlarmResultVO> result = new MegviiPage();
+//
+//        List<FaceRecognitionAlarmResultVO> list  = new ArrayList<>();
+//        FaceRecognitionAlarmResultVO faceRecognitionAlarmResultVO = new FaceRecognitionAlarmResultVO();
+//        faceRecognitionAlarmResultVO.setStayTime("0天1时");
+//        faceRecognitionAlarmResultVO.setAreaName("三楼");
+//        faceRecognitionAlarmResultVO.setAlarmType("抽烟");
+//        faceRecognitionAlarmResultVO.setIpAddress("127.0.0.1");
+//        faceRecognitionAlarmResultVO.setItemId(1965454554225L);
+//        faceRecognitionAlarmResultVO.setItemCode("RLSB_TYPE_1");
+//        faceRecognitionAlarmResultVO.setItemName("人脸识别设备_1");
+//        faceRecognitionAlarmResultVO.setEye(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
+//        faceRecognitionAlarmResultVO.setCenter(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
+//        list.add(faceRecognitionAlarmResultVO);
+//
+//        faceRecognitionAlarmResultVO.setAreaName("二楼");
+//        list.add(faceRecognitionAlarmResultVO);
+//        faceRecognitionAlarmResultVO.setAlarmType("喝酒");
+//        faceRecognitionAlarmResultVO.setAreaName("二楼");
+//        list.add(faceRecognitionAlarmResultVO);
+//        faceRecognitionAlarmResultVO.setAlarmType("打架");
+//        faceRecognitionAlarmResultVO.setAreaName("一楼");
+//        list.add(faceRecognitionAlarmResultVO);
+//        faceRecognitionAlarmResultVO.setAlarmType("滋事");
+//        faceRecognitionAlarmResultVO.setAreaName("一楼");
+//        list.add(faceRecognitionAlarmResultVO);
+//        result.setList(list);
+//        result.setTotal(1);
+//        result.setPageSize(paramVO.getPageSize());
+//        result.setPageNum(paramVO.getPageNumber());
+//        return JsonResult.querySuccess(result);
+        return JsonResult.querySuccess(manufacturerApiService.listFaceRecognitionAlarm(paramVO));
     }
 
 
@@ -112,25 +112,25 @@ public class FaceRecognitionController {
      */
     @PostMapping("/listFaceRecognitionFault")
     public JsonResult<MegviiPage<FaceRecognitionFaultResultVO>> listFaceRecognitionFault(@RequestBody FaceRecognitionAlarmParamVO paramVO){
-        MegviiPage<FaceRecognitionFaultResultVO> result = new MegviiPage<>();
-        result.setTotal(100);
-        result.setPageNum(paramVO.getPageNumber());
-        result.setPageSize(paramVO.getPageSize());
-        List<FaceRecognitionFaultResultVO> list = new ArrayList<>();
-        FaceRecognitionFaultResultVO resultVO = new FaceRecognitionFaultResultVO();
-        resultVO.setIpAddress("127.0.0.1");
-        resultVO.setStayTime("0天1时");
-        resultVO.setAlarmLevel(1);
-        resultVO.setItemCode("RLSB_TYPE_1");
-        resultVO.setItemName("人脸识别设备_1");
-        resultVO.setAreaName("区域名名称");
-        resultVO.setAreaCode("区域编码");
-        resultVO.setEye(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
-        resultVO.setCenter(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
-        list.add(resultVO);
-        result.setList(list);
-        return JsonResult.querySuccess(result);
-        // return JsonResult.querySuccess(manufacturerApiService.listFaceRecognitionFault(paramVO));
+//        MegviiPage<FaceRecognitionFaultResultVO> result = new MegviiPage<>();
+//        result.setTotal(100);
+//        result.setPageNum(paramVO.getPageNumber());
+//        result.setPageSize(paramVO.getPageSize());
+//        List<FaceRecognitionFaultResultVO> list = new ArrayList<>();
+//        FaceRecognitionFaultResultVO resultVO = new FaceRecognitionFaultResultVO();
+//        resultVO.setIpAddress("127.0.0.1");
+//        resultVO.setStayTime("0天1时");
+//        resultVO.setAlarmLevel(1);
+//        resultVO.setItemCode("RLSB_TYPE_1");
+//        resultVO.setItemName("人脸识别设备_1");
+//        resultVO.setAreaName("区域名名称");
+//        resultVO.setAreaCode("区域编码");
+//        resultVO.setEye(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
+//        resultVO.setCenter(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, 2, 3})));
+//        list.add(resultVO);
+//        result.setList(list);
+//        return JsonResult.querySuccess(result);
+        return JsonResult.querySuccess(manufacturerApiService.listFaceRecognitionFault(paramVO));
     }
 
     /**
@@ -170,7 +170,7 @@ public class FaceRecognitionController {
         innerResult.setCaptureImageUrl("https://tse3-mm.cn.bing.net/th/id/OIP-C.Ah9pBmriGIffYSoJi4_wlAHaFY?pid=ImgDet&rs=1");
         list.add(innerResult);
         result.setList(list);
-        result.setTotal(1);
+        result.setTotal(1L);
         result.setPageSize(pageSize);
         result.setPageNum(pageNumber);
         return JsonResult.querySuccess(result);

@@ -53,6 +53,18 @@ public class FaceRecognitionAlarmResultVO {
      */
     private String alarmType;
 
+    /**
+     * 报警级别
+     */
+    private String alarmLevel;
+
+    /**
+     * 告警类型
+     */
+    private String catchImageUrl;
+
+    private String catchImageTarget;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime alarmTime;

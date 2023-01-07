@@ -1,5 +1,7 @@
 package com.thtf.face_recognition.job;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.thtf.common.dto.itemserver.ItemParameterUpdateDTO;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -61,9 +64,9 @@ public class ItemStatusJob {
         offlineChange.setNewValue("0");
         itemAPI.updateParameterValue(offlineChange);
     }
-    // @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
-    public void pullMegviiAlarm(){
-        String uri = "/v1/api/device/list";
-        // String jsonResult = HttpUtil.httpPostJson(megviiConfig.getBaseUrl() + uri, jsonParam);
+
+    @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+    public void pullMegviiAlarm() throws Exception {
+        megviiApiServiceImpl.listPushIntelligentData();
     }
 }

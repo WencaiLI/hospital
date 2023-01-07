@@ -69,12 +69,12 @@ public class MegviiPushDataIntelligentDTO {
     /**
      * 告警时间,算法仓设备为告警开始时间
      */
-    private Date alarmTime;
+    private Long alarmTime;
 
     /**
      * 告警结束时间
      */
-    private Date alarmEndTime;
+    private Long alarmEndTime;
 
     /**
      * 告警持续时间，单位：秒

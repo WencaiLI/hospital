@@ -31,6 +31,11 @@ public class FaceRecognitionItemResultVO {
     private String buildingAreaName;
 
     /**
+     * 报警类型
+     */
+    private Integer alarmCategory;
+
+    /**
      * 区域编码
      */
     private String areaCode;
