@@ -21,6 +21,7 @@ import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.face_recognition.common.config.IdGeneratorSnowflake;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
 import com.thtf.face_recognition.common.enums.MegviiAlarmTypeEnum;
@@ -160,9 +161,14 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             innerResult.setItemDescription(item.getDescription());
             innerResult.setAreaName(item.getAreaName());
             innerResult.setIpAddress("127.0.0.1");
+
             x.forEach(e->{
                 if(e.getItemCode().equals(item.getCode())){
                     innerResult.setAlarmTime(e.getAlarmTime());
+                    if(null != e.getAlarmTime()){
+                        long duration = LocalDateTimeUtil.between(e.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
+                        innerResult.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
+                    }
                     innerResult.setAlarmType(MegviiAlarmTypeEnum.getMegviiEventLevelDescByTypeId(e.getAlarmType()));
                     innerResult.setCatchImageUrl("https://img95.699pic.com/photo/40178/3328.jpg_wh860.jpg");
                     // innerResult.setCatchImageTarget(e.getTargetRect());
@@ -301,6 +307,74 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
      */
     @Override
     public MegviiPage<FaceRecognitionFaultResultVO> listFaceRecognitionFault(FaceRecognitionAlarmParamVO paramVO) {
+        MegviiPage<FaceRecognitionFaultResultVO> result = new MegviiPage<>();
+
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
+            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
+        }else {
+            if(StringUtils.isNotBlank(paramVO.getAreaCodes())){
+                areaCodeList = Arrays.asList(paramVO.getAreaCodes().split(","));
+            }
+        }
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(paramVO.getSysCode());
+        tblItem.setPageSize(paramVO.getPageSize());
+        tblItem.setPageNumber(paramVO.getPageNumber());
+        if(StringUtils.isNotBlank(paramVO.getKeyword())){
+            tblItem.setKeyAreaName(paramVO.getKeyword());
+            tblItem.setKeyName(paramVO.getKeyword());
+            tblItem.setKeyCode(paramVO.getKeyword());
+        }
+        tblItem.setAlarm(0); // 有报警显示，报警优先
+        tblItem.setFault(1);
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+        PageInfo<TblItem> pageInfo = itemAPI.queryAllItemsPage(tblItem).getData();
+        result.setPageNum(pageInfo.getPageNum());
+        result.setPageSize(pageInfo.getPageSize());
+        result.setTotal(pageInfo.getTotal());
+
+        // 设备集
+        List<TblItem> itemList = pageInfo.getList();
+        // 设备编码集
+        List<String> itemCodeList = pageInfo.getList().stream().map(TblItem::getCode).distinct().collect(Collectors.toList());
+        if(itemCodeList.size() == 0){
+            return null;
+        }
+        List<TblAlarmRecordUnhandle> recordList = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, 1).getData();
+
+        List<FaceRecognitionFaultResultVO> resultList = new ArrayList<>();
+        for (TblItem item : itemList) {
+            FaceRecognitionFaultResultVO innerResult = new FaceRecognitionFaultResultVO();
+            innerResult.setAreaCode(item.getAreaCode());
+            innerResult.setAreaName(item.getAreaName());
+            innerResult.setItemName(item.getName());
+            innerResult.setItemCode(item.getCode());
+            innerResult.setIpAddress("127.0.0.1");
+            // 匹配设备模型视角信息
+            if(StringUtils.isNotBlank(item.getViewLongitude())){
+                innerResult.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            if(StringUtils.isNotBlank(item.getViewLatitude())){
+                innerResult.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            recordList.forEach(record->{
+                if(record.getItemCode().equals(item.getCode())){
+                    innerResult.setAlarmLevel(record.getAlarmLevel());
+                    innerResult.setAlarmTime(record.getAlarmTime());
+                    long duration = LocalDateTimeUtil.between(record.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
+                    innerResult.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
+                }
+            });
+        }
+
+        result.setList(resultList);
+        return result;
+    }
+
+    public MegviiPage<FaceRecognitionFaultResultVO> listFaceRecognitionFaultOld(FaceRecognitionAlarmParamVO paramVO) {
         MegviiPage<FaceRecognitionFaultResultVO> result = new MegviiPage<>();
 
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
