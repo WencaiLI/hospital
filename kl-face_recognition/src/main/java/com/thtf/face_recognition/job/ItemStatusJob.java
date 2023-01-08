@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.thtf.common.dto.itemserver.ItemParameterUpdateDTO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
 import com.thtf.face_recognition.common.enums.MegviiItemStatus;
@@ -64,7 +65,7 @@ public class ItemStatusJob {
         }
     }
 
-    @Scheduled(cron = "*/10 * * * * ?")  // 十分钟执行一次
+    // @Scheduled(cron = "0 0/1 * * * ?")  // 十分钟执行一次
     public void pullMegviiAlarm() throws Exception {
         megviiApiServiceImpl.listPushIntelligentData();
     }
@@ -74,11 +75,18 @@ public class ItemStatusJob {
      * @Date: 2023/1/7
      * @Return: void
      */
-    @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+   //  @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
     public void test(){
-        List<TblItem> sub_face_recognition = itemAPI.searchItemBySysCodeAndAreaCode("sub_face_recognition", null).getData();
-        if (null != sub_face_recognition){
-            itemAPI.updateAlarmOrFaultStatus(sub_face_recognition.get(0).getCode(),0,null);
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode("sub_face_recognition");
+        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
+        int min = 0;
+        int max = itemList.size();
+
+//        // List<TblItem> sub_face_recognition = itemAPI.searchItemBySysCodeAndAreaCode("sub_face_recognition", null).getData();
+//        System.out.println(sub_face_recognition);
+        if (null != itemList){
+            itemAPI.updateAlarmOrFaultStatus(itemList.get(0).getCode(),0,null);
         }
     }
 }
