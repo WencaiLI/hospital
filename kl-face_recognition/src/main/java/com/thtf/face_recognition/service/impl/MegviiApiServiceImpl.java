@@ -620,12 +620,17 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         int alarmType = random.nextInt(min+max)+min;
 
 
-        int  min_1 = 1673140;
+        int  min_1 = 1671140;
+        System.out.println(min_1);
         int max_1= (int) (System.currentTimeMillis()/1000000);
+        System.out.println(max_1);
 
-        long alarmTime = (random.nextInt(max_1+min_1)+min_1)*1000000;
+        String alarmTime = (random.nextInt(max_1 - min_1) + min_1) +"000000";
 
 
+        System.out.println(min_1);
+        System.out.println((random.nextInt(max_1+min_1)+min_1));
+        System.out.println(alarmTime);
         String jsonResult =  "{\"alarmControlType\":1,\n" +
                 "\"alarmEndTime\":"+alarmTime+",\n" +
                 "\"alarmRecordUuId\":\"5ce33c9accb94a978976b232958bdc88\",\n" +
