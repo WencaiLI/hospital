@@ -8,6 +8,7 @@ import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.AppEnvMonitorDisplayDTO;
 import com.thtf.environment.dto.AppListAlarmParamDTO;
 import com.thtf.environment.dto.KeyValueDTO;
@@ -40,9 +41,11 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
 
     @Override
     public AppEnvMonitorDisplayDTO getDisplayInfo(String sysCode, String buildingCodes) {
+        ItemGroupParamVO itemGroupParamVO = new ItemGroupParamVO();
+        itemGroupParamVO.setSystemCode(sysCode);
+        itemGroupParamVO.setBuildingCodes(buildingCodes);
         AppEnvMonitorDisplayDTO result = new AppEnvMonitorDisplayDTO();
-        ItemTotalAndOnlineAndAlarmNumDTO rpcResult = itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode, null, buildingCodes).getData();
-        result.setGroupNum(rpcResult.getGroupNum());
+        result.setGroupNum(itemAPI.queryAllGroup(itemGroupParamVO).getData().size());
         return result;
     }
 

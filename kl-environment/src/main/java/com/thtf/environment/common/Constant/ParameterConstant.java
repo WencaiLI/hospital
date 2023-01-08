@@ -118,6 +118,10 @@ public class ParameterConstant {
      */
     public final static String ENV_MONITOR_ONLINE = "OnlineStatus";
 
+    public final static String ENV_MONITOR_ONLINE_VALUE = "0";
+
+    public final static String ENV_MONITOR_OFFLINE_VALUE = "1";
+
     /**
      * 报警
      */

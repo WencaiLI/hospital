@@ -87,7 +87,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode, String areaCode,String buildingCodes) {
-        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes).getData();
+        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,ParameterConstant.ENV_MONITOR_ONLINE,ParameterConstant.ENV_MONITOR_ONLINE_VALUE,true,true).getData();
     }
 
     /**
@@ -230,6 +230,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         if(null != paramVO.getAlarmCategory()){
             if(paramVO.getAlarmCategory() == 1){
+                tblItem.setAlarm(0);
                 tblItem.setFault(1);
             }
             if(paramVO.getAlarmCategory() == 0){
