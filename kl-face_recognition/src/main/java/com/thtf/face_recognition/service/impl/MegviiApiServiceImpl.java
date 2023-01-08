@@ -131,18 +131,22 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
 
         List<TblItem> itemList = pageInfo.getList();
 
-        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
+        List<String> itemCodeList = itemList.stream().map(TblItem::getCode).distinct().collect(Collectors.toList());
         if(itemCodeList.size() == 0){
             return null;
         }
         // 匹配报警信息
         List<TblAlarmRecordUnhandle> data = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, 0).getData();
-        // 匹配报警信息
+        // 第二种 使用库里的表数据 匹配报警信息
         List<String> detailAlarmIdList = data.stream().map(TblAlarmRecordUnhandle::getAlarmDescription).collect(Collectors.toList());
         List<String> newDetailAlarmIdList = detailAlarmIdList.stream().filter(StringUtils::isNumeric).collect(Collectors.toList());
         List<Long> alarmIdList = newDetailAlarmIdList.stream().map(Long::parseLong).collect(Collectors.toList());
 
         List<MegviiAlarmData> megviiAlarmData = new ArrayList<>();
+
+        // 第一种使用报警表数据
+        List<TblAlarmRecordUnhandle> x = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, 0).getData();
+
         if(alarmIdList.size()>0){
             megviiAlarmData  = megviiAlarmDataMapper.selectList(new QueryWrapper<MegviiAlarmData>().lambda().in(MegviiAlarmData::getId, alarmIdList));
         }
@@ -156,16 +160,25 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             innerResult.setItemDescription(item.getDescription());
             innerResult.setAreaName(item.getAreaName());
             innerResult.setIpAddress("127.0.0.1");
-            megviiAlarmData.forEach(e->{
+            x.forEach(e->{
                 if(e.getItemCode().equals(item.getCode())){
                     innerResult.setAlarmTime(e.getAlarmTime());
-                    System.out.println(e.getAlarmType());
                     innerResult.setAlarmType(MegviiAlarmTypeEnum.getMegviiEventLevelDescByTypeId(e.getAlarmType()));
-                    innerResult.setCatchImageUrl(e.getImageUrl());
-                    innerResult.setCatchImageTarget(e.getTargetRect());
+                    innerResult.setCatchImageUrl("https://img95.699pic.com/photo/40178/3328.jpg_wh860.jpg");
+                    // innerResult.setCatchImageTarget(e.getTargetRect());
                     // innerResult.setAlarmLevel("2");
                 }
             });
+//            megviiAlarmData.forEach(e->{
+//                if(e.getItemCode().equals(item.getCode())){
+//                    innerResult.setAlarmTime(e.getAlarmTime());
+//                    System.out.println(e.getAlarmType());
+//                    innerResult.setAlarmType(MegviiAlarmTypeEnum.getMegviiEventLevelDescByTypeId(e.getAlarmType()));
+//                    innerResult.setCatchImageUrl(e.getImageUrl());
+//                    innerResult.setCatchImageTarget(e.getTargetRect());
+//                    // innerResult.setAlarmLevel("2");
+//                }
+//            });
             if(StringUtils.isNotBlank(item.getViewLongitude())){
                 innerResult.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
@@ -297,7 +310,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         listAlarmInfoLimitOneParamDTO.setPageSize(paramVO.getPageSize());
         listAlarmInfoLimitOneParamDTO.setPageNumber(paramVO.getPageNumber());
         PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-        result.setTotal(Long.valueOf(pageInfo.getTotal()));
+        result.setTotal(pageInfo.getTotal());
         result.setPageNum(pageInfo.getPageNum());
         result.setPageSize(pageInfo.getPageSize());
         List<FaceRecognitionFaultResultVO> resultList = new ArrayList<>();
@@ -354,79 +367,67 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         result.setPageNum(pageNumber);
 
         List<AppAlarmRecordDTO> list = data.getList();
-        List<String> alarmCodeList = list.stream().map(AppAlarmRecordDTO::getItemCode).collect(Collectors.toList());
+        List<String> alarmCodeList = list.stream().map(AppAlarmRecordDTO::getItemCode).distinct().collect(Collectors.toList());
         List<MegviiAlarmData> megviiAlarmDataList = megviiAlarmDataMapper.selectList(new QueryWrapper<MegviiAlarmData>().lambda().in(MegviiAlarmData::getItemCode, alarmCodeList));
 
-        for (MegviiAlarmData megviiAlarmData : megviiAlarmDataList) {
-
+        // todo 临时测试
+        data.getList().forEach(e->{
             MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
-            innerResult.setEventName(MegviiAlarmTypeEnum.getMegviiEventLevelDescByTypeId(megviiAlarmData.getAlarmType()));
-            if(StringUtils.isNoneBlank(megviiAlarmData.getPersonInfo())){
-                // String jsonString = JSON.toJSONString(megviiAlarmData.getPersonInfo());
-                String jsonString = megviiAlarmData.getPersonInfo();
-                 System.out.println(jsonString);
-//                JSONObject jsonObject = JSONObject.parseObject(jsonString);
-//                String uuid = jsonObject.getString("uuid");
+            innerResult.setEventTime(e.getAlarmTime());
+            innerResult.setEventName("抽烟检测");
+            innerResult.setEventArea(e.getBuildingAreaName());
+            innerResult.setEventType("抽烟检测");
+            innerResult.setPersonImageUri("https://cn.bing.com/images/search?view=detailV2&ccid=isSbzM2F&id=BFD57DAD8BC76037E4EB26A7F794DE185D483CAC&thid=OIP.isSbzM2F9zSH9BEOocDK6wHaE8&mediaurl=https%3a%2f%2fimg.zcool.cn%2fcommunity%2f0174d05a003921a801202b0ce5d968.jpg%403000w_1l_0o_100sh.jpg&exph=2000&expw=3000&q=%e6%8a%bd%e7%83%9f%e5%9b%be%e7%89%87&simid=608036338657023855&FORM=IRPRST&ck=46DDA6838EDC1FF2A4A11F9565B260AE&selectedIndex=1");
+            innerResult.setCaptureImageUrl("https://cn.bing.com/images/search?view=detailV2&ccid=Idi4oDUx&id=3D448ACC293537F1EAB594508F054B24C158E392&thid=OIP.Idi4oDUxgQvVnkvMZUoXawHaFj&mediaurl=https%3a%2f%2fimg95.699pic.com%2fphoto%2f50007%2f4628.jpg_wh860.jpg&exph=620&expw=827&q=%e6%8a%bd%e7%83%9f%e5%9b%be%e7%89%87&simid=608000857919004612&FORM=IRPRST&ck=F1D8B44F7CC479845454E819FEB1C1E9&selectedIndex=15");
+            innerResult.setIdentifyNum("411523199920011004123X");
+            innerResult.setPersonName("张非");
+            resultList.add(innerResult);
+        });
+
+
+        // todo 正式环境
+//        for (MegviiAlarmData megviiAlarmData : megviiAlarmDataList) {
+//
+//            MegviiItemEventDTO innerResult = new MegviiItemEventDTO();
+//            innerResult.setEventName(MegviiAlarmTypeEnum.getMegviiEventLevelDescByTypeId(megviiAlarmData.getAlarmType()));
+//            if(StringUtils.isNoneBlank(megviiAlarmData.getPersonInfo())){
+//                String jsonString = megviiAlarmData.getPersonInfo();
 //                // todo 测试使用
-//                String bodyImageUrl = jsonObject.getString("bodyImageUrl");
-                List<MegviiPersonInfo> megviiPersonInfo = JSON.parseArray(jsonString, MegviiPersonInfo.class);
-                if(megviiPersonInfo.size() > 0) {
-
-
-                    String uuid = megviiPersonInfo.get(0).getUuid();
-                    // todo 测试使用
-                    String bodyImageUrl = megviiPersonInfo.get(0).getBodyImageUrl();
-                    System.out.println(uuid + bodyImageUrl);
-                    innerResult.setPersonImageUri(bodyImageUrl);
-
-                    if (StringUtils.isNoneBlank(uuid)) {
-                        MegviiUserInfoDTO userInfo = getUserInfoByUUId(uuid);
-                        System.out.println(userInfo);
-                        if(null != userInfo){
-                            innerResult.setIdentifyNum(userInfo.getIdentifyNum());
-                            // todo 正式环境
-                            innerResult.setPersonImageUri(userInfo.getImageUri());
-                            if (userInfo.getVisitedName() != null) {
-                                innerResult.setPersonName(userInfo.getName());
-                            }
-                            if (userInfo.getName() != null) {
-                                innerResult.setPersonName(userInfo.getName());
-                            }
-                            innerResult.setPersonType(MegviiPersonTypeEnum.getMegviiPersonTypeEnumById(userInfo.getType()));
-                            innerResult.setPhone(userInfo.getPhone());
-                        }else {
-                            innerResult.setIdentifyNum("411523199920011004123X");
-                            innerResult.setPersonName("张非");
-                        }
-
-//                    innerResult.setEventType(MegviiEventTypeEnum.getMegviiEventTypeDescByTypeId(recordResult.getEventTypeId()));
-                        // innerResult.setEventArea();
-
-                        // 设备区域 innerResult.setEventArea();
-//                    innerResult.setEventTime(covertTimeStampToLocalDateTime(recordResult.getDealTime()));
-                    }
-                }
-
-//                JSONObject jsonObject = JSONObject.parseObject(megviiAlarmData.getPersonInfo());
-//                String bodyImageUrl = jsonObject.getString("bodyImageUrl");
-//
-//
-//
-//                if(null != bodyImageUrl){
+//                List<MegviiPersonInfo> megviiPersonInfo = JSON.parseArray(jsonString, MegviiPersonInfo.class);
+//                if(megviiPersonInfo.size() > 0) {
+//                    String uuid = megviiPersonInfo.get(0).getUuid();
+//                    // todo 测试使用
+//                    String bodyImageUrl = megviiPersonInfo.get(0).getBodyImageUrl();
 //                    innerResult.setPersonImageUri(bodyImageUrl);
-//                    String faceRect = jsonObject.getString("faceRect");
-//                    if(StringUtils.isNotBlank(faceRect)) {
-//                        innerResult.setPersonImageFaceRect(faceRect);
+//
+//                    if (StringUtils.isNoneBlank(uuid)) {
+//                        MegviiUserInfoDTO userInfo = getUserInfoByUUId(uuid);
+//                        System.out.println(userInfo);
+//                        if(null != userInfo){
+//                            innerResult.setIdentifyNum(userInfo.getIdentifyNum());
+//                            // todo 正式环境
+//                            innerResult.setPersonImageUri(userInfo.getImageUri());
+//                            if (userInfo.getVisitedName() != null) {
+//                                innerResult.setPersonName(userInfo.getName());
+//                            }
+//                            if (userInfo.getName() != null) {
+//                                innerResult.setPersonName(userInfo.getName());
+//                            }
+//                            innerResult.setPersonType(MegviiPersonTypeEnum.getMegviiPersonTypeEnumById(userInfo.getType()));
+//                            innerResult.setPhone(userInfo.getPhone());
+//                        }else {
+//                            innerResult.setIdentifyNum("411523199920011004123X");
+//                            innerResult.setPersonName("张非");
+//                        }
 //                    }
 //                }
-            }
-            String imageUrl = megviiAlarmData.getImageUrl();
-            innerResult.setCaptureImageUrl(imageUrl);
-            innerResult.setCaptureImageRect(megviiAlarmData.getTargetRect());
-            innerResult.setEventTime(megviiAlarmData.getAlarmTime());
-            resultList.add(innerResult);
-//            innerResult.set
-        }
+//            }
+//            String imageUrl = megviiAlarmData.getImageUrl();
+//            innerResult.setCaptureImageUrl(imageUrl);
+//            innerResult.setCaptureImageRect(megviiAlarmData.getTargetRect());
+//            innerResult.setEventTime(megviiAlarmData.getAlarmTime());
+//            resultList.add(innerResult);
+//        }
         result.setList(resultList);
         return result;
     }
@@ -621,16 +622,8 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
 
 
         int  min_1 = 1671140;
-        System.out.println(min_1);
         int max_1= (int) (System.currentTimeMillis()/1000000);
-        System.out.println(max_1);
-
         String alarmTime = (random.nextInt(max_1 - min_1) + min_1) +"000000";
-
-
-        System.out.println(min_1);
-        System.out.println((random.nextInt(max_1+min_1)+min_1));
-        System.out.println(alarmTime);
         String jsonResult =  "{\"alarmControlType\":1,\n" +
                 "\"alarmEndTime\":"+alarmTime+",\n" +
                 "\"alarmRecordUuId\":\"5ce33c9accb94a978976b232958bdc88\",\n" +

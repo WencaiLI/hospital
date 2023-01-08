@@ -144,7 +144,7 @@ public class VehicleSchedulingController {
     @GetMapping("/findOrganizationTree")
     JsonResult<List<TblOrganizationDTO>> findOrganizationTree(){
         try {
-            return adminAPI.findOrganizationTree();
+            return JsonResult.querySuccess(adminAPI.findOrganizationTree().getData());
         }catch (Exception e) {
             return JsonResult.error("查询失败");
         }
