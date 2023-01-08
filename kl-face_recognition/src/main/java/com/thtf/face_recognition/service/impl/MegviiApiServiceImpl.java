@@ -368,6 +368,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
                     innerResult.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
                 }
             });
+            resultList.add(innerResult);
         }
 
         result.setList(resultList);
