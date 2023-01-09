@@ -125,6 +125,10 @@ public class VehicleSchedulingParamVO {
      */
     private String keyword;
 
+    private String keyCarNumber;
+
+    private String keyDescription;
+
     private Integer pageNumber;
 
     private Integer pageSize;

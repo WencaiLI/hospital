@@ -18,6 +18,7 @@ import com.thtf.office.service.TblVehicleSchedulingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -252,6 +253,10 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
      */
     @Override
     public List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO) {
+        if(StringUtils.isNotBlank(paramVO.getKeyword())){
+            paramVO.setKeyCarNumber(paramVO.getCarNumber());
+            paramVO.setKeyDescription(paramVO.getDescription());
+        }
         return vehicleSchedulingMapper.select(paramVO);
     }
 
