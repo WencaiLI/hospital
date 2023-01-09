@@ -87,7 +87,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode, String areaCode,String buildingCodes) {
-        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,ParameterConstant.ENV_MONITOR_ONLINE,ParameterConstant.ENV_MONITOR_ONLINE_VALUE,true,true).getData();
+        List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+        String itemTypeCodes = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.joining(","));
+
+        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,itemTypeCodes,ParameterConstant.ENV_MONITOR_ONLINE,ParameterConstant.ENV_MONITOR_ONLINE_VALUE,true,true).getData();
     }
 
     /**
@@ -872,52 +875,68 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     @Override
     public Object listParameterMap(ListParameterMapDTO listParameterMapDTO) {
-        Map<String, Object> resultMap = new HashMap<>();
-        List<ParameterTypeCodeAndValueDTO> heapList = new ArrayList<>();
+        List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
 
-        // 报警堆参数
-        ParameterTypeCodeAndValueDTO heap1 = new ParameterTypeCodeAndValueDTO();
-        heap1.setParameterTypeCode(ParameterConstant.ENV_MONITOR_ALARM);
-        String alarmValue = "1";
-        heap1.setParameterValue(alarmValue);
-        heapList.add(heap1);
-        String alarmHeapKey = ParameterConstant.ENV_MONITOR_ALARM+"_"+alarmValue;
-        // 故障堆参数
-        ParameterTypeCodeAndValueDTO heap3 = new ParameterTypeCodeAndValueDTO();
-        heap3.setParameterTypeCode(ParameterConstant.ENV_MONITOR_FAULT);
-        String faultValue = "1";
-        heap3.setParameterValue(faultValue);
-        heapList.add(heap3);
-        String faultHeapKey = ParameterConstant.ENV_MONITOR_FAULT+"_"+faultValue;
-        // 正常堆参数
-        ParameterTypeCodeAndValueDTO heap2 = new ParameterTypeCodeAndValueDTO();
-        heap2.setParameterTypeCode(ParameterConstant.ENV_MONITOR_ALARM);
-        String normalValue = "0";
-        heap2.setParameterValue(normalValue);
-        heapList.add(heap2);
-        String normalHeapKey = ParameterConstant.ENV_MONITOR_ALARM+"_"+normalValue;
-        listParameterMapDTO.setParameterInfo(heapList);
-        Map<String, Map<String, String>> data = itemAPI.listParameterMap(listParameterMapDTO).getData();
-        resultMap.put("alarm",data.get(alarmHeapKey));
-        resultMap.put("fault",data.get(faultHeapKey));
-        resultMap.put("normal",data.get(normalHeapKey));
+        Map<String, Object> resultMap = new HashMap<>();
+
+
+        // 报警堆
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(listParameterMapDTO.getSysCode());
+        if(StringUtils.isNotBlank(listParameterMapDTO.getBuildingCodes())){
+            buildingCodeList = Arrays.asList(listParameterMapDTO.getBuildingCodes().split(","));
+        }else {
+            if(StringUtils.isNotBlank(listParameterMapDTO.getAreaCodes())){
+                areaCodeList = Arrays.asList(listParameterMapDTO.getAreaCodes().split(","));
+            }
+        }
+
+        if(StringUtils.isNotBlank(listParameterMapDTO.getItemTypeCodes())){
+            tblItem.setItemTypeCodeList(Arrays.asList(listParameterMapDTO.getItemTypeCodes().split(",")));
+        }else {
+            List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+            tblItem.setItemTypeCodeList(itemTypeCodeList);
+        }
+
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+
+        // 报警
+        tblItem.setAlarm(1);
+        List<TblItem> alarmItemList = itemAPI.queryAllItems(tblItem).getData();
+        Map<String, String> alarmMap = getItemCodeAndTypeMap(alarmItemList);
+        // 故障
+        tblItem.setAlarm(0);
+        tblItem.setFault(1);
+        List<TblItem> faultItemList = itemAPI.queryAllItems(tblItem).getData();
+        Map<String, String> faultMap = getItemCodeAndTypeMap(faultItemList);
+        // 正常
+        tblItem.setAlarm(0);
+        tblItem.setFault(0);
+        List<TblItem> normalList = itemAPI.queryAllItems(tblItem).getData();
+        Map<String, String> normalMap = getItemCodeAndTypeMap(normalList);
+
+        resultMap.put("alarm",alarmMap);
+        resultMap.put("fault",faultMap);
+        resultMap.put("normal",normalMap);
         return resultMap;
     }
-
-//    /**
-//     * @Author: liwencai
-//     * @Description:
-//     * @Date: 2022/11/23
-//     * @return: java.util.List<java.lang.String>
-//     */
-//    List<String> getAllParameterCodeNeed(){
-//        EnvMonitorItemLiveParameterEnum[] values = EnvMonitorItemLiveParameterEnum.values();
-//        List<String> result = new ArrayList<>();
-//        for (EnvMonitorItemLiveParameterEnum envMonitorItemLiveParameterEnum : values) {
-//            result.add(envMonitorItemLiveParameterEnum.getParameterType());
-//        }
-//        return result;
-//    }
+    /**
+     * @Author: liwencai
+     * @Description: 形成设备堆
+     * @Date: 2023/1/9
+     * @Param tblItemList:
+     * @Return: java.util.Map<java.lang.String,java.lang.String>
+     */
+    Map<String, String> getItemCodeAndTypeMap(List<TblItem> tblItemList){
+        Map<String, String> map = new HashMap<>();
+        tblItemList.forEach(e->{
+            map.put(e.getCode(),e.getTypeCode());
+        });
+        return map;
+    }
 
     /**
      * @Author: liwencai
