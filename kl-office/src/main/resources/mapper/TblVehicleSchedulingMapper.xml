@@ -9,13 +9,14 @@
                 and id = #{id}
             </if>
             <if test="null != keyword">
-                and (
-                car_number like CONCAT('%',#{keyword},'%') or
-                code like CONCAT('%',#{keyword},'%') or
-                user_name like CONCAT('%',#{keyword},'%') or
-                purpose like CONCAT('%',#{keyword},'%') or
-                driver_name like CONCAT('%',#{keyword},'%')
-                )
+                <trim prefix="and (" suffix=")" prefixOverrides="or">
+                    <if test="null != keyCarNumber">
+                        or car_number like CONCAT('%',#{keyCarNumber},'%')
+                    </if>
+                    <if test="null != keyCarNumber">
+                        or description like CONCAT('%',#{keyDescription},'%')
+                    </if>
+                </trim>
             </if>
             <if test="carNumber">
                 and car_number = #{carNumber}
