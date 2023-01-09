@@ -9,6 +9,7 @@ import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
+import com.thtf.face_recognition.common.util.megvii.StringUtil;
 import com.thtf.face_recognition.dto.DisplayParamDTO;
 import com.thtf.face_recognition.dto.FaceRecognitionPointDTO;
 import com.thtf.face_recognition.dto.mapstruct.PageInfoConvert;
@@ -73,16 +74,24 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
             }
 
         }
+
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(displayParamDTO.getSysCode());
         tblItem.setBuildingCodeList(buildingCodeList);
-        tblItem.setAreaCodeList(Collections.singletonList(areaCode));
+        if(StringUtils.isNotBlank(areaCode)){
+            tblItem.setAreaCodeList(Collections.singletonList(areaCode));
+        }
+
         Integer allItemCount = itemAPI.queryAllItemsCount(tblItem).getData();
         tblItem.setAlarm(1);
         Integer alarm = itemAPI.queryAllItemsCount(tblItem).getData();
         tblItem.setAlarm(null);
+        tblItem.setAlarm(0);
         tblItem.setFault(1);
         Integer fault = itemAPI.queryAllItemsCount(tblItem).getData();
+        result.setItemNum(allItemCount);
+        result.setFaultNum(fault);
+        result.setAlarmNum(alarm);
 
         // 查询在线数量
         countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
@@ -92,9 +101,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
         countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_OFFLINE_VALUE);
         Integer offlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
-        result.setItemNum(allItemCount);
-        result.setFaultNum(fault);
-        result.setAlarmNum(alarm);
+
         result.setOnlineNum(onlineCount);
         result.setOfflineNum(offlineCount);
         return result;
