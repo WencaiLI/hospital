@@ -2,8 +2,10 @@ package com.thtf.environment.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.alarmserver.EChartsHourlyVO;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
+import com.thtf.common.dto.alarmserver.TwentyFourHourAlarmStatisticsDTO;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
@@ -15,6 +17,7 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.config.ParameterConfigNacos;
+import com.thtf.environment.dto.EChartsMoreVO;
 import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.dto.TimeValueDTO;
@@ -91,6 +94,51 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         String itemTypeCodes = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.joining(","));
 
         return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,itemTypeCodes,ParameterConstant.ENV_MONITOR_ONLINE,ParameterConstant.ENV_MONITOR_ONLINE_VALUE,true,true).getData();
+    }
+    /**
+     * @Author: liwencai
+     * @Description: 以24小时为维度统计报警总数,每日的每小时累加
+     * @Date: 2023/1/11
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Param isHandled: 是否是已处理
+     * @Param areaCode: 区域编码
+     * @Param startTime: 开始时间
+     * @Param endTime: 结束时间
+     * @Return: com.thtf.common.response.JsonResult
+     */
+    @Override
+    public EChartsMoreVO getTotalAlarmHourly(String sysCode, String buildingCodes, String areaCode, Boolean isHandled, String startTime, String endTime) {
+        List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+        if(null == parameterInfo || parameterInfo.size() == 0){
+            return null;
+        }
+        EChartsMoreVO result = new EChartsMoreVO();
+        Map<String, String> codeNameMap = new HashMap<>();
+        parameterInfo.forEach(e->{
+            codeNameMap.put(e.getItemTypeCode(),e.getItemTypeName().split("[(]")[0].split("（")[0]);
+        });
+        List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.toList());
+        // 计算未处理的24小时统计
+        TwentyFourHourAlarmStatisticsDTO param = new TwentyFourHourAlarmStatisticsDTO();
+        param.setSysCode(sysCode);
+        if(StringUtils.isNotBlank(buildingCodes)){
+            param.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                param.setAreaCode(areaCode);
+            }
+        }
+        if(itemTypeCodeList.size()>0){
+            param.setItemTypeCodeList(itemTypeCodeList);
+        }
+
+
+        EChartsHourlyVO data = alarmAPI.getTwentyFourHourAlarmStatistics(param).getData();
+        result.setCodeNameMap(codeNameMap);
+        result.setKeys(data.getKeys());
+        result.setValues(data.getValues());
+        return result;
     }
 
     /**
@@ -701,6 +749,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             Map<String, Object> map = groupAboutItemType.get(group.getId());
             map.put("id",group.getId());
             map.put("name",group.getName());
+            // map.put("buildingCode",group)
             /* 匹配区域名称信息 */
             String[] split = group.getBuildingAreaCodes().split(",");
             StringBuilder stringBuilder = new StringBuilder();
@@ -923,6 +972,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         resultMap.put("normal",normalMap);
         return resultMap;
     }
+
+
+
     /**
      * @Author: liwencai
      * @Description: 形成设备堆
