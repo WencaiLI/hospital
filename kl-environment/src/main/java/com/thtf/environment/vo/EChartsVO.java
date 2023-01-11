@@ -11,6 +11,7 @@ import java.util.List;
  */
 @Data
 public class EChartsVO {
+    private String unit;
     private List<String> keys;
     private List<Object> values;
 }

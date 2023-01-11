@@ -29,8 +29,11 @@ public class EnvItemMonitorDTO {
     private String alarmParameterValue;
 //    private String faultParameterCode;
 //    private String faultParameterValue;
-    private String onlineParameterCode;
-    private String onlineParameterValue;
+//    private String onlineParameterCode;
+//    private String onplineParameterValue;
+
+    private String parameterCode;
+    private String parameterValue;
 //    private String stateParameterCode;
 //    private String stateParameterValue;
     private List<Integer> eye;
