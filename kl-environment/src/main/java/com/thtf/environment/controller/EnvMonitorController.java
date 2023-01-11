@@ -2,8 +2,8 @@ package com.thtf.environment.controller;
 
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
-import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
+import com.thtf.environment.dto.EChartsMoreVO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
@@ -126,6 +126,28 @@ public class EnvMonitorController {
                                                              @RequestParam(value = "startTime",required = false) String startTime,
                                                              @RequestParam(value = "endTime",required = false) String endTime){
         return JsonResult.querySuccess(envMonitorService.getAlarmUnhandledStatistics(sysCode,buildingCodes,areaCode,isHandled,startTime,endTime));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 以24小时为维度统计报警总数,每日的每小时累加
+     * @Date: 2023/1/11
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Param isHandled: 是否是已处理
+     * @Param areaCode: 区域编码
+     * @Param startTime: 开始时间
+     * @Param endTime: 结束时间
+     * @Return: com.thtf.common.response.JsonResult
+     */
+    @PostMapping("/hourly_total")
+    public JsonResult<EChartsMoreVO> getTotalAlarmHourly(@RequestParam(value = "sysCode") String sysCode,
+                                                         @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                         @RequestParam(value = "isHandled",required = false) Boolean isHandled,
+                                                         @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                         @RequestParam(value = "startTime",required = false) String startTime,
+                                                         @RequestParam(value = "endTime",required = false) String endTime){
+        return JsonResult.querySuccess(envMonitorService.getTotalAlarmHourly(sysCode,buildingCodes,areaCode,isHandled,startTime,endTime));
     }
 
     /**

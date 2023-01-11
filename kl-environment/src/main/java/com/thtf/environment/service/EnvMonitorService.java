@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
 import com.thtf.common.dto.itemserver.ParameterInfoDTO;
+import com.thtf.environment.dto.EChartsMoreVO;
 import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.entity.TblHistoryMoment;
@@ -142,4 +143,6 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
     EnvItemMonitorDTO getMonitorPointInfo(String itemCode);
 
     Object listParameterMap(ListParameterMapDTO listParameterMapDTO);
+
+    EChartsMoreVO getTotalAlarmHourly(String sysCode, String buildingCodes, String areaCode, Boolean isHandled, String startTime, String endTime);
 }
