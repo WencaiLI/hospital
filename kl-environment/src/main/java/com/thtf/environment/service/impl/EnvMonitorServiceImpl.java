@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -508,7 +509,17 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
+        EChartsVO result = new EChartsVO();
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+        if(null == parameterInfo){
+            return null;
+        }
+
+        parameterInfo.forEach(e->{
+            if (e.getItemTypeCode().equals(itemTypeCode)){
+                result.setUnit(e.getUnit());
+            }
+        });
         List<TimeValueDTO> hourlyHistoryMoment = null;
         if(StringUtils.isBlank(parameterCode)){
             if(StringUtils.isNotBlank(itemTypeCode)){
@@ -547,7 +558,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
         }
         hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
-        EChartsVO result = new EChartsVO();
+
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
         result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
         return result;
@@ -565,12 +576,18 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EChartsVO getDailyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date) {
+        EChartsVO result = new EChartsVO();
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         Date newDate = YYMMDDStringToDate(date);
         if(null == date){
             log.error("时间格式错误");
             return null;
         }
+        parameterInfo.forEach(e->{
+            if (e.getItemTypeCode().equals(itemTypeCode)){
+                result.setUnit(e.getUnit());
+            }
+        });
         List<TimeValueDTO> hourlyHistoryMoment = null;
         try (HintManager hintManager = HintManager.getInstance()) {
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_END_SUFFIX);
@@ -617,7 +634,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         // 排序
         hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
-        EChartsVO result = new EChartsVO();
+
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
         result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
         return result;
@@ -635,12 +652,18 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EChartsVO getMonthlyHistoryMoment(String itemCode, String itemTypeCode, String parameterCode, String date) {
+        EChartsVO result = new EChartsVO();
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         Date newDate = YYMMDDStringToDate(date);
         if(null == date){
             log.error("时间格式错误");
             return null;
         }
+        parameterInfo.forEach(e->{
+            if (e.getItemTypeCode().equals(itemTypeCode)){
+                result.setUnit(e.getUnit());
+            }
+        });
         List<TimeValueDTO> hourlyHistoryMoment = null;
         try (HintManager hintManager = HintManager.getInstance()) {
             // todo liwencai 此处存在bug
@@ -692,7 +715,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
             hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
         }
-        EChartsVO result = new EChartsVO();
+
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
         result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
         return result;
@@ -880,6 +903,17 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EnvItemMonitorDTO getMonitorPointInfo(String itemCode) {
+        TblItem data1 = itemAPI.searchItemByItemCode(itemCode).getData();
+        if(null == data1){
+            return null;
+        }
+        AtomicReference<String> monitorParameter = new AtomicReference<>();
+        List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+        parameterInfo.forEach(e->{
+            if(e.getItemTypeCode().equals(data1.getTypeCode())){
+                monitorParameter.set(e.getParameterType());
+            }
+        });
 //         ItemMonitorPointInfoDTO monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode).getData();
 //        TblAlarmRecordUnhandle data = alarmAPI.getAlarmInfoByItemCodeLimitOne(itemCode).getData();
 //        monitorPointInfo.setA
@@ -888,7 +922,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         listItemNestedParametersParamDTO.setItemCodeList(Collections.singletonList(itemCode));
 
         List<String> parameterCodeList = new ArrayList<>();
-        parameterCodeList.add(ParameterConstant.ENV_MONITOR_ONLINE);
+        if(StringUtils.isNotBlank(monitorParameter.get())){
+            parameterCodeList.add(monitorParameter.get());
+        }
+        // parameterCodeList.add(ParameterConstant.ENV_MONITOR_ONLINE);
         parameterCodeList.add(ParameterConstant.ENV_MONITOR_ALARM);
         listItemNestedParametersParamDTO.setParameterTypeCodeList(parameterCodeList);
         List<ListItemNestedParametersResultDTO> data = itemAPI.listItemNestedParameters(listItemNestedParametersParamDTO).getData();
@@ -911,11 +948,14 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                     result.setAlarmParameterValue(e.getValue());
                     resultParameterList.add(e);
                 }
-                if(ParameterConstant.ENV_MONITOR_ONLINE.equals(e.getParameterType())){
-                    result.setOnlineParameterCode(e.getCode());
-                    result.setOnlineParameterValue(e.getValue());
-                    resultParameterList.add(e);
+                if(StringUtils.isNotBlank(monitorParameter.get())){
+                    if(monitorParameter.get().equals(e.getParameterType())){
+                        result.setParameterCode(e.getCode());
+                        result.setParameterValue(e.getValue());
+                        resultParameterList.add(e);
+                    }
                 }
+
             });
             result.setParameterList(resultParameterList);
         }
