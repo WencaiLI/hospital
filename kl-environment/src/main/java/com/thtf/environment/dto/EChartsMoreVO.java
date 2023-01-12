@@ -1,10 +1,8 @@
 package com.thtf.environment.dto;
 
-import com.sun.org.glassfish.gmbal.NameValue;
 import lombok.Data;
-
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * @Author: liwencai
