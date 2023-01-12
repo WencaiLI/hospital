@@ -2,6 +2,7 @@ package com.thtf.environment.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.dto.adminserver.AreaNestBuildingDTO;
 import com.thtf.common.dto.alarmserver.EChartsHourlyVO;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
@@ -760,8 +761,13 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         for (TblGroup group : pageInfo.getList()) {
             areaCodeList.addAll(Arrays.asList(group.getBuildingAreaCodes().split(",")));
         }
-        /* 获取全部区域信息 */
-        List<CodeAndNameDTO> areaCodeAndNameList = adminAPI.listAreaNameListByAreaCodeList(areaCodeList).getData();
+
+        String areaCodes = areaCodeList.stream().distinct().collect(Collectors.joining(","));
+
+        /* 获取全部建区域-筑编码映射 */
+        Map<String, AreaNestBuildingDTO> areaNestBuildingMap = adminAPI.getAreaBuildingMap(areaCodes).getData();
+//        /* 获取全部区域信息 */
+//        List<CodeAndNameDTO> areaCodeAndNameList = adminAPI.listAreaNameListByAreaCodeList(areaCodeList).getData();
         /* 获取所有的参数 */
         List<TblItemParameter> parameterList = itemAPI.getParameterListByItemCodeListAndParameterTypeCodeList(itemCodeList,this.getParameterCodeList(parameterInfo)).getData();
         /* 所有类别相关的组信息 */
@@ -775,20 +781,36 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             // map.put("buildingCode",group)
             /* 匹配区域名称信息 */
             String[] split = group.getBuildingAreaCodes().split(",");
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder areaStringBuilder = new StringBuilder();
+            StringBuilder buildingStringBuilder = new StringBuilder();
             if(split.length>0){
                 for (String area : split) {
-                    areaCodeAndNameList.forEach(e->{
-                        if(e.getCode().equals(area)){
-                            stringBuilder.append(e.getName());
-                            stringBuilder.append(",");
+                    AreaNestBuildingDTO areaNestBuildingDTO = areaNestBuildingMap.get(area);
+                    if(null != areaNestBuildingDTO){
+                        if(null != areaNestBuildingDTO.getAreaName() && StringUtils.isNotBlank(areaNestBuildingDTO.getAreaName())){
+                            areaStringBuilder.append(areaNestBuildingDTO.getAreaName());
+                            areaStringBuilder.append(",");
                         }
-                    });
+                        if(null != areaNestBuildingDTO.getBuildingName() && StringUtils.isNotBlank(areaNestBuildingDTO.getBuildingName())){
+                            buildingStringBuilder.append(areaNestBuildingDTO.getBuildingName());
+                            buildingStringBuilder.append(",");
+                        }
+
+                    }
                 }
             }
-            if(stringBuilder.length()>0){
-                map.put("areaName",stringBuilder.toString().substring(0,stringBuilder.length()-1));
+            if(areaStringBuilder.length()>0){
+                map.put("areaName",areaStringBuilder.toString().substring(0,areaStringBuilder.length()-1));
+            }else {
+                map.put("areaName",null);
             }
+
+            if(buildingStringBuilder.length()>0){
+                map.put("buildingName",buildingStringBuilder.toString().substring(0,buildingStringBuilder.length()-1));
+            }else {
+                map.put("buildingName",null);
+            }
+
             /* 匹配不同类别的数据 */
             resultList.add(map);
         }
