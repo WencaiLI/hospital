@@ -440,13 +440,22 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
     @Override
-    public PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode,Integer pageNumber,Integer pageSize) {
+    public PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
 
         // 故障设备信息
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(sysCode);
         tblItem.setTypeCode(itemTypeCode);
-        tblItem.setFault(1);
+        if(null != alarmCategory){
+            if (alarmCategory == 0){
+                tblItem.setAlarm(1);
+            }
+            if(alarmCategory == 1){
+                tblItem.setAlarm(0);
+                tblItem.setFault(1);
+            }
+        }
+
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
         if(itemList ==  null || itemList.size() == 0){
             return null;
@@ -458,14 +467,21 @@ public class ElevatorServiceImpl implements ElevatorService {
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
         listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
         // 设置筛选条件为故障报警
-        listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
-        if(null != itemCodeList && itemCodeList.size()>0){
+        if(null != alarmCategory){
+            if (alarmCategory == 0){
+                listAlarmInfoLimitOneParamDTO.setAlarmCategory("0");
+            }
+            if(alarmCategory == 1){
+                listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
+            }
+        }
+        if(itemCodeList.size() > 0){
             listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
         }
         listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
         listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
         alarmPageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-
+        // 报警信息
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmPageInfo.getList();
         List<String> alarmItemCodeList = recordUnhandles.stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
         List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode,alarmItemCodeList).getData();
