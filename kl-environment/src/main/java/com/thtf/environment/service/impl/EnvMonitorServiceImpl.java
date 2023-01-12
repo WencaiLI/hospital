@@ -1074,17 +1074,20 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 // 设备总数
                 int num = 0;
                 // 需要统计计算平均值的总值
-                int totalValue = 0;
+                double totalValue = (double) 0;
                 // 需要统计计算平均值的总设备数
                 int totalNum = 0;
                 // 值单位
                 if(null != parameterList && parameterList.size()>0){
-                    for (TblItemParameter itemParameter : parameterList) {
-                        if(itemCodeList.contains(itemParameter.getItemCode()) && parameterCode.equals(itemParameter.getParameterType())){
-                            num ++;
-                            if(null != itemParameter.getValue() && StringUtils.isNumeric(itemParameter.getValue())){
+                    List<TblItemParameter> collect = parameterList.stream().filter(e -> parameterCode.equals(e.getParameterType())).collect(Collectors.toList());
+
+                    for (TblItemParameter itemParameter : collect) {
+                        if(itemCodeList.contains(itemParameter.getItemCode())){
+                            // 执行
+                            if(null != itemParameter.getValue()){
+                                totalValue += Double.parseDouble(itemParameter.getValue());
+                                num ++;
                                 totalNum ++;
-                                totalValue += Integer.parseInt(itemParameter.getValue());
                             }
                         }
                     }
