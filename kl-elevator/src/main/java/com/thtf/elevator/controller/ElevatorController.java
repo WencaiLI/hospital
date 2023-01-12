@@ -121,10 +121,11 @@ public class ElevatorController {
      */
     @PostMapping("/getAllAlarmPage")
     public JsonResult<PageInfoVO> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
-                                                           @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
-                                                           @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                                           @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.querySuccess(elevatorService.getAllAlarmPage(sysCode,itemTypeCode,pageNumber,pageSize));
+                                                  @RequestParam("alarmCategory") Integer alarmCategory,
+                                                  @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                  @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+                                                  @RequestParam(value = "pageSize",required = false) Integer pageSize){
+        return JsonResult.querySuccess(elevatorService.getAllAlarmPage(sysCode,itemTypeCode,alarmCategory,pageNumber,pageSize));
     }
 
     /**
