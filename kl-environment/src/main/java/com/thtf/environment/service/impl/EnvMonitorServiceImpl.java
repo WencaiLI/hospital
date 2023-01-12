@@ -18,10 +18,7 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.config.ParameterConfigNacos;
-import com.thtf.environment.dto.EChartsMoreVO;
-import com.thtf.environment.dto.EnvItemMonitorDTO;
-import com.thtf.environment.dto.PageInfoVO;
-import com.thtf.environment.dto.TimeValueDTO;
+import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.ItemTypeConvert;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.dto.convert.ParameterConverter;
@@ -116,6 +113,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             return null;
         }
         EChartsMoreVO result = new EChartsMoreVO();
+        List<KeyValueDTO> values = new ArrayList<>();
+
+
+
         Map<String, String> codeNameMap = new HashMap<>();
         parameterInfo.forEach(e->{
             codeNameMap.put(e.getItemTypeCode(),e.getItemTypeName().split("[(]")[0].split("（")[0]);
@@ -134,12 +135,23 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         if(itemTypeCodeList.size()>0){
             param.setItemTypeCodeList(itemTypeCodeList);
         }
-
-
         EChartsHourlyVO data = alarmAPI.getTwentyFourHourAlarmStatistics(param).getData();
-        result.setCodeNameMap(codeNameMap);
+        itemTypeCodeList.forEach(itemTypeCode->{
+            KeyValueDTO keyValueDTO = new KeyValueDTO();
+            String property = null;
+            try {
+                property = this.getParameterName(itemTypeCode,parameterInfo).split("[(]")[0].split("（")[0];
+                // property = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemType.getCode()).getParameterTypeName();
+            }catch (Exception ignored){
+            }
+            keyValueDTO.setKey(property);
+            //
+            List<Long> list = data.getValues().get(itemTypeCode);
+            keyValueDTO.setValue(list);
+            values.add(keyValueDTO);
+        });
         result.setKeys(data.getKeys());
-        result.setValues(data.getValues());
+        result.setValues(values);
         return result;
     }
 
@@ -546,6 +558,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         List<Integer> collect = new ArrayList<>();
         if (null != hourlyHistoryMoment){
+            hourlyHistoryMoment.forEach(timeValueDTO->{
+                timeValueDTO.setTime(String.format("%02d", Integer.valueOf(timeValueDTO.getTime())));
+            });
             collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
         }else {
             hourlyHistoryMoment = new ArrayList<>();
@@ -558,7 +573,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 hourlyHistoryMoment.add(timeValueDTO);
             }
         }
-        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getTime));
 
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
         result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
@@ -624,7 +639,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         int year = getYear(newDate);
         int month = getMonth(newDate);
         int daysOfMonth = getDaysOfMonth(newDate);
+         System.out.println(hourlyHistoryMoment);
         String timePrefix = year+"-"+month+"-";
+        // 为null补0
+        hourlyHistoryMoment.forEach(e->{
+            e.setTime(timePrefix+String.format("%02d", Integer.valueOf(e.getTime())));
+        });
         for (int i = 1; i <= daysOfMonth; i++) {
             if(!collect.contains(i)){
                 TimeValueDTO timeValueDTO = new TimeValueDTO();
@@ -634,7 +654,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
         }
         // 排序
-        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+        hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getTime));
 
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
         result.setValues(hourlyHistoryMoment.stream().map(TimeValueDTO::getValue).collect(Collectors.toList()));
@@ -694,8 +714,11 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
         }
         if(null != hourlyHistoryMoment){
-            List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
             int year = getYear(newDate);
+            List<Integer> collect = hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).map(Integer::valueOf).collect(Collectors.toList());
+            hourlyHistoryMoment.forEach(timeValueDTO->{
+                timeValueDTO.setTime(year+"-"+String.format("%02d", Integer.valueOf(timeValueDTO.getTime())));
+            });
             for (int i = 1; i <= 12; i++) {
                 if(!collect.contains(i)){
                     TimeValueDTO timeValueDTO = new TimeValueDTO();
@@ -704,7 +727,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                     hourlyHistoryMoment.add(timeValueDTO);
                 }
             }
-            hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+            hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getTime));
         }else {
             hourlyHistoryMoment = new ArrayList<>();
             int year = getYear(newDate);
@@ -714,7 +737,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                     timeValueDTO.setValue(0);
                     hourlyHistoryMoment.add(timeValueDTO);
             }
-            hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getValue));
+            hourlyHistoryMoment.sort(Comparator.comparing(TimeValueDTO::getTime));
         }
 
         result.setKeys(hourlyHistoryMoment.stream().map(TimeValueDTO::getTime).collect(Collectors.toList()));
