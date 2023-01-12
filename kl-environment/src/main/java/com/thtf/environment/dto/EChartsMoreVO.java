@@ -1,5 +1,6 @@
 package com.thtf.environment.dto;
 
+import com.sun.org.glassfish.gmbal.NameValue;
 import lombok.Data;
 
 import java.util.List;
@@ -13,6 +14,6 @@ import java.util.Map;
 @Data
 public class EChartsMoreVO {
     private List<Integer> keys;
-    private Map<String,List<Long>> values;
-    private Map<String, String> codeNameMap;
+    private List<KeyValueDTO> values;
+    // private Map<String, String> codeNameMap;
 }
