@@ -50,4 +50,6 @@ public class PageInfoVO implements Serializable {
     private int navigateLastPage;  //导航条上的最后一页
 
     private List list;  // 结果集
+
+    private Long total;
 }
