@@ -114,9 +114,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         EChartsMoreVO result = new EChartsMoreVO();
         List<KeyValueDTO> values = new ArrayList<>();
-
-
-
         Map<String, String> codeNameMap = new HashMap<>();
         parameterInfo.forEach(e->{
             codeNameMap.put(e.getItemTypeCode(),e.getItemTypeName().split("[(]")[0].split("（")[0]);
@@ -135,6 +132,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         if(itemTypeCodeList.size()>0){
             param.setItemTypeCodeList(itemTypeCodeList);
         }
+        param.setStartTime(startTime);
+        param.setEndTime(endTime);
+        param.setIsHandled(isHandled);
         EChartsHourlyVO data = alarmAPI.getTwentyFourHourAlarmStatistics(param).getData();
         itemTypeCodeList.forEach(itemTypeCode->{
             KeyValueDTO keyValueDTO = new KeyValueDTO();
