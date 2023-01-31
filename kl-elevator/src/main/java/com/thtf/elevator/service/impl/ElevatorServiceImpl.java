@@ -292,56 +292,6 @@ public class ElevatorServiceImpl implements ElevatorService {
         }
         pageInfoVO.setList(resultDTOList);
         return pageInfoVO;
-        // 根据设备编码和设备类别编码、是否在线筛选设备编码信息 不分页
-        // 根据设备编码集，获取分页设备信息 分页
-//
-//
-//        // 设备信息
-//
-//        ListItemCodeParamDTO listItemCodeParamDTO = new ListItemCodeParamDTO();
-//        listItemCodeParamDTO.setSysCode(sysCode);
-//        if(StringUtils.isNotBlank(itemTypeCode)){
-//            listItemCodeParamDTO.setItemTypeCodeList(Collections.singletonList(itemTypeCode));
-//        }
-//        // 所有该子系统的设备编码
-//        List<String> itemCodeList = itemAPI.listItemCode(listItemCodeParamDTO).getData();
-//        if(null != itemCodeList && itemCodeList.size() == 0){
-//            return null;
-//        }
-//
-//        ListItemNestedParametersParamDTO listItemNestedParametersParamDTO = new ListItemNestedParametersParamDTO();
-//        listItemNestedParametersParamDTO.setItemCodeList(itemCodeList);
-//        if(null != onlineStatus){
-//            List<ParameterTypeCodeAndValueDTO> parameterList = new ArrayList<>();
-//            ParameterTypeCodeAndValueDTO param = new ParameterTypeCodeAndValueDTO();
-//            param.setParameterTypeCode(ParameterConstant.ELEVATOR_RUN_STATUS);
-//            param.setParameterValue("1");
-//            parameterList.add(param);
-//            listItemNestedParametersParamDTO.setParameterList(parameterList);
-//        }
-//        itemAPI.listItemNestedParametersPage;
-//        List<String> itemCodeTypeList = new ArrayList<>();
-//        PageInfo<ItemNestedParameterVO> itemInfosPage;
-//        if(StringUtils.isNotBlank(itemTypeCode)){
-//            itemCodeTypeList.add(itemTypeCode);
-//            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,itemCodeTypeList,pageNum,pageSize).getData();
-//        }else {
-//            itemInfosPage = itemAPI.searchItemNestedParametersBySyscodeAndItemTypeCodePage(sysCode,null,pageNum,pageSize).getData();
-//        }
-//
-//        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemInfosPage);
-//
-//        List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoList(itemInfosPage.getList());
-//
-//        for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {
-//            for (ItemNestedParameterVO item : itemInfosPage.getList()) {
-//                if (item.getCode().equals(elevatorInfoResultDTO.getItemCode())){
-//                    convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
-//                }
-//            }
-//        }
-//        pageInfoVO.setList(resultDTOList);
-//        return pageInfoVO;
     }
 
 
@@ -441,7 +391,6 @@ public class ElevatorServiceImpl implements ElevatorService {
      */
     @Override
     public PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
-
         // 故障设备信息
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(sysCode);
@@ -455,13 +404,11 @@ public class ElevatorServiceImpl implements ElevatorService {
                 tblItem.setFault(1);
             }
         }
-
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
         if(itemList ==  null || itemList.size() == 0){
             return null;
         }
         List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
-        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(data);
         /* 获取故障报警信息 */
         PageInfo<TblAlarmRecordUnhandle> alarmPageInfo;
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
@@ -485,9 +432,7 @@ public class ElevatorServiceImpl implements ElevatorService {
         List<TblAlarmRecordUnhandle> recordUnhandles = alarmPageInfo.getList();
         List<String> alarmItemCodeList = recordUnhandles.stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
         List<ItemNestedParameterVO> itemInfos = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode,alarmItemCodeList).getData();
-
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(alarmPageInfo);
-
         List<ElevatorAlarmResultDTO> resultDTOList = new ArrayList<>();
         for (ItemNestedParameterVO item : itemInfos) {
             ElevatorAlarmResultDTO elevatorInfoResult = new ElevatorAlarmResultDTO();
@@ -500,7 +445,6 @@ public class ElevatorServiceImpl implements ElevatorService {
                 if(item.getCode().equals(alarmRecordUnhandle.getItemCode())){
                     long duration = LocalDateTimeUtil.between(alarmRecordUnhandle.getAlarmTime(), LocalDateTime.now(), ChronoUnit.MILLIS);
                     elevatorInfoResult.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
-                    // elevatorInfoResult.setStayTime(getTimeGap(alarmRecordUnhandle.getAlarmTime(),LocalDateTime.now()));
                     elevatorInfoResult.setAlarmLevel(alarmRecordUnhandle.getAlarmLevel());
                     elevatorInfoResult.setAlarmTime(alarmRecordUnhandle.getAlarmTime());
                     elevatorInfoResult.setAlarmCategory(alarmRecordUnhandle.getAlarmCategory());
@@ -509,44 +453,21 @@ public class ElevatorServiceImpl implements ElevatorService {
             convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResult,item.getParameterList());
             resultDTOList.add(elevatorInfoResult);
         }
-
         pageInfoVO.setList(resultDTOList);
         return pageInfoVO;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备报警、故障统计
+     * @Date: 2023/1/31
+     * @Param sysCode: 子系统编码
+     * @Param startTime: 开始时间
+     * @Param endTime: 结束时间
+     * @Return: java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo>
+     */
     @Override
     public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode,String startTime,String endTime) {
         return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, null, startTime, endTime).getData();
-    }
-
-    /* ================= 复用代码区 =================== */
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取时间差（*天*小时*分*秒）
-     * @Date: 2022/10/27
-     * @Param: startTime: 开始时间
-     * @Param: endTime: 结束使劲按
-     * @Return: java.lang.String
-     */
-    public String getTimeGap(LocalDateTime startTime, LocalDateTime endTime){
-        Date nowDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
-        Date alarmTimeStartTime = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
-        long nd = 1000 * 24 * 60 * 60;
-        long nh = 1000 * 60 * 60;
-        long nm = 1000 * 60;
-        long ns = 1000;
-        // 获得两个时间的毫秒时间差异
-        long diff = nowDate.getTime() - alarmTimeStartTime.getTime();
-        // 计算差多少天
-        long day = diff / nd;
-        // 计算差多少小时
-        long hour = diff % nd / nh;
-        // 计算差多少分钟
-        long min = diff % nd % nh / nm;
-        // 计算差多少秒
-        long sec = diff % nd % nh % nm /ns;
-        // 输出结果
-        return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
     }
 }
