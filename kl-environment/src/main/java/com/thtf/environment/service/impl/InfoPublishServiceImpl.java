@@ -75,9 +75,9 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         String parameterCode = null;
         String parameterValue = null;
         // 运行状态筛选
-        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS)){
-            parameterCode = ParameterConstant.INFO_PUBLISH_RUN_STATUS;
-            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS);
+        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS)){
+            parameterCode = ParameterConstant.INFO_PUBLISH_ONLINE_STATUS;
+            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS);
         }
         // 查询所有设备信息
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(

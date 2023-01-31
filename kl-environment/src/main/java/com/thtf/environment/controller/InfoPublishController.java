@@ -36,30 +36,22 @@ public class InfoPublishController {
     private InfoPublishService infoPublishService;
     @Resource
     private ItemAPI itemAPI;
-    @Resource
-    private AlarmAPI alarmAPI;
 
     /**
      * @Author: liwencai
      * @Description: 获取当日最新报警信息
      * @Date: 2022/9/22
-     * @Param sysCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param sysCode: 子系统编码
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: com.thtf.common.response.JsonResult
      */
-    @GetMapping("/getAlarmUnhandledToday")
-    public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
-                                          @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                          @RequestParam(value = "pageSize",required = false)Integer pageSize){
-
-        try {
-            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return JsonResult.error("服务器错误");
-        }
-    }
+//    @GetMapping("/getAlarmUnhandledToday")
+//    public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
+//                                          @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+//                                          @RequestParam(value = "pageSize",required = false)Integer pageSize){
+//        return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
+//    }
 
     /**
      * @Author: liwencai
@@ -80,16 +72,16 @@ public class InfoPublishController {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 点位信息
      * @Date: 2022/12/1
-     * @Param sysCode:
-     * @Param itemCodes:
+     * @Param sysCode: 子系统编码
+     * @Param itemCode: 设备编码
      * @return: com.thtf.common.response.JsonResult
      */
     @GetMapping("/monitor_point_info")
     public JsonResult<ItemInfoOfLargeScreenDTO> getMonitorPoint(@RequestParam("sysCode") String sysCode,
-                                                                @RequestParam("itemCode") String itemCodes){
-        return JsonResult.querySuccess(infoPublishService.getMonitorPoint(sysCode,itemCodes));
+                                                                @RequestParam("itemCode") String itemCode){
+        return JsonResult.querySuccess(infoPublishService.getMonitorPoint(sysCode,itemCode));
 
     }
     /**
@@ -107,7 +99,7 @@ public class InfoPublishController {
     public JsonResult<PageInfoVO> getLargeScreenInfo(@RequestParam("sysCode") String sysCode,
                                                      @RequestParam(value = "areaCode",required = false) String areaCode,
                                                      @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                     @RequestParam(value = "runValue",required = false) String runValue,
+                                                     @RequestParam(value = "onlineValue",required = false) String onlineValue,
                                                      @RequestParam(value = "keyword",required = false) String keyword,
                                                      @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                                      @RequestParam(value = "pageSize",required = false) Integer pageSize){
@@ -120,8 +112,8 @@ public class InfoPublishController {
                 map.put("areaCode",areaCode);
             }
         }
-        if(StringUtils.isNotBlank(runValue)){
-            map.put(ParameterConstant.INFO_PUBLISH_RUN_STATUS,runValue);
+        if(StringUtils.isNotBlank(onlineValue)){
+            map.put(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS,onlineValue);
         }
         if(StringUtils.isNotBlank(keyword)){
             map.put("keyword",keyword);
