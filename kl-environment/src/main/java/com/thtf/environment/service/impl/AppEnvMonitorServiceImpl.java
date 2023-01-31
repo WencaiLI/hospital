@@ -36,7 +36,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
 
     @Autowired
     private AlarmAPI alarmAPI;
-    @Resource
+    @Autowired
     private EnvMonitorServiceImpl envMonitorServiceImpl;
 
     @Override
