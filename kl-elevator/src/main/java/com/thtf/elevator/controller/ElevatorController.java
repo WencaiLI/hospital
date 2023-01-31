@@ -42,18 +42,6 @@ public class ElevatorController {
 
     /**
      * @Author: liwencai
-     * @Description: 获取报警数量
-     * @Date: 2022/9/5
-     * @Param sysCode: 子系统编码
-     * @return: com.thtf.common.response.JsonResult<com.thtf.elevator.dto.DisplayInfoDTO>
-     */
-    // @PostMapping("/alarmNumber")
-    JsonResult<Integer> alarmNumber(@RequestParam("sysCode")String sysCode){
-        return JsonResult.querySuccess(elevatorService.alarmNumber(sysCode));
-    }
-
-    /**
-     * @Author: liwencai
      * @Description: 获取电梯的设备参数
      * @Date: 2022/9/5
      * @Param itemCodeList:
@@ -65,20 +53,6 @@ public class ElevatorController {
         return JsonResult.querySuccess(elevatorService.itemCodeList(itemCodeList,isNeedAreaName));
     }
 
-
-    /**
-     * @Author: liwencai
-     * @Description: 查看关联设备信息
-     * @Date: 2022/9/5
-     * @Param relationType:
-     * @Param itemCode:
-     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.itemserver.TblItem>>
-     */
-    // @PostMapping(value = "/getItemRelInfo")
-    public JsonResult<List<TblItem>> getItemRelInfo(@RequestParam("relationType") String relationType,
-                                              @RequestParam("itemCode") String itemCode){
-        return JsonResult.querySuccess(elevatorService.getItemRelInfo(relationType,itemCode));
-    }
 
     /**
      * @Author: liwencai
