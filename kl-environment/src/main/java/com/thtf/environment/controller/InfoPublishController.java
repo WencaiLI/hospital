@@ -2,11 +2,13 @@ package com.thtf.environment.controller;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.thtf.common.dto.itemserver.CountItemByParameterListDTO;
 import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.dto.InfoPublishDisplayDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
@@ -68,10 +70,11 @@ public class InfoPublishController {
      * @return: com.thtf.common.response.JsonResult
      */
     @PostMapping("/countInfoPublicItemStatus")
-    public JsonResult<Map<String,Integer>> countInfoPublicItemStatus(@RequestParam("sysCode")String sysCode,
-                                                                     @RequestParam(value = "areaCodes",required = false)String areaCode,
-                                                                     @RequestParam(value = "itemTypeCodes",required = false)String itemTypeCodes){
-        return itemAPI.countInfoPublicItemStatus(sysCode,areaCode,itemTypeCodes);
+    public JsonResult<InfoPublishDisplayDTO> countInfoPublicItemStatus(@RequestParam("sysCode")String sysCode,
+                                                                       @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
+                                                                       @RequestParam(value = "areaCodes",required = false)String areaCode,
+                                                                       @RequestParam(value = "itemTypeCodes",required = false)String itemTypeCodes){
+        return JsonResult.querySuccess(infoPublishService.getDisplayInfo(sysCode,buildingCodes,areaCode,itemTypeCodes));
     }
 
 

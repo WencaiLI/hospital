@@ -1,5 +1,6 @@
 package com.thtf.environment.service;
 
+import com.thtf.environment.dto.InfoPublishDisplayDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
@@ -78,4 +79,16 @@ public interface InfoPublishService {
      * @return: com.thtf.environment.dto.InfoPublishPointDTO
      */
     ItemInfoOfLargeScreenDTO getMonitorPoint(String sysCode, String itemCode);
+
+    /**
+     * @Author: liwencai
+     * @Description: 前端展示数据
+     * @Date: 2023/1/30
+     * @Param sysCode:
+     * @Param buildingCodes:
+     * @Param areaCode:
+     * @Param itemTypeCodes:
+     * @Return: com.thtf.environment.dto.InfoPublishDisplayDTO
+     */
+    InfoPublishDisplayDTO getDisplayInfo(String sysCode, String buildingCodes, String areaCode, String itemTypeCodes);
 }
