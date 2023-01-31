@@ -138,16 +138,13 @@ public class BroadcastServiceImpl implements BroadcastService {
         String parameterCode = null;
         String parameterValue = null;
         if(StringUtils.isNotBlank(runVale)){
-            parameterCode = ParameterConstant.BROADCAST_STATE;
+            parameterCode = ParameterConstant.BROADCAST_ONLINE;
             parameterValue = runVale;
         }
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
                 sysCode, null, buildingCodes ,areaCode,parameterCode, parameterValue, keyword,pageNumber,pageSize).getData();
-
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
         // 获取设备报警信息
-        // List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
-
         List<ItemInfoOfBroadcastDTO> resultList = new ArrayList<>();
         // 获取设备基本信息
         for (ItemNestedParameterVO item : itemPageInfo.getList()) {
@@ -159,7 +156,7 @@ public class BroadcastServiceImpl implements BroadcastService {
             itemInfoOfBroadcastDTO.setAreaName(item.getAreaName());
             itemInfoOfBroadcastDTO.setBuildingCode(item.getBuildingCode());
             // todo 怎么获取IP地址存疑
-            itemInfoOfBroadcastDTO.setIpAddress("10.10.82.146");
+            itemInfoOfBroadcastDTO.setIpAddress("127.0.0.1");
             // 配置模型视角
             if(StringUtils.isNotBlank(item.getViewLongitude())){
                 itemInfoOfBroadcastDTO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));

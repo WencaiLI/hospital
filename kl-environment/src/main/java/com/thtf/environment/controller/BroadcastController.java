@@ -157,11 +157,11 @@ public class BroadcastController {
     JsonResult<PageInfoVO> getItemInfo(@RequestParam("sysCode") String sysCode,
                                        @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
                                        @RequestParam(value = "areaCode",required = false) String areaCode,
-                                       @RequestParam(value = "runValue",required = false) String runValue,
+                                       @RequestParam(value = "onlineValue",required = false) String onlineValue,
                                        @RequestParam(value = "keyword",required = false) String keyword,
                                        @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
                                        @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.querySuccess(broadcastService.getItemInfo(sysCode,buildingCodes,areaCode,runValue,keyword,pageNumber,pageSize));
+        return JsonResult.querySuccess(broadcastService.getItemInfo(sysCode,buildingCodes,areaCode,onlineValue,keyword,pageNumber,pageSize));
     }
 
     /**
