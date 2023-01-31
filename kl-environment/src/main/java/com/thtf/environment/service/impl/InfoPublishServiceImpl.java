@@ -5,6 +5,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
+import com.thtf.common.dto.itemserver.CountItemByParameterListDTO;
+import com.thtf.common.dto.itemserver.CountItemInfoParamDTO;
+import com.thtf.common.dto.itemserver.CountItemInfoResultDTO;
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
@@ -41,8 +44,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InfoPublishServiceImpl implements InfoPublishService {
 
-    private final static String BIG_SCREEN_TYPE_CODE = "XXFBDP_TYPE"; // 信息发布大屏类别在数据库中的字段
-
     @Resource
     private ItemAPI itemAPI;
     @Resource
@@ -74,9 +75,9 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         String parameterCode = null;
         String parameterValue = null;
         // 运行状态筛选
-        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS)){
-            parameterCode = ParameterConstant.INFO_PUBLISH_RUN_STATUS;
-            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_RUN_STATUS);
+        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS)){
+            parameterCode = ParameterConstant.INFO_PUBLISH_ONLINE_STATUS;
+            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS);
         }
         // 查询所有设备信息
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
@@ -343,6 +344,63 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         }
         this.convertToItemInfoOfLargeScreenDTO(innerResult,itemNestedParameterVO.getParameterList());
         return innerResult;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 前端展示数据
+     * @Date: 2023/1/30
+     * @Param sysCode:
+     * @Param buildingCodes:
+     * @Param areaCode:
+     * @Param itemTypeCodes:
+     * @Return: com.thtf.environment.dto.InfoPublishDisplayDTO
+     */
+    @Override
+    public InfoPublishDisplayDTO getDisplayInfo(String sysCode, String buildingCodes, String areaCode, String itemTypeCodes) {
+        InfoPublishDisplayDTO result = new InfoPublishDisplayDTO();
+
+        CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
+        countItemByParameterListDTO.setSysCode(sysCode);
+        List<String> buildingCodeList = null;
+        List<String> itemTypeCodeList = null;
+        if(StringUtils.isNotBlank(buildingCodes)){
+            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        }else {
+            countItemByParameterListDTO.setAreaCode(areaCode);
+        }
+        if (StringUtils.isNotBlank(itemTypeCodes)){
+            itemTypeCodeList = Arrays.asList(itemTypeCodes.split(","));
+        }
+        countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
+        countItemByParameterListDTO.setItemTypeCodeList(itemTypeCodeList);
+
+        // 查看在线数量
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS);
+        countItemByParameterListDTO.setParameterValue("1");
+        Integer onlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
+        result.setOnlineCount(onlineCount);
+
+        // 查看开启数量
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.INFO_PUBLISH_RUN_STATUS);
+        countItemByParameterListDTO.setParameterValue("1");
+        Integer onCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
+        result.setOnCount(onCount);
+
+        CountItemInfoParamDTO countItemInfoParamDTO = new CountItemInfoParamDTO();
+        countItemInfoParamDTO.setSysCode(sysCode);
+        if(null != buildingCodeList){
+            countItemInfoParamDTO.setBuildingCodeList(buildingCodeList);
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                countItemInfoParamDTO.setAreaCodeList(Collections.singletonList(areaCode));
+            }
+        }
+        CountItemInfoResultDTO itemInfo = itemAPI.countItemInfo(countItemInfoParamDTO).getData();
+        result.setTotalCount(itemInfo.getItemNumber());
+        result.setFaultNumber(itemInfo.getFaultItemNumber());
+        result.setAlarmNumber(itemInfo.getAlarmItemNumber());
+        return result;
     }
 
     /* *************************** 复用代码区域 开始 ************************** */
