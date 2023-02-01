@@ -144,5 +144,17 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
 
     Object listParameterMap(ListParameterMapDTO listParameterMapDTO);
 
+    /**
+     * @Author: liwencai
+     * @Description: 24小时维度统计报警数量
+     * @Date: 2023/2/1
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑区域编码集合
+     * @Param areaCode: 区域编码
+     * @Param isHandled: 是否包含已处理报警
+     * @Param startTime: 开始时间
+     * @Param endTime: 结束时间
+     * @Return: com.thtf.environment.dto.EChartsMoreVO
+     */
     EChartsMoreVO getTotalAlarmHourly(String sysCode, String buildingCodes, String areaCode, Boolean isHandled, String startTime, String endTime);
 }
