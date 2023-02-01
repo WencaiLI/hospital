@@ -119,10 +119,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         EChartsMoreVO result = new EChartsMoreVO();
         List<KeyValueDTO> values = new ArrayList<>();
-        Map<String, String> codeNameMap = new HashMap<>();
-        parameterInfo.forEach(e->{
-            codeNameMap.put(e.getItemTypeCode(),e.getItemTypeName().split("[(]")[0].split("（")[0]);
-        });
+//        Map<String, String> codeNameMap = new HashMap<>(parameterInfo.size());
+//        parameterInfo.forEach(e->{
+//            codeNameMap.put(e.getItemTypeCode(),e.getItemTypeName().split("[(]")[0].split("（")[0]);
+//        });
         List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.toList());
         // 计算未处理的24小时统计
         TwentyFourHourAlarmStatisticsDTO param = new TwentyFourHourAlarmStatisticsDTO();

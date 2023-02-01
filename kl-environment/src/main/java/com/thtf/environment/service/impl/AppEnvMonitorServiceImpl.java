@@ -66,7 +66,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
             tblAlarmRecordUnhandle.setBuildingCodeList(buildingCodesList);
             tblAlarmRecordUnhandle.setAlarmCategory(0);
             tblAlarmRecordUnhandle.setItemTypeCode(parameter.getItemTypeCode());
-            Integer data = alarmAPI.queryAllAlarmCount(tblAlarmRecordUnhandle).getData();
+            Long data = alarmAPI.queryAllAlarmCount(tblAlarmRecordUnhandle).getData();
             keyValueDTO.setValue(data);
             result.add(keyValueDTO);
         }
