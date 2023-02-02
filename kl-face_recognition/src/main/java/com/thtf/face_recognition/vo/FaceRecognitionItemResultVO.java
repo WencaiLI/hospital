@@ -1,6 +1,7 @@
 package com.thtf.face_recognition.vo;
 
 import com.thtf.common.dto.itemserver.ListVideoItemResultDTO;
+import com.thtf.common.entity.itemserver.TblItemParameter;
 import lombok.Data;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class FaceRecognitionItemResultVO {
     /**
      * 报警类型
      */
-    private Integer alarmCategory;
+    private String alarmCategory;
 
     /**
      * 区域编码
@@ -103,6 +104,16 @@ public class FaceRecognitionItemResultVO {
     private String alarmParameterValue;
 
     /**
+     * 报警参数编码
+     */
+    private String faultParameterCode;
+
+    /**
+     * 报警参数值
+     */
+    private String faultParameterValue;
+
+    /**
      * 相机视角
      */
     private List<Integer> eye;
@@ -111,6 +122,8 @@ public class FaceRecognitionItemResultVO {
      * 人眼视角
      */
     private List<Integer> center;
+
+    private List<TblItemParameter> parameterList;
 
 //    /**
 //     * 摄像设备

@@ -96,6 +96,11 @@ public class PageInfoVO implements Serializable {
     private int navigateLastPage;
 
     /**
+     *
+     */
+    private long total;
+
+    /**
      * 结果集
      */
     private List list;

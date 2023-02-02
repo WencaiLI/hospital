@@ -1,5 +1,8 @@
 package com.thtf.face_recognition.dto.mapstruct;
 
+
+
+import com.thtf.common.entity.itemserver.TblItemParameter;
 import org.mapstruct.Mapper;
 
 /**
@@ -9,5 +12,4 @@ import org.mapstruct.Mapper;
  */
 @Mapper(componentModel = "spring")
 public interface FaceRecognitionItemConvert {
-
 }

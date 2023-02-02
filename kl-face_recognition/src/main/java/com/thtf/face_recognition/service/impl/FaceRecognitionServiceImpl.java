@@ -130,21 +130,6 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         }
         // 设备编码集
         List<String> itemCodeList = pageInfo.getList().stream().map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
-
-        // 故障
-        List<String> faultItemCodeList = pageInfo.getList().stream().filter(e -> e.getFault() == 1).map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
-
-        // 报警
-        List<String> alarmItemCodeList = pageInfo.getList().stream().filter(e -> e.getAlarm() == 1).map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
-        List<TblAlarmRecordUnhandle> alarmRecordUnhandleList = new ArrayList<>();
-        if(faultItemCodeList.size() > 0){
-            alarmRecordUnhandleList.addAll(alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(faultItemCodeList,1).getData());
-        }
-        if(alarmItemCodeList.size() > 0){
-            alarmRecordUnhandleList.addAll(alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(alarmItemCodeList,0).getData());
-        }
-
-
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         // 集中查询摄像机信息
         ListVideoItemParamDTO listVideoItemParamDTO = new ListVideoItemParamDTO();
@@ -153,6 +138,9 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         // 集中查询设备参数
         List<String> parameterCode = new ArrayList<>();
         parameterCode.add(ParameterConstant.FACE_RECOGNITION_Position);
+        parameterCode.add(ParameterConstant.FACE_RECOGNITION_ONLINE);
+        parameterCode.add(ParameterConstant.FACE_RECOGNITION_ALARM);
+        parameterCode.add(ParameterConstant.FACE_RECOGNITION_FAULT);
         ListItemNestedParametersParamDTO param = new ListItemNestedParametersParamDTO();
         param.setItemCodeList(itemCodeList);
         param.setParameterTypeCodeList(parameterCode);
@@ -188,12 +176,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
                         }
                     });
                     // 匹配报警信息
-
-                    alarmRecordUnhandleList.forEach(alarm->{
-                        if(alarm.getItemCode().equals(e.getCode())){
-                            result.setAlarmCategory(alarm.getAlarmCategory());
-                        }
-                    });
+                    result.setAlarmCategory(this.getAlarmCategory(item.getAlarm(),item.getFault()));
                     resultList.add(result);
                 }
             });
@@ -201,6 +184,24 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         });
         pageInfoVO.setList(resultList);
         return pageInfoVO;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 将item中的alarm和fault转换为alarmCategory(报警表)
+     * @Date: 2023/2/2
+     * @Param alarm: 0 正常 1 报警
+     * @Param fault: 0 正常 1 故障
+     * @Return: java.lang.Integer
+     */
+    String getAlarmCategory(Integer alarm,Integer fault){
+        if(1 == alarm){
+            return ParameterConstant.FACE_RECOGNITION_ALARM_VALUE;
+        }
+        if(0 == alarm && 1 == fault){
+            return ParameterConstant.FACE_RECOGNITION_FAULT_VALUE;
+        }
+        return null;
     }
 
     /**
@@ -215,6 +216,8 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         List<String> parameterCode = new ArrayList<>();
         parameterCode.add(ParameterConstant.FACE_RECOGNITION_ONLINE);
         parameterCode.add(ParameterConstant.FACE_RECOGNITION_Position);
+        parameterCode.add(ParameterConstant.FACE_RECOGNITION_ALARM);
+        parameterCode.add(ParameterConstant.FACE_RECOGNITION_FAULT);
         ListItemNestedParametersParamDTO param = new ListItemNestedParametersParamDTO();
         param.setItemCodeList(Collections.singletonList(itemCode));
         param.setParameterTypeCodeList(parameterCode);
@@ -297,15 +300,42 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
      * @Return: void
      */
     public void convertToParameterInfo(FaceRecognitionItemResultVO listFaceRecognitionItem, List<TblItemParameter> parameterList){
+        List<TblItemParameter> list = new ArrayList<>();
         parameterList.forEach(e->{
+            // 在线
             if(ParameterConstant.FACE_RECOGNITION_ONLINE.equals(e.getParameterType())){
                 listFaceRecognitionItem.setOnlineParameterCode(e.getCode());
                 listFaceRecognitionItem.setOnlineValue(e.getValue());
+                list.add(e);
+
             }
+            // 方位
             if(ParameterConstant.FACE_RECOGNITION_Position.equals(e.getParameterType())){
                 listFaceRecognitionItem.setPositionParameterCode(e.getCode());
                 listFaceRecognitionItem.setPositionValue(e.getValue());
+                list.add(e);
+            }
+            // 报警
+            if(ParameterConstant.FACE_RECOGNITION_ALARM.equals(e.getParameterType())){
+                listFaceRecognitionItem.setAlarmParameterCode(e.getCode());
+                listFaceRecognitionItem.setAlarmParameterValue(e.getValue());
+                list.add(e);
+            }
+            // 故障
+            if(ParameterConstant.FACE_RECOGNITION_FAULT.equals(e.getParameterType())){
+                listFaceRecognitionItem.setFaultParameterCode(e.getCode());
+                listFaceRecognitionItem.setFaultParameterValue(e.getValue());
+                list.add(e);
             }
         });
+        list.forEach(e->{
+            e.setCreatedBy(null);
+            e.setCreatedTime(null);
+            e.setUpdateBy(null);
+            e.setDataUpdateTime(null);
+            e.setDeleteBy(null);
+            e.setDeleteTime(null);
+        });
+        listFaceRecognitionItem.setParameterList(list);
     }
 }

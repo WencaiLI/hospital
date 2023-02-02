@@ -30,7 +30,17 @@ public class ParameterConstant {
     public static final String FACE_RECOGNITION_ALARM = "Alarm";
 
     /**
+     * 报警状态编码
+     */
+    public static final String FACE_RECOGNITION_FAULT = "Fault";
+
+    /**
      * 方位
      */
     public static final String FACE_RECOGNITION_Position = "Position";
+
+    public static final String FACE_RECOGNITION_ALARM_VALUE = "0";
+
+
+    public static final String FACE_RECOGNITION_FAULT_VALUE = "1";
 }
