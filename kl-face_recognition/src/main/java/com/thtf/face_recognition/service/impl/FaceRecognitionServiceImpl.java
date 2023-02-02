@@ -145,8 +145,6 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         param.setItemCodeList(itemCodeList);
         param.setParameterTypeCodeList(parameterCode);
         List<ListItemNestedParametersResultDTO> itemNestedParametersResultList = itemAPI.listItemNestedParameters(param).getData();
-        // 查询报警信息
-
         // 结果集
         pageInfo.getList().forEach(e->{
             itemNestedParametersResultList.forEach(item->{
@@ -158,7 +156,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
                     result.setDescription(e.getDescription());
                     result.setBuildingCode(e.getBuildingCode());
                     result.setAreaCode(e.getAreaCode());
-                    result.setBuildingAreaName(e.getBuildingAreaName());
+                    result.setBuildingAreaName(e.getAreaName());
                     // 模型视角信息
                     if(StringUtils.isNotBlank(e.getViewLongitude())){
                         result.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
@@ -216,8 +214,6 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         List<String> parameterCode = new ArrayList<>();
         parameterCode.add(ParameterConstant.FACE_RECOGNITION_ONLINE);
         parameterCode.add(ParameterConstant.FACE_RECOGNITION_Position);
-        parameterCode.add(ParameterConstant.FACE_RECOGNITION_ALARM);
-        parameterCode.add(ParameterConstant.FACE_RECOGNITION_FAULT);
         ListItemNestedParametersParamDTO param = new ListItemNestedParametersParamDTO();
         param.setItemCodeList(Collections.singletonList(itemCode));
         param.setParameterTypeCodeList(parameterCode);
