@@ -29,6 +29,9 @@ public class FaceRecognitionItemResultVO {
      */
     private String buildingCode;
 
+    /**
+     * 区域名称
+     */
     private String buildingAreaName;
 
     /**
@@ -123,7 +126,7 @@ public class FaceRecognitionItemResultVO {
      */
     private List<Integer> center;
 
-    private List<TblItemParameter> parameterList;
+    private List<TblItemParameterVO> parameterList;
 
 //    /**
 //     * 摄像设备

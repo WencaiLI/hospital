@@ -32,5 +32,5 @@ public class FaceRecognitionDisplayVO {
     /**
      * 离线设备总数
      */
-    private Integer offlineNum;
+    // private Integer offlineNum;
 }

@@ -12,11 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @Author: liwencai
  * @Date: 2022/11/7 09:57
@@ -49,13 +44,13 @@ public class FaceRecognitionController {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取人脸识别设备列表
      * @Date: 2022/11/7
      * @Param: paramVO:
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.face_recognition.vo.FaceRecognitionItemResultVO>>
      */
     @PostMapping("/listFaceRecognitionItem")
-    public JsonResult<PageInfoVO> listFaceRecognitionItem(@RequestBody FaceRecognitionItemParamVO paramVO){
+    public JsonResult<PageInfoVO<FaceRecognitionItemResultVO>> listFaceRecognitionItem(@RequestBody FaceRecognitionItemParamVO paramVO){
         return JsonResult.querySuccess(faceRecognitionService.listFaceRecognitionItem(paramVO));
     }
 

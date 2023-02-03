@@ -12,6 +12,7 @@ import com.thtf.face_recognition.common.constant.ParameterConstant;
 import com.thtf.face_recognition.common.util.megvii.StringUtil;
 import com.thtf.face_recognition.dto.DisplayParamDTO;
 import com.thtf.face_recognition.dto.FaceRecognitionPointDTO;
+import com.thtf.face_recognition.dto.mapstruct.FaceRecognitionItemConvert;
 import com.thtf.face_recognition.dto.mapstruct.PageInfoConvert;
 import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.vo.*;
@@ -47,6 +48,10 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
 
     @Resource
     private PageInfoConvert pageInfoConvert;
+
+
+    @Resource
+    FaceRecognitionItemConvert faceRecognitionItemConvert;
 
 
     /**
@@ -97,13 +102,13 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
         countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_ONLINE_VALUE);
         Integer onlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
-        // 离线数量
-        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
-        countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_OFFLINE_VALUE);
-        Integer offlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
+//        // 离线数量
+//        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.FACE_RECOGNITION_ONLINE);
+//        countItemByParameterListDTO.setParameterValue(ParameterConstant.FACE_RECOGNITION_OFFLINE_VALUE);
+//        Integer offlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
 
         result.setOnlineNum(onlineCount);
-        result.setOfflineNum(offlineCount);
+        // result.setOfflineNum(offlineCount);
         return result;
     }
 
@@ -115,7 +120,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
      * @Return: com.thtf.face_recognition.vo.PageInfoVO
      */
     @Override
-    public PageInfoVO listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO) {
+    public PageInfoVO<FaceRecognitionItemResultVO> listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO) {
         List<FaceRecognitionItemResultVO> resultList = new ArrayList<>();
         ListItemByKeywordPageParamDTO feignParam = new ListItemByKeywordPageParamDTO();
         BeanUtils.copyProperties(paramVO,feignParam);
@@ -130,7 +135,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         }
         // 设备编码集
         List<String> itemCodeList = pageInfo.getList().stream().map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        PageInfoVO<FaceRecognitionItemResultVO> pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         // 集中查询摄像机信息
         ListVideoItemParamDTO listVideoItemParamDTO = new ListVideoItemParamDTO();
         listVideoItemParamDTO.setItemCodeList(itemCodeList);
@@ -324,14 +329,6 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
                 list.add(e);
             }
         });
-        list.forEach(e->{
-            e.setCreatedBy(null);
-            e.setCreatedTime(null);
-            e.setUpdateBy(null);
-            e.setDataUpdateTime(null);
-            e.setDeleteBy(null);
-            e.setDeleteTime(null);
-        });
-        listFaceRecognitionItem.setParameterList(list);
+        listFaceRecognitionItem.setParameterList(faceRecognitionItemConvert.toTblItemParameterVOList(list));
     }
 }
