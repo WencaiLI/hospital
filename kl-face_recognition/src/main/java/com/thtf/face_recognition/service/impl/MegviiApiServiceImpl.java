@@ -114,6 +114,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         tblItem.setSystemCode(paramVO.getSysCode());
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
+        tblItem.setFault(0);
         tblItem.setAlarm(1);
         if(StringUtils.isNoneBlank(paramVO.getKeyword())){
             tblItem.setKeyword(paramVO.getKeyword());

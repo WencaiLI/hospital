@@ -11,12 +11,31 @@ import com.thtf.face_recognition.vo.*;
  */
 public interface FaceRecognitionService {
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备展示信息
+     * @Date: 2023/11/7
+     * @Param displayParamDTO:
+     * @Return: com.thtf.face_recognition.vo.FaceRecognitionDisplayVO
+     */
     FaceRecognitionDisplayVO getDisplayInfo(DisplayParamDTO displayParamDTO);
 
-    PageInfoVO listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO);
+    /**
+     * @Author: liwencai
+     * @Description: 获取人脸识别设备列表
+     * @Date: 2022/11/7
+     * @Param paramVO:
+     * @Return: com.thtf.face_recognition.vo.PageInfoVO
+     */
+    PageInfoVO<FaceRecognitionItemResultVO> listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO);
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取监测点位信息
+     * @Date: 2022/11/7
+     * @Param itemCode:
+     * @Return: com.thtf.face_recognition.dto.FaceRecognitionPointDTO
+     */
     FaceRecognitionPointDTO getMonitorPointInfo(String itemCode);
 
-
-//    List<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO);
 }

@@ -11,7 +11,7 @@ import java.util.List;
  * @Description:
  */
 @Data
-public class PageInfoVO implements Serializable {
+public class PageInfoVO<T> implements Serializable {
     public static final int DEFAULT_NAVIGATE_PAGES = 8;
 
     /**
@@ -103,5 +103,5 @@ public class PageInfoVO implements Serializable {
     /**
      * 结果集
      */
-    private List list;
+    private List<T> list;
 }
