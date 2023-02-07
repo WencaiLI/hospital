@@ -88,7 +88,6 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
         List<ItemNestedParameterVO> list = itemPageInfo.getList();
         // 获取所有设备报警信息
-        // List<TblAlarmRecordUnhandle> allAlarmRecordUnhandled = alarmAPI.getAlarmInfoByItemCodeListLimitOne(list.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList())).getData();
         List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
         for (ItemNestedParameterVO itemNestedParameterVO : list) {
             ItemInfoOfLargeScreenDTO innerResult = new ItemInfoOfLargeScreenDTO();
@@ -106,12 +105,6 @@ public class InfoPublishServiceImpl implements InfoPublishService {
             if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
                 innerResult.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
-//            // 匹配报警信息
-//            allAlarmRecordUnhandled.forEach(e->{
-//                if(e.getItemCode().equals(itemNestedParameterVO.getCode())){
-//                    innerResult.setAlarmStatus(e.getAlarmCategory());
-//                }
-//            });
             this.convertToItemInfoOfLargeScreenDTO(innerResult,itemNestedParameterVO.getParameterList());
             resultList.add(innerResult);
         }
