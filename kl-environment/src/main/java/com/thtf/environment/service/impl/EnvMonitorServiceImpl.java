@@ -97,7 +97,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode, String areaCode,String buildingCodes) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         String itemTypeCodes = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.joining(","));
-
         return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,itemTypeCodes,ParameterConstant.ENV_MONITOR_ONLINE,ParameterConstant.ENV_MONITOR_ONLINE_VALUE,true,true).getData();
     }
     /**
