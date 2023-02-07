@@ -9,23 +9,45 @@ import lombok.Data;
  */
 @Data
 public class EnvMonitorItemParamVO {
-    private String sysCode; // 设备类别编码
+    /**
+     * 子系统编码
+     */
+    private String sysCode;
+    /**
+     * 设备类别编码
+     */
+    private String itemTypeCode;
 
-    private String itemTypeCode; // 设备类别编码
+    /**
+     * 建筑编码
+     */
+    private String buildingCodes;
 
-    private String buildingCodes; // 建筑编码
+    /**
+     * 报警类别
+     */
+    private Integer alarmCategory;
 
-    private Integer alarmCategory; // 报警类别
-
-    private String areaCode; // 区域编码
-
+    /**
+     * 区域编码
+     */
+    private String areaCode;
 //    private Integer onlineStatus; // 在线状态
 //
 //    private Integer status; // 设备状态 正常 故障 报警
 
-    private String keyword; // 关键词 监测设备名称及编号的模糊检索
+    /**
+     * 关键词 监测设备名称及编号的模糊检索
+     */
+    private String keyword;
 
+    /**
+     * 页号
+     */
     private Integer pageNumber; // 页号
 
+    /**
+     * 页大小
+     */
     private Integer pageSize; // 页大小
 }

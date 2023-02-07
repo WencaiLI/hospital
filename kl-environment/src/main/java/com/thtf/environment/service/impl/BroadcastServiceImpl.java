@@ -222,12 +222,6 @@ public class BroadcastServiceImpl implements BroadcastService {
                 innerResult.setAudioReceiveValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
-//            // 音量接受
-//            if (ParameterConstant.BROADCAST_AUDIO_CONTROL.equals(parameter.getParameterType())) {
-//                innerResult.setAudioReceiveParameterCode(parameter.getCode());
-//                innerResult.setAudioReceiveValue(parameter.getValue());
-//                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-//            }
             // 报警
             if (ParameterConstant.BROADCAST_ALARM.equals(parameter.getParameterType())) {
                 innerResult.setAlarmParameterCode(parameter.getCode());

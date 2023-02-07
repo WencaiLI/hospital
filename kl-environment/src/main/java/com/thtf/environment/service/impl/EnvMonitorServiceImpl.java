@@ -252,11 +252,11 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Override
     public PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO) {
         // 查询故障或报警
-        if(null == paramVO.getAlarmCategory()){
+//        if(null == paramVO.getAlarmCategory()){
             return this.listAllItem(paramVO);
-        }else { // 报警设备
-            return this.listAlarmItem(paramVO);
-        }
+//        }else { // 报警设备
+//            return this.listAlarmItem(paramVO);
+//        }
     }
 
     /**
@@ -412,9 +412,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         });
     }
 
-
-
-
     /**
      * @Author: liwencai
      * @Description: 查询所有的设备详情（分页）
@@ -423,47 +420,72 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     public PageInfoVO listAllItem(EnvMonitorItemParamVO paramVO){
+
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+
         if(null == parameterInfo || parameterInfo.size() == 0){
             return null;
         }
         // 所有设备类别编码
         List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
 
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
+            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
+        }else {
+            if (StringUtils.isNotBlank(paramVO.getAreaCode())){
+                areaCodeList = Arrays.asList(paramVO.getAreaCode().split(","));
+            }
+        }
+        if(StringUtils.isNotBlank(paramVO.getItemTypeCode())){
+            itemTypeCodeList = Arrays.asList(paramVO.getItemTypeCode().split(","));
+        }
+        ListItemNestedParametersPageParamDTO paramDTO = new ListItemNestedParametersPageParamDTO();
+        if(StringUtils.isNotBlank(paramVO.getKeyword())){
+            paramDTO.setKeyword(paramVO.getKeyword());
+            paramDTO.setCodeKey(paramVO.getKeyword());
+            paramDTO.setNameKey(paramVO.getKeyword());
+            paramDTO.setAreaKey(paramVO.getKeyword());
+        }
+        paramDTO.setSysCode(paramVO.getSysCode());
+        paramDTO.setBuildingCodeList(buildingCodeList);
+        paramDTO.setAreaCodeList(areaCodeList);
+        if(itemTypeCodeList.size()>0){
+            paramDTO.setItemTypeCodeList(itemTypeCodeList);
+        }
+        if(null != paramVO.getAlarmCategory()){
+            // 故障
+            if(1 == paramVO.getAlarmCategory()){
+                paramDTO.setAlarm(0);
+                paramDTO.setFault(1);
+            }
+            if(0 == paramVO.getAlarmCategory()){
+                paramDTO.setAlarm(1);
+            }
+        }
+        paramDTO.setPageNumber(paramVO.getPageNumber());
+        paramDTO.setPageSize(paramVO.getPageSize());
+        PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
+
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
         List<String> itemCodeList;
-        List<String> groupIdStringList;
         // todo liwencai 需要修改
-        PageInfo<TblItem> pageInfo = itemAPI.searchItemBySysCodeAndTypeCodeAndAreaCodeListAndKeywordPage(paramVO.getSysCode(), paramVO.getItemTypeCode(), paramVO.getKeyword(), null, paramVO.getPageNumber(), paramVO.getPageSize()).getData();
         // 设备编码集
-        itemCodeList = pageInfo.getList().stream().map(TblItem::getCode).collect(Collectors.toList());
-        // 查询设备参数集
-        List<TblItemParameter> itemParameterList = itemAPI.searchParameterByItemCodes(itemCodeList).getData();
+        itemCodeList = pageInfo.getList().stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
         // 查询设备的最新报警信息
         List<TblAlarmRecordUnhandle> alarmList = alarmAPI.getAlarmInfoByItemCodeListLimitOne(itemCodeList).getData();
-        // 分组id集
-        groupIdStringList = pageInfo.getList().stream().filter(e->null != e.getGroupId()).map(TblItem::getGroupId).map(String::valueOf).collect(Collectors.toList());
-        List<TblGroup> groupList = null;
-        if(groupIdStringList.size()>0){
-            groupList = itemAPI.searchGroupByIdList(groupIdStringList).getData();
-        }
         // 匹配分组信息集
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
-        for (TblItem item : pageInfo.getList()) {
+        for (ItemNestedParameterVO item : pageInfo.getList()) {
             EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
             envMonitorItemResultVO.setItemCode(item.getCode());
+            envMonitorItemResultVO.setItemTypeCode(item.getTypeCode());
             envMonitorItemResultVO.setItemName(item.getName());
             envMonitorItemResultVO.setAreaCode(item.getAreaCode());
             envMonitorItemResultVO.setAreaName(item.getAreaName());
-            // 匹配分组信息
-            if(null != groupList){
-                groupList.forEach(e->{
-                    if(e.getId().equals(item.getGroupId())){
-                        envMonitorItemResultVO.setGroupId(e.getId());
-                        envMonitorItemResultVO.setGroupName(e.getName());
-                    }
-                });
-            }
+            envMonitorItemResultVO.setGroupId(item.getGroupId());
+            envMonitorItemResultVO.setGroupName(item.getGroupName());
             // 匹配模型视角信息
             if(StringUtils.isNotBlank(item.getViewLongitude())){
                 envMonitorItemResultVO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
@@ -472,8 +494,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 envMonitorItemResultVO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
             // 匹配参数信息
-            this.convertToParameter(envMonitorItemResultVO,itemParameterList,parameterInfo,itemTypeCodeList);
-
+            this.convertToParameter(envMonitorItemResultVO,item.getParameterList(),parameterInfo,itemTypeCodeList);
             // 匹配报警信息
             alarmList.forEach(e->{
                 if(e.getItemCode().equals(item.getCode())){
@@ -597,8 +618,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_END_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
                 if(StringUtils.isNotBlank(itemTypeCode)){
-//                    System.out.println(itemTypeCode);
-//                    String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
                     String parameterType = this.getParameterType(itemTypeCode,parameterInfo);
                     parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
                 }else if(StringUtils.isNotBlank(itemCode)){
@@ -607,7 +626,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                     List<TblItem> data = itemAPI.queryAllItems(tblItem).getData();
                     if(null != data && data.size()>0){
                         String parameterType = this.getParameterType(itemTypeCode,parameterInfo);
-//                        String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(data.get(0).getTypeCode()).getParameterType();
                         parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
                     }
                 }
@@ -627,7 +645,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         int year = getYear(newDate);
         int month = getMonth(newDate);
         int daysOfMonth = getDaysOfMonth(newDate);
-         System.out.println(hourlyHistoryMoment);
         String timePrefix = year+"-"+month+"-";
         // 为null补0
         hourlyHistoryMoment.forEach(e->{
@@ -680,8 +697,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
                 if(StringUtils.isNotBlank(itemTypeCode)){
-//                    System.out.println(itemTypeCode);
-//                    String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(itemTypeCode).getParameterType();
                     String parameterType = this.getParameterType(itemTypeCode,parameterInfo);
                     parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
                 }else if(StringUtils.isNotBlank(itemCode)){
