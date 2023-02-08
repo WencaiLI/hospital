@@ -762,34 +762,41 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     @Override
-    public PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize) {
+    public PageInfoVO listGroupedItemAlarmInfo(String sysCode,String buildingCodes, String areaCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-        String areaCode = null;
-        if(StringUtils.isNotBlank(areaName)){
-            areaCode = adminAPI.searchAreaCodeByAreaName(areaName).getData();
+
+        if(null == parameterInfo || parameterInfo.size() == 0){
+            return null;
         }
-        ItemGroupKeywordParamDTO paramDTO = new ItemGroupKeywordParamDTO();
-        paramDTO.setSystemCode(sysCode);
-        paramDTO.setAreaCode(areaCode);
-        paramDTO.setKeyword(keyword);
-        paramDTO.setPageNumber(pageNumber);
-        paramDTO.setPageSize(pageSize);
-        paramDTO.setName(groupName);
-        PageInfo<TblGroup> pageInfo = itemAPI.listGroupByKeywordOfNameAndAreaCodePage(paramDTO).getData();
+        // 所有设备类别编码
+        List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+        // groupName areaName 没有参与筛选
+        ItemGroupParamVO paramVO = new ItemGroupParamVO();
+        paramVO.setSystemCode(sysCode);
+        paramVO.setBuildingCodes(buildingCodes);
+        paramVO.setBuildingAreaCodes(areaCode);
+        paramVO.setKeyword(keyword);
+        paramVO.setItemTypeCodeList(itemTypeCodeList);
+        paramVO.setPageNumber(pageNumber);
+        paramVO.setPageSize(pageSize);
+        PageInfo<TblGroup> pageInfo = itemAPI.queryAllGroupPage(paramVO).getData();
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        if(null == pageInfo || null == pageInfo.getList()){
+            return pageInfoVO;
+        }
         /* 获取全部的设备编码 */
         List<String> itemCodeList = new ArrayList<>();
         for (TblGroup group : pageInfo.getList()) {
-            itemCodeList.addAll(Arrays.asList(group.getContainItemCodes().split(",")));
+            if(StringUtils.isNotBlank(group.getContainItemCodes())){
+                itemCodeList.addAll(Arrays.asList(group.getContainItemCodes().split(",")));
+            }
         }
         /* 获取全部区域编码 */
         List<String> areaCodeList = new ArrayList<>();
         for (TblGroup group : pageInfo.getList()) {
             areaCodeList.addAll(Arrays.asList(group.getBuildingAreaCodes().split(",")));
         }
-
         String areaCodes = areaCodeList.stream().distinct().collect(Collectors.joining(","));
-
         /* 获取全部建区域-筑编码映射 */
         Map<String, AreaNestBuildingDTO> areaNestBuildingMap = adminAPI.getAreaBuildingMap(areaCodes).getData();
 //        /* 获取全部区域信息 */
@@ -836,7 +843,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }else {
                 map.put("buildingName",null);
             }
-
             /* 匹配不同类别的数据 */
             resultList.add(map);
         }
