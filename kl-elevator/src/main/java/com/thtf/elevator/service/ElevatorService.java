@@ -24,7 +24,7 @@ public interface ElevatorService {
      * @Param itemType:
      * @return: java.util.List<com.thtf.elevator.dto.DisplayInfoDTO>
      */
-    List<DisplayInfoDTO> displayInfo(String sysCode);
+    List<DisplayInfoDTO> displayInfo(String sysCode, String buildingCodes, String areaCode);
 
     /**
      * @Author: liwencai
