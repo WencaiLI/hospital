@@ -12,17 +12,36 @@ import java.util.List;
 @Data
 public class DisplayInfoDTO {
 
-    private Integer areaNum; // 区域总数
+    /**
+     * 区域总数
+     */
+    private Integer areaNum;
 
-    private Integer runningAreaNum; // 运行广播区域总数
 
-    private Integer itemNum; // 设备总数
+    /**
+     * 运行广播区域总数
+     */
+    private Integer runningAreaNum;
 
-    private Integer runningItemNum; // 运行设备总数
+    /**
+     * 设备总数
+     */
+    private Integer itemNum;
 
-    private Integer faultItemNum; // 故障报警
+    /**
+     * 运行设备总数
+     */
+    private Integer runningItemNum;
 
-    private Integer monitorNum; // 故障报警
+    /**
+     * 故障报警
+     */
+    private Integer faultItemNum;
+
+    /**
+     * 报警数量
+     */
+    private Integer monitorNum;
 
    //  List<KeyValueDTO> results;
 }

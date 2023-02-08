@@ -64,7 +64,7 @@ public class InfoPublishController {
     @PostMapping("/countInfoPublicItemStatus")
     public JsonResult<InfoPublishDisplayDTO> countInfoPublicItemStatus(@RequestParam("sysCode")String sysCode,
                                                                        @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
-                                                                       @RequestParam(value = "areaCodes",required = false)String areaCode,
+                                                                       @RequestParam(value = "areaCode",required = false)String areaCode,
                                                                        @RequestParam(value = "itemTypeCodes",required = false)String itemTypeCodes){
         return JsonResult.querySuccess(infoPublishService.getDisplayInfo(sysCode,buildingCodes,areaCode,itemTypeCodes));
     }
