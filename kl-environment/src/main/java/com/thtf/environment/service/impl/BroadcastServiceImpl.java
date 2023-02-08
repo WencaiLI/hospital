@@ -65,39 +65,42 @@ public class BroadcastServiceImpl implements BroadcastService {
         List<String> areaCodeList = null;
         if(StringUtils.isNotBlank(buildingCodes)){
             buildingCodeList = Arrays.asList(buildingCodes.split(","));
-        }else {
+        } else {
             if(StringUtils.isNotBlank(areaCode)){
                 areaCodeList = Arrays.asList(areaCode.split(","));
             }
         }
-//        if (StringUtils.isBlank(areaCode)){
-//            areaCode = null;
-//        }
+        // 设备总数 报警设备数 故障设备总数
+        CountItemInfoParamDTO countItemInfoParam = new CountItemInfoParamDTO();
+        countItemInfoParam.setSysCode(sysCode);
+        countItemInfoParam.setBuildingCodeList(buildingCodeList);
+        countItemInfoParam.setAreaCodeList(areaCodeList);
+        CountItemInfoResultDTO itemInfo = itemAPI.countItemInfo(countItemInfoParam).getData();
+        result.setItemNum(itemInfo.getItemNumber());
+        result.setMonitorNum(itemInfo.getAlarmItemNumber());
+        result.setFaultItemNum(itemInfo.getFaultItemNumber());
+
+
+        // 在线数
         CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
-        if(StringUtils.isNotBlank(buildingCodes)){
-            countItemByParameterListDTO.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+        if(null != buildingCodeList && buildingCodeList.size()>0){
+            countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
         }else {
             countItemByParameterListDTO.setAreaCode(areaCode);
         }
         countItemByParameterListDTO.setSysCode(sysCode);
-        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.BROADCAST_TASK_STATUS);
+        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.BROADCAST_ONLINE);
         countItemByParameterListDTO.setParameterValue(ParameterConstant.BROADCAST_TASK_ON_VALUE);
-
-        result.setMonitorNum(itemAPI.countItemByParameterList(countItemByParameterListDTO).getData());
-        // 设备一般信息
-        ItemTotalAndOnlineAndAlarmNumDTO state = itemAPI.getItemParameterAndTotalAndAlarmItemNumber(sysCode, buildingCodes, areaCode,
-                ParameterConstant.BROADCAST_STATE, ParameterConstant.ON_OFF_STATUS_ON_VALUE).getData();
-        result.setItemNum(state.getTotalNum());
-        result.setRunningItemNum(state.getOnlineNum());
-        result.setFaultItemNum(state.getMalfunctionAlarmNumber());
-        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode, ParameterConstant.BROADCAST_TASK_STATUS, ParameterConstant.BROADCAST_TASK_ON_VALUE).getData();
-
+        result.setRunningItemNum(itemAPI.countItemByParameterList(countItemByParameterListDTO).getData());
+        // 群控分组信息
+        // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode,buildingCodes,areaCode, ParameterConstant.BROADCAST_TASK_STATUS, ParameterConstant.BROADCAST_TASK_ON_VALUE).getData();
         if(null == data){
-            result.setAreaNum(0); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
-            result.setRunningAreaNum(0); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+            result.setAreaNum(0);
+            result.setRunningAreaNum(0);
         }else {
-            result.setAreaNum(data.getTotalNum()); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
-            result.setRunningAreaNum(data.getOtherNum()); // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
+            result.setAreaNum(data.getTotalNum());
+            result.setRunningAreaNum(data.getOtherNum());
         }
         return result;
     }

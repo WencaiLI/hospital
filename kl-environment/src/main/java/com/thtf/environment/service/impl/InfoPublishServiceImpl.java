@@ -352,20 +352,37 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Override
     public InfoPublishDisplayDTO getDisplayInfo(String sysCode, String buildingCodes, String areaCode, String itemTypeCodes) {
         InfoPublishDisplayDTO result = new InfoPublishDisplayDTO();
-
-        CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
-        countItemByParameterListDTO.setSysCode(sysCode);
         List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
         List<String> itemTypeCodeList = null;
         if(StringUtils.isNotBlank(buildingCodes)){
             buildingCodeList = Arrays.asList(buildingCodes.split(","));
-        }else {
-            countItemByParameterListDTO.setAreaCode(areaCode);
+        } else {
+            if(StringUtils.isNotBlank(areaCode)){
+                areaCodeList = Arrays.asList(areaCode.split(","));
+            }
         }
         if (StringUtils.isNotBlank(itemTypeCodes)){
             itemTypeCodeList = Arrays.asList(itemTypeCodes.split(","));
         }
+        // 设备总数 报警设备数 故障设备总数
+        CountItemInfoParamDTO countItemInfoParam = new CountItemInfoParamDTO();
+        countItemInfoParam.setSysCode(sysCode);
+        countItemInfoParam.setBuildingCodeList(buildingCodeList);
+        countItemInfoParam.setAreaCodeList(areaCodeList);
+        countItemInfoParam.setItemTypeCodeList(itemTypeCodeList);
+        CountItemInfoResultDTO itemInfo = itemAPI.countItemInfo(countItemInfoParam).getData();
+        result.setTotalCount(itemInfo.getItemNumber());
+        result.setAlarmNumber(itemInfo.getAlarmItemNumber());
+        result.setFaultNumber(itemInfo.getFaultItemNumber());
+
+
+        CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
+        countItemByParameterListDTO.setSysCode(sysCode);
         countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
+        if(null == buildingCodeList || buildingCodeList.size() == 0){
+            countItemByParameterListDTO.setAreaCode(areaCode);
+        }
         countItemByParameterListDTO.setItemTypeCodeList(itemTypeCodeList);
 
         // 查看在线数量
@@ -380,19 +397,19 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         Integer onCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
         result.setOnCount(onCount);
 
-        CountItemInfoParamDTO countItemInfoParamDTO = new CountItemInfoParamDTO();
-        countItemInfoParamDTO.setSysCode(sysCode);
-        if(null != buildingCodeList){
-            countItemInfoParamDTO.setBuildingCodeList(buildingCodeList);
-        }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                countItemInfoParamDTO.setAreaCodeList(Collections.singletonList(areaCode));
-            }
-        }
-        CountItemInfoResultDTO itemInfo = itemAPI.countItemInfo(countItemInfoParamDTO).getData();
-        result.setTotalCount(itemInfo.getItemNumber());
-        result.setFaultNumber(itemInfo.getFaultItemNumber());
-        result.setAlarmNumber(itemInfo.getAlarmItemNumber());
+//        CountItemInfoParamDTO countItemInfoParamDTO = new CountItemInfoParamDTO();
+//        countItemInfoParamDTO.setSysCode(sysCode);
+//        if(null != buildingCodeList){
+//            countItemInfoParamDTO.setBuildingCodeList(buildingCodeList);
+//        }else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                countItemInfoParamDTO.setAreaCodeList(Collections.singletonList(areaCode));
+//            }
+//        }
+//        CountItemInfoResultDTO itemInfo = itemAPI.countItemInfo(countItemInfoParamDTO).getData();
+//        result.setTotalCount(itemInfo.getItemNumber());
+//        result.setFaultNumber(itemInfo.getFaultItemNumber());
+//        result.setAlarmNumber(itemInfo.getAlarmItemNumber());
         return result;
     }
 
