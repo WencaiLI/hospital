@@ -61,12 +61,18 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     public DisplayInfoDTO displayInfo(String sysCode, String buildingCodes,String areaCode) {
         DisplayInfoDTO result = new DisplayInfoDTO();
-        if(StringUtils.isBlank(buildingCodes)){
-            buildingCodes = null;
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(buildingCodes)){
+            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                areaCodeList = Arrays.asList(areaCode.split(","));
+            }
         }
-        if (StringUtils.isBlank(areaCode)){
-            areaCode = null;
-        }
+//        if (StringUtils.isBlank(areaCode)){
+//            areaCode = null;
+//        }
         CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
         if(StringUtils.isNotBlank(buildingCodes)){
             countItemByParameterListDTO.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
