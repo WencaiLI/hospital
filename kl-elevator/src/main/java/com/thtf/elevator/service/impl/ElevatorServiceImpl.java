@@ -466,8 +466,6 @@ public class ElevatorServiceImpl implements ElevatorService {
             ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
             // 设置筛选条件为故障报警
             listAlarmInfoLimitOneParamDTO.setItemCodeList(alarmOrFaultItemCodeList);
-            alarmAPI.getAlarmInfoByItemCodeListLimitOne(alarmOrFaultItemCodeList);
-            // 报警信息
             recordUnhandles = alarmAPI.getAlarmInfoByItemCodeListLimitOne(alarmOrFaultItemCodeList).getData();
         }
         List<ElevatorAlarmResultDTO> resultDTOList = new ArrayList<>();
