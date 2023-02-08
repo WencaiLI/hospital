@@ -144,8 +144,8 @@ public class EnvMonitorController {
     @PostMapping("/hourly_total")
     public JsonResult<EChartsMoreVO> getTotalAlarmHourly(@RequestParam(value = "sysCode") String sysCode,
                                                          @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                         @RequestParam(value = "isHandled",required = false) Boolean isHandled,
                                                          @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                         @RequestParam(value = "isHandled",required = false) Boolean isHandled,
                                                          @RequestParam(value = "startTime",required = false) String startTime,
                                                          @RequestParam(value = "endTime",required = false) String endTime){
         return JsonResult.querySuccess(envMonitorService.getTotalAlarmHourly(sysCode,buildingCodes,areaCode,isHandled,startTime,endTime));
@@ -172,12 +172,14 @@ public class EnvMonitorController {
      */
     @PostMapping("/grouped_item_info")
     public JsonResult<PageInfoVO> listGroupedItemAlarmInfo(@RequestParam("sysCode")String sysCode,
+                                                           @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                           @RequestParam(value = "areaCode",required = false) String areaCode,
                                                            @RequestParam(value = "groupName",required = false)String groupName,
                                                            @RequestParam(value = "areaName",required = false)String areaName,
                                                            @RequestParam(value = "keyword",required = false)String keyword,
                                                            @RequestParam("pageNumber")Integer pageNumber,
                                                            @RequestParam("pageSize")Integer pageSize){
-        return JsonResult.querySuccess(envMonitorService.listGroupedItemAlarmInfo(sysCode,groupName,areaName,keyword,pageNumber,pageSize));
+        return JsonResult.querySuccess(envMonitorService.listGroupedItemAlarmInfo(sysCode,buildingCodes,areaCode,groupName,areaName,keyword,pageNumber,pageSize));
     }
 
     /**

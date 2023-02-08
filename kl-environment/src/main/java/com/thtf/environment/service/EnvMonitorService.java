@@ -109,7 +109,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param sysCode: 子系统编码
      * @return: com.thtf.environment.dto.PageInfoVO
      */
-    PageInfoVO listGroupedItemAlarmInfo(String sysCode,String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize);
+    PageInfoVO listGroupedItemAlarmInfo(String sysCode,String buildingCodes, String areaCodes, String groupName,String areaName,String keyword,Integer pageNumber,Integer pageSize);
 
 
     /**
