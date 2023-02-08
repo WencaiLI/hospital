@@ -64,7 +64,7 @@ public interface ElevatorService {
      * @Param: pageSize: 页大小
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
-    PageInfoVO getAllElevatorPage(String sysCode, String itemTypeCode, Integer onlineStatus, Integer pageNum, Integer pageSize);
+    PageInfoVO getAllElevatorPage(String sysCode, String buildingCodes, String areaCode, String itemTypeCode, Integer onlineStatus, Integer pageNum, Integer pageSize);
 
     /**
      * @Author: liwencai
@@ -76,7 +76,7 @@ public interface ElevatorService {
      * @Param: pageSize:
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
-    PageInfoVO getAllAlarmPage(String sysCode,String itemTypeCode, Integer alarmCategory, Integer pageNumber, Integer pageSize);
+    PageInfoVO getAllAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode, Integer alarmCategory, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai
