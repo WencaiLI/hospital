@@ -24,14 +24,16 @@ public class EnvMonitorItemParamVO {
     private String buildingCodes;
 
     /**
+     * 区域编码
+     */
+    private String areaCode;
+
+    /**
      * 报警类别
      */
     private Integer alarmCategory;
 
-    /**
-     * 区域编码
-     */
-    private String areaCode;
+
 //    private Integer onlineStatus; // 在线状态
 //
 //    private Integer status; // 设备状态 正常 故障 报警
