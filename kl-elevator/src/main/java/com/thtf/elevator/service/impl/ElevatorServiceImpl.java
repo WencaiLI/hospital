@@ -113,7 +113,16 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     @Override
-    public List<DisplayInfoDTO> displayInfo(String sysCode) {
+    public List<DisplayInfoDTO> displayInfo(String sysCode,String buildingCodes, String areaCode) {
+        List<String> buildingCodeList = null;
+        List<String> areaCodeList = null;
+        if(StringUtils.isNotBlank(buildingCodes)){
+            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        }else {
+            if(StringUtils.isNotBlank(areaCode)){
+                areaCodeList = Arrays.asList(areaCode.split(","));
+            }
+        }
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
@@ -128,6 +137,8 @@ public class ElevatorServiceImpl implements ElevatorService {
             TblItem tblItem = new TblItem();
             tblItem.setSystemCode(sysCode);
             tblItem.setTypeCode(itemType .getCode());
+            tblItem.setBuildingCodeList(buildingCodeList);
+            tblItem.setAreaCodeList(areaCodeList);
             List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
             List<KeyValueDTO> kvList = new ArrayList<>();
             KeyValueDTO keyValueDTO = new KeyValueDTO();
@@ -138,29 +149,45 @@ public class ElevatorServiceImpl implements ElevatorService {
             String parameterType = ParameterConstant.ELEVATOR_RUN_STATUS;
             String parameterValue = "1";
             // 运行数量
-            Integer runNumber = itemAPI.countParameterNumByItemCodeListAndPtypeAndPvalue(
-                    parameterType,
-                    itemList.stream().map(TblItem::getCode).collect(Collectors.toList()),
-                    parameterValue).getData();
-
+            List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
             KeyValueDTO runNumberKV = new KeyValueDTO();
             runNumberKV.setKey("运行总数");
-            runNumberKV.setValue(runNumber);
+            if(itemCodeList.size()>0){
+                Integer runNumber = itemAPI.countParameterNumByItemCodeListAndPtypeAndPvalue(
+                        parameterType,
+                        itemList.stream().map(TblItem::getCode).collect(Collectors.toList()),
+                        parameterValue).getData();
+                runNumberKV.setValue(runNumber);
+            }else {
+                runNumberKV.setValue(0);
+            }
             kvList.add(runNumberKV);
             displayInfoDTO.setResults(kvList);
             result.add(displayInfoDTO);
         }
         // 报警总数
-        KeyValueDTO alarmKV = new KeyValueDTO();
-        alarmKV.setKey("故障报警");
-        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
-        param.setSysCode(sysCode);
-        param.setParameterTypeCode(ParameterConstant.ELEVATOR_FAULT);
-        param.setParameterValue("1");
-        alarmKV.setValue(itemAPI.countItemByParameterList(param).getData());
-        DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
-        displayInfoDTO.setResults(new ArrayList<KeyValueDTO>(Collections.singleton(alarmKV)));
-        result.add(displayInfoDTO);
+//        KeyValueDTO alarmKV = new KeyValueDTO();
+//        alarmKV.setKey("故障设备");
+//        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
+//        param.setSysCode(sysCode);
+//        param.setParameterTypeCode(ParameterConstant.ELEVATOR_FAULT);
+//        param.setParameterValue("1");
+//        alarmKV.setValue(itemAPI.countItemByParameterList(param).getData());
+//        DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
+//        displayInfoDTO.setResults(new ArrayList<KeyValueDTO>(Collections.singleton(alarmKV)));
+//        result.add(displayInfoDTO);
+//
+//        // 报警总数
+//        KeyValueDTO alarmKV = new KeyValueDTO();
+//        alarmKV.setKey("故障设备");
+//        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
+//        param.setSysCode(sysCode);
+//        param.setParameterTypeCode(ParameterConstant.ELEVATOR_FAULT);
+//        param.setParameterValue("1");
+//        alarmKV.setValue(itemAPI.countItemByParameterList(param).getData());
+//        DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
+//        displayInfoDTO.setResults(new ArrayList<KeyValueDTO>(Collections.singleton(alarmKV)));
+//        result.add(displayInfoDTO);
         return result;
     }
 

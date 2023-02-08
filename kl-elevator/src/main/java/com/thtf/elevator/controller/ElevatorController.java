@@ -36,8 +36,10 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     @PostMapping("/displayInfo")
-    JsonResult<List<DisplayInfoDTO>> displayInfo(@RequestParam(value ="sysCode")String sysCode){
-        return JsonResult.querySuccess(elevatorService.displayInfo(sysCode));
+    JsonResult<List<DisplayInfoDTO>> displayInfo(@RequestParam(value ="sysCode")String sysCode,
+                                                 @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                 @RequestParam(value = "areaCode",required = false) String areaCode){
+        return JsonResult.querySuccess(elevatorService.displayInfo(sysCode,buildingCodes,areaCode));
     }
 
     /**
