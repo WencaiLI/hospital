@@ -116,13 +116,22 @@ public class ElevatorServiceImpl implements ElevatorService {
     public List<DisplayInfoDTO> displayInfo(String sysCode,String buildingCodes, String areaCode) {
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodeList = Arrays.asList(areaCode.split(","));
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodeList = Arrays.asList(areaCode.split(","));
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
+
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+//        }else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                areaCodeList = Arrays.asList(areaCode.split(","));
+//            }
+//        }
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
@@ -279,13 +288,20 @@ public class ElevatorServiceImpl implements ElevatorService {
 
         List<String> buildingCodesList = null;
         List<String> areaCodesList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodesList = Arrays.asList(buildingCodes.split(","));
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodesList = Arrays.asList(areaCode.split(","));
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodesList = Arrays.asList(areaCode.split(","));
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodesList = Arrays.asList(buildingCodes.split(","));
             }
         }
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            buildingCodesList = Arrays.asList(buildingCodes.split(","));
+//        }else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                areaCodesList = Arrays.asList(areaCode.split(","));
+//            }
+//        }
         ListItemNestedParametersPageParamDTO listItemPage = new ListItemNestedParametersPageParamDTO();
         listItemPage.setSysCode(sysCode);
         listItemPage.setBuildingCodeList(buildingCodesList);
@@ -426,13 +442,20 @@ public class ElevatorServiceImpl implements ElevatorService {
         // 故障设备信息
         List<String> buildingCodesList = null;
         List<String> areaCodesList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodesList = Arrays.asList(buildingCodes.split(","));
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodesList = Arrays.asList(areaCode.split(","));
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodesList = Arrays.asList(areaCode.split(","));
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodesList = Arrays.asList(buildingCodes.split(","));
             }
         }
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            buildingCodesList = Arrays.asList(buildingCodes.split(","));
+//        }else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                areaCodesList = Arrays.asList(areaCode.split(","));
+//            }
+//        }
         ListItemNestedParametersPageParamDTO paramDTO = new ListItemNestedParametersPageParamDTO();
         if(null != alarmCategory){
             if (alarmCategory == 0){
@@ -502,7 +525,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo>
      */
     @Override
-    public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode,String startTime,String endTime) {
-        return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, null, startTime, endTime).getData();
+    public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String buildingCodes,String areaCode, String startTime,String endTime) {
+        return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, buildingCodes,areaCode,null, startTime, endTime).getData();
     }
 }

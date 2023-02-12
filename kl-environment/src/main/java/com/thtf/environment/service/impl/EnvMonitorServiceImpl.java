@@ -22,6 +22,7 @@ import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.config.ParameterConfigNacos;
 import com.thtf.environment.dto.*;
+import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.dto.convert.ItemTypeConvert;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.dto.convert.ParameterConverter;
@@ -119,19 +120,15 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         EChartsMoreVO result = new EChartsMoreVO();
         List<KeyValueDTO> values = new ArrayList<>();
-//        Map<String, String> codeNameMap = new HashMap<>(parameterInfo.size());
-//        parameterInfo.forEach(e->{
-//            codeNameMap.put(e.getItemTypeCode(),e.getItemTypeName().split("[(]")[0].split("（")[0]);
-//        });
         List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.toList());
         // 计算未处理的24小时统计
         TwentyFourHourAlarmStatisticsDTO param = new TwentyFourHourAlarmStatisticsDTO();
         param.setSysCode(sysCode);
-        if(StringUtils.isNotBlank(buildingCodes)){
-            param.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+        if(StringUtils.isNotBlank(areaCode)){
+            param.setAreaCode(areaCode);
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                param.setAreaCode(areaCode);
+            if(StringUtils.isNotBlank(buildingCodes)){
+                param.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
             }
         }
         if(itemTypeCodeList.size()>0){

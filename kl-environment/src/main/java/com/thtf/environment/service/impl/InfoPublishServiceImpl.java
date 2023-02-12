@@ -175,13 +175,20 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     public PageInfoVO getLargeScreenAlarmInfo(String sysCode, String buildingCodes, String areaCode, String keyword, Integer pageNumber, Integer pageSize) {
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodeList = Arrays.asList(areaCode.split(","));
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodeList = Arrays.asList(areaCode.split(","));
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+//        }else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                areaCodeList = Arrays.asList(areaCode.split(","));
+//            }
+//        }
         TblItem tblItem = new TblItem();
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
@@ -276,11 +283,19 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         // 根据区域和子系统获取和建筑编码获取大屏系统
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(sysCode);
-        if(StringUtils.isNotBlank(buildingCodes)){
-            tblItem.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+        if(StringUtils.isNotBlank(areaCode)){
+            tblItem.setAreaCodeList(Arrays.asList(areaCode.split(",")));
         }else {
-            tblItem.setAreaCode(areaCode);
+            if(StringUtils.isNotBlank(buildingCodes)){
+                tblItem.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+            }
         }
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            tblItem.setBuildingCodeList(Arrays.asList(buildingCodes.split(",")));
+//        }else {
+//            tblItem.setAreaCode(areaCode);
+//        }
+//
         if(StringUtils.isNotBlank(itemCodes)){
             tblItem.setCodeList(Collections.singletonList(itemCodes));
         }
@@ -355,13 +370,15 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
         List<String> itemTypeCodeList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodeList = Arrays.asList(buildingCodes.split(","));
-        } else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodeList = Arrays.asList(areaCode.split(","));
+
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodeList = Arrays.asList(areaCode.split(","));
+        }else {
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
+
         if (StringUtils.isNotBlank(itemTypeCodes)){
             itemTypeCodeList = Arrays.asList(itemTypeCodes.split(","));
         }

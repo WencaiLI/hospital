@@ -105,11 +105,11 @@ public class InfoPublishController {
                                                      @RequestParam(value = "pageSize",required = false) Integer pageSize){
         Map<String, Object> map = new HashMap<>();
         map.put("sysCode",sysCode);
-        if (StringUtils.isNotBlank(buildingCodes)){
-            map.put("buildingCodes", buildingCodes);
+        if(StringUtils.isNotBlank(areaCode)){
+            map.put("areaCode",areaCode);
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                map.put("areaCode",areaCode);
+            if (StringUtils.isNotBlank(buildingCodes)){
+                map.put("buildingCodes", buildingCodes);
             }
         }
         if(StringUtils.isNotBlank(onlineValue)){

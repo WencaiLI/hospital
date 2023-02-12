@@ -85,7 +85,7 @@ public interface ElevatorService {
      * @Param sysCode:
      * @return: java.util.List<com.thtf.elevator.dto.KeyValueDTO>
      */
-    List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String startTime, String endTime);
+    List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode,String buildingCodes,String areaCode, String startTime, String endTime);
 
     /**
      * @Author: liwencai
