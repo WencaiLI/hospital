@@ -13,6 +13,7 @@ import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.dto.ParameterInfoDTO;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.PageInfoConvert;
@@ -63,13 +64,20 @@ public class BroadcastServiceImpl implements BroadcastService {
         DisplayInfoDTO result = new DisplayInfoDTO();
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodeList = Arrays.asList(buildingCodes.split(","));
-        } else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodeList = Arrays.asList(areaCode.split(","));
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodeList = Arrays.asList(areaCode.split(","));
+        }else {
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+//        } else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                areaCodeList = Arrays.asList(areaCode.split(","));
+//            }
+//        }
         // 设备总数 报警设备数 故障设备总数
         CountItemInfoParamDTO countItemInfoParam = new CountItemInfoParamDTO();
         countItemInfoParam.setSysCode(sysCode);
@@ -263,13 +271,20 @@ public class BroadcastServiceImpl implements BroadcastService {
 
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+        if(StringUtils.isNotBlank(areaCode)){
+            areaCodeList = Arrays.asList(areaCode.split(","));
         }else {
-            if(StringUtils.isNotBlank(areaCode)){
-                areaCodeList = Arrays.asList(areaCode.split(","));
+            if(StringUtils.isNotBlank(buildingCodes)){
+                buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
+//        if(StringUtils.isNotBlank(buildingCodes)){
+//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
+//        }else {
+//            if(StringUtils.isNotBlank(areaCode)){
+//                areaCodeList = Arrays.asList(areaCode.split(","));
+//            }
+//        }
         TblItem tblItem = new TblItem();
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);

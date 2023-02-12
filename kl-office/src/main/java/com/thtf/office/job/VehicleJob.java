@@ -14,9 +14,8 @@ import org.springframework.stereotype.Component;
 public class VehicleJob {
     @Autowired
     TblVehicleInfoService vehicleInfoService;
-    @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+    @Scheduled(cron = "0/30 * * * * ?")  // 三十秒执行一次
     public void refreshVehicleStatus(){
-        System.out.println("执行");
         vehicleInfoService.updateInfoStatus();
     }
 }

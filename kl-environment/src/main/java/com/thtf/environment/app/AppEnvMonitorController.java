@@ -32,8 +32,8 @@ public class AppEnvMonitorController {
 
 
     @PostMapping("/alarm_count")
-    public JsonResult getAlarmCount(@RequestParam("sysCode") String sysCode,
-                                    @RequestParam(value = "buildingCodes",required = false) String buildingCodes){
+    public JsonResult<List<KeyValueDTO>> getAlarmCount(@RequestParam("sysCode") String sysCode,
+                                                       @RequestParam(value = "buildingCodes",required = false) String buildingCodes){
         return JsonResult.querySuccess(appEnvMonitorService.getAlarmCount(sysCode,buildingCodes));
     }
 

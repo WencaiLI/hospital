@@ -430,7 +430,6 @@ public class DateUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 		Date date = DateUtil.string2Date(dateTime, pattern);
 		cd.setTime(date);
-		System.out.println(Calendar.HOUR);
 		cd.add(Calendar.HOUR, hour);
 		String nowTime = sdf.format(cd.getTime());
 		return nowTime;

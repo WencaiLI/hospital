@@ -149,7 +149,6 @@ public class RedisOperationService {
                 //将json转成需要的对象
                 BroadcastContentInsertDTO broadcastContentInsertDTO = JSONObject.parseObject(jsonObject,BroadcastContentInsertDTO.class);
                 resultList.add(broadcastContentInsertDTO);
-                System.out.println(broadcastContentInsertDTO);
             }
         }
         return resultList;

@@ -117,10 +117,15 @@ public class ElevatorController {
      */
     @PostMapping("/getItemFaultStatistics")
     public JsonResult<ItemFaultStatisticsDTO> getItemFaultStatistics(@RequestParam("sysCode")String sysCode,
+                                                                     @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                                     @RequestParam(value = "areaCode",required = false) String areaCode,
                                                                      @RequestParam("startTime")String startTime,
                                                                      @RequestParam("endTime")String endTime){
-        List<ItemAlarmNumberInfo> itemFaultStatistics = elevatorService.getItemFaultStatistics(sysCode, startTime, endTime);
+        List<ItemAlarmNumberInfo> itemFaultStatistics = elevatorService.getItemFaultStatistics(sysCode, buildingCodes, areaCode,startTime, endTime);
 
+        if(null == itemFaultStatistics || itemFaultStatistics.size() == 0){
+            return JsonResult.querySuccess(null);
+        }
         ItemFaultStatisticsDTO result = new ItemFaultStatisticsDTO();
         List<String> itemNameList = new ArrayList<>();
         List<Integer> monitorAlarmNumberList = new ArrayList<>();

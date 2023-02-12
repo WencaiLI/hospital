@@ -54,6 +54,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         List<KeyValueDTO> result = new ArrayList<>();
         List<ParameterTemplateAndDetailDTO> parameterInfo = envMonitorServiceImpl.getParameterInfo();
         List<String> buildingCodesList = null;
+
         if(StringUtils.isNotBlank(buildingCodes)){
             buildingCodesList = Arrays.asList(buildingCodes.split(","));
         }
