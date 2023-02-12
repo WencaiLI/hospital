@@ -17,6 +17,7 @@ import com.thtf.face_recognition.dto.mapstruct.PageInfoConvert;
 import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.vo.*;
 
+import com.thtf.face_recognition.vo.PageInfoVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
