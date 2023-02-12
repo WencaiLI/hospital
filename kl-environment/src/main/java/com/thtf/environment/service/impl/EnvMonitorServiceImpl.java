@@ -248,12 +248,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO) {
-        // 查询故障或报警
-//        if(null == paramVO.getAlarmCategory()){
-            return this.listAllItem(paramVO);
-//        }else { // 报警设备
-//            return this.listAlarmItem(paramVO);
-//        }
+        return this.listAllItem(paramVO);
     }
 
     /**
@@ -467,7 +462,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
         List<String> itemCodeList;
-        // todo liwencai 需要修改
         // 设备编码集
         itemCodeList = pageInfo.getList().stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
         // 查询设备的最新报警信息
@@ -492,12 +486,17 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
             // 匹配参数信息
             this.convertToParameter(envMonitorItemResultVO,item.getParameterList(),parameterInfo,itemTypeCodeList);
-            // 匹配报警信息
-            alarmList.forEach(e->{
-                if(e.getItemCode().equals(item.getCode())){
-                    envMonitorItemResultVO.setAlarmCategory(e.getAlarmCategory());
-                }
-            });
+            // 匹配报警信息  0 正常 1 报警 2 故障
+            if(item.getAlarm() == 1){
+                envMonitorItemResultVO.setAlarmCategory(1);
+                envMonitorItemResultVO.setAlarmParameterValue("1");
+            }else if (item.getAlarm() == 0 && item.getFault() == 1){
+                envMonitorItemResultVO.setAlarmCategory(2);
+                envMonitorItemResultVO.setFaultParameterCode("1");
+            }else {
+                envMonitorItemResultVO.setAlarmCategory(0);
+                envMonitorItemResultVO.setAlarmParameterValue("0");
+            }
             resultVOList.add(envMonitorItemResultVO);
         }
         pageInfoVO.setList(resultVOList);

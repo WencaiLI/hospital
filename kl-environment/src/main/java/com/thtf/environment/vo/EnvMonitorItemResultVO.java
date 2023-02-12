@@ -100,11 +100,6 @@ public class EnvMonitorItemResultVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dataCollectionTime;
 
-//    /**
-//     * 参数List
-//     */
-//    private List<TblItemParameter> parameterList;
-
     /**
      * 模型视角
      */
