@@ -461,11 +461,11 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
 
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
-        List<String> itemCodeList;
+        // List<String> itemCodeList;
         // 设备编码集
-        itemCodeList = pageInfo.getList().stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
+        // itemCodeList = pageInfo.getList().stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
         // 查询设备的最新报警信息
-        List<TblAlarmRecordUnhandle> alarmList = alarmAPI.getAlarmInfoByItemCodeListLimitOne(itemCodeList).getData();
+        // List<TblAlarmRecordUnhandle> alarmList = alarmAPI.getAlarmInfoByItemCodeListLimitOne(itemCodeList).getData();
         // 匹配分组信息集
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         for (ItemNestedParameterVO item : pageInfo.getList()) {
@@ -486,7 +486,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
             // 匹配参数信息
             this.convertToParameter(envMonitorItemResultVO,item.getParameterList(),parameterInfo,itemTypeCodeList);
-            // 匹配报警信息  0 正常 1 报警 2 故障
+            // 匹配报警信息  0 正常 1 报警 2 故障 此处的报警信息的设备取决于前端取哪个字段
             if(item.getAlarm() == 1){
                 envMonitorItemResultVO.setAlarmCategory(1);
                 envMonitorItemResultVO.setAlarmParameterValue("1");
