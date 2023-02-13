@@ -18,40 +18,40 @@
                     </if>
                 </trim>
             </if>
-            <if test="carNumber">
+            <if test="null != carNumber">
                 and car_number = #{carNumber}
             </if>
-            <if test="vehicleInfoId">
+            <if test="null != vehicleInfoId">
                 vehicle_info_id = #{vehicleInfoId}
             </if>
-            <if test="code != null">
+            <if test="null != code">
                 and code = #{code}
             </if>
-            <if test="vehicleCategoryId">
+            <if test="null != vehicleCategoryId">
                 and vehicle_category_id = #{vehicleCategoryId}
             </if>
-            <if test="userName">
+            <if test="null != userName">
                 and user_name = #{userName}
             </if>
-            <if test="organizationId">
+            <if test="null != organizationId">
                 and organization_id = #{organizationId}
             </if>
-            <if test="organizationName">
+            <if test="null != organizationName">
                 and organization_name = #{organizationName}
             </if>
-            <if test="purpose">
+            <if test="null != purpose">
                 and purpose = #{purpose}
             </if>
-            <if test="driverId">
+            <if test="null != driverId">
                 and driver_id = #{driverId}
             </if>
-            <if test="driverName">
+            <if test="null != driverName">
                 and driver_name = #{driverName}
             </if>
-            <if test="startTime">
+            <if test="null != startTime">
                 and start_time = #{startTime}
             </if>
-            <if test="endTime">
+            <if test="null != endTime">
                 and end_time = #{endTime}
             </if>
             order by create_time desc
