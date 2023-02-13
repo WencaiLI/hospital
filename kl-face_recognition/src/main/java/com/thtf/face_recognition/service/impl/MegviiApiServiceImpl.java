@@ -114,7 +114,6 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         tblItem.setSystemCode(paramVO.getSysCode());
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
-        tblItem.setFault(0);
         tblItem.setAlarm(1);
         if(StringUtils.isNoneBlank(paramVO.getKeyword())){
             tblItem.setKeyword(paramVO.getKeyword());
@@ -149,6 +148,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         // 第一种使用报警表数据
         List<TblAlarmRecordUnhandle> x = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, 0).getData();
 
+        System.out.println(x);
         if(alarmIdList.size()>0){
             megviiAlarmData  = megviiAlarmDataMapper.selectList(new QueryWrapper<MegviiAlarmData>().lambda().in(MegviiAlarmData::getId, alarmIdList));
         }
@@ -718,6 +718,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
                 "\"indicatorStatusColor\":\"㓒灯亮\",\n" +
                 "\"personInfo\":[{\"uuid\":\"xssddss\",\"name\":\"李文彩\",\"bodyImageUrl\":\"https://img.51miz.com/Photo/2017/06/05/15/P894207_edcab57f8cc99b89c686ca312df9ce05.jpg\"}]\n" +
                 "}";
+
         MegviiPushDataIntelligentDTO megviiPushDataIntelligentDTO = jsonToMegviiPushDataIntelligentDTO(jsonResult);
         MegviiApiServiceImpl megviiApiService = new MegviiApiServiceImpl();
         MegviiAlarmData megviiAlarmData = new MegviiAlarmData();
@@ -761,6 +762,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         tblAlarmRecordUnhandle.setAlarmCategory(0);
         // tblAlarmRecordUnhandle.setAlarmPlanId();
         alarmAPI.insertAlarmUnhandled(tblAlarmRecordUnhandle);
+        itemAPI.updateAlarmOrFaultStatus(item.getCode(),1,null);
         return null;
     }
 
