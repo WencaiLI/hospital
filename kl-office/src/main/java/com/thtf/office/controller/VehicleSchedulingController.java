@@ -103,6 +103,7 @@ public class VehicleSchedulingController {
      */
     @PostMapping("/select")
     public JsonResult<PageInfo<TblVehicleScheduling>> select(@RequestBody VehicleSchedulingParamVO paramVO){
+        System.out.println(paramVO);
         if(null != paramVO.getPageNumber() && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
         }
