@@ -254,8 +254,9 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
     @Override
     public List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO) {
         if(StringUtils.isNotBlank(paramVO.getKeyword())){
-            paramVO.setKeyCarNumber(paramVO.getCarNumber());
-            paramVO.setKeyDescription(paramVO.getDescription());
+            paramVO.setKeyCarNumber(paramVO.getKeyword());
+            paramVO.setKeyDestination(paramVO.getKeyword());
+            // paramVO.setKeyDescription(paramVO.getKeyword());
         }
         return vehicleSchedulingMapper.select(paramVO);
     }

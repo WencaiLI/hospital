@@ -16,6 +16,9 @@
                     <if test="null != keyCarNumber">
                         or description like CONCAT('%',#{keyDescription},'%')
                     </if>
+                    <if test="null != keyDestination">
+                        or destination like CONCAT('%',#{keyDestination},'%')
+                    </if>
                 </trim>
             </if>
             <if test="null != carNumber">
