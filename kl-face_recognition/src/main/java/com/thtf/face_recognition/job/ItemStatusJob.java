@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -65,7 +66,7 @@ public class ItemStatusJob {
         }
     }
 
-    // @Scheduled(cron = "0 0/1 * * * ?")  // 十分钟执行一次
+    @Scheduled(cron = "0 0/1 * * * ?")  // 十分钟执行一次
     public void pullMegviiAlarm() throws Exception {
         megviiApiServiceImpl.listPushIntelligentData();
     }
@@ -75,18 +76,12 @@ public class ItemStatusJob {
      * @Date: 2023/1/7
      * @Return: void
      */
-   //  @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
+//     @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
     public void test(){
-        TblItem tblItem = new TblItem();
-        tblItem.setSystemCode("sub_face_recognition");
-        List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
         int min = 0;
-        int max = itemList.size();
-
-//        // List<TblItem> sub_face_recognition = itemAPI.searchItemBySysCodeAndAreaCode("sub_face_recognition", null).getData();
-//        System.out.println(sub_face_recognition);
-        if (null != itemList){
-            itemAPI.updateAlarmOrFaultStatus(itemList.get(0).getCode(),0,null);
-        }
+        int max = 9;
+        Random random = new Random();
+        int i = random.nextInt(min+max)+min;
+        itemAPI.updateAlarmOrFaultStatus("RLSB_TYPE_"+i,0,null);
     }
 }
