@@ -8,6 +8,7 @@ import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.office.common.util.CodeGeneratorUtil;
 import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.dto.converter.VehicleSchedulingConverter;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
@@ -321,17 +322,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         List<TblBasicData> basicDatas = Objects.requireNonNull(datas.getBody()).getData();
         TblBasicData basicData = basicDatas.stream().filter(obj -> obj.getBasicName().contains("入库")).findFirst().get();
         String num = basicData.getBasicCode();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyyMMdd");
-        List<TblVehicleScheduling> infos = vehicleSchedulingMapper.selectList(new QueryWrapper<TblVehicleScheduling>().like("update_time", formatter.format(LocalDateTime.now(ZoneId.of("+8")))).orderByDesc("update_time"));
-        if(!infos.isEmpty()){
-            DecimalFormat dft = new DecimalFormat("000");
-            num += formatter2.format(LocalDateTime.now(ZoneId.of("+8"))) +
-                    dft.format(Integer.parseInt(infos.get(0).getCode().substring(infos.get(0).getCode().length()-3))+1);
-        } else {
-            num += formatter2.format(LocalDateTime.now(ZoneId.of("+8"))) + "001";
-        }
-        return num;
+        return CodeGeneratorUtil.getCode(num);
     }
 
     /**
