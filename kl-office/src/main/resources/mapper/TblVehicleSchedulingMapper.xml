@@ -8,7 +8,7 @@
             <if test="id != null">
                 and id = #{id}
             </if>
-            <if test="null != keyword">
+            <if test="null != keywords">
                 <trim prefix="and (" suffix=")" prefixOverrides="or">
                     <if test="null != keyCarNumber">
                         or car_number like CONCAT('%',#{keyCarNumber},'%')
