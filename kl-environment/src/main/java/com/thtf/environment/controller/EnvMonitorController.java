@@ -5,6 +5,7 @@ import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.EChartsMoreVO;
+import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
@@ -64,7 +65,7 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult
      */
     @PostMapping("/monitor_point_info")
-    public JsonResult monitor_point_info(@RequestParam("itemCode") String itemCode){
+    public JsonResult<EnvItemMonitorDTO> monitor_point_info(@RequestParam("itemCode") String itemCode){
         return JsonResult.querySuccess(envMonitorService.getMonitorPointInfo(itemCode));
 
     }
