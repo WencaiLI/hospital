@@ -25,6 +25,8 @@ public class EnvItemMonitorDTO {
     private String description;
     private String systemCode;
     private String systemName;
+    // null 正常 0 报警 1 故障
+    private Integer alarmCategory;
     private String alarmParameterCode;
     private String alarmParameterValue;
     private String parameterCode;

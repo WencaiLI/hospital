@@ -931,10 +931,14 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 monitorParameter.set(e.getParameterType());
             }
         });
-//         ItemMonitorPointInfoDTO monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode).getData();
-//        TblAlarmRecordUnhandle data = alarmAPI.getAlarmInfoByItemCodeLimitOne(itemCode).getData();
-//        monitorPointInfo.setA
+
         EnvItemMonitorDTO result = new EnvItemMonitorDTO();
+        if(data1.getAlarm() == 1){
+            result.setAlarmCategory(0);
+        }else if(data1.getFault() == 1 && data1.getAlarm() == 0){
+            result.setAlarmCategory(1);
+        }
+
         ListItemNestedParametersParamDTO listItemNestedParametersParamDTO = new ListItemNestedParametersParamDTO();
         listItemNestedParametersParamDTO.setItemCodeList(Collections.singletonList(itemCode));
 
