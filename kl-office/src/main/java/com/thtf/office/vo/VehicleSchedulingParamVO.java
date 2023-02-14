@@ -123,7 +123,7 @@ public class VehicleSchedulingParamVO {
     /**
      * 关键词
      */
-    private String keyword;
+    private String keywords;
 
     private String keyCarNumber;
 
