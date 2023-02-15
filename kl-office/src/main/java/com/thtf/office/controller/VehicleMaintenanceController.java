@@ -26,6 +26,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @RequestMapping("/vehicle/maintenance")
+@Validated
 public class VehicleMaintenanceController {
 
     @Resource

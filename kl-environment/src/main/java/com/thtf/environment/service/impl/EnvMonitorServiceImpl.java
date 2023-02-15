@@ -931,7 +931,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 monitorParameter.set(e.getParameterType());
             }
         });
-
+//         ItemMonitorPointInfoDTO monitorPointInfo = itemAPI.getMonitorPointInfo(itemCode).getData();
+//        TblAlarmRecordUnhandle data = alarmAPI.getAlarmInfoByItemCodeLimitOne(itemCode).getData();
+//        monitorPointInfo.setA
         EnvItemMonitorDTO result = new EnvItemMonitorDTO();
         if(data1.getAlarm() == 1){
             result.setAlarmCategory(0);

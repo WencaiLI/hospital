@@ -47,6 +47,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/vehicle/info")
+@Validated
 public class VehicleInfoController {
 
     @Resource
