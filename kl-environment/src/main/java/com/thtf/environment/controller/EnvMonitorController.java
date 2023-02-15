@@ -218,7 +218,7 @@ public class EnvMonitorController {
     public JsonResult<EChartsVO> getDailyHistoryMoment(@RequestParam(value = "parameterCode",required = false) String parameterCode,
                                                        @RequestParam(value = "itemCode",required = false) String itemCode,
                                                        @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
-                                                       @RequestParam("date") String date){
+                                                       @RequestParam("date") String date) throws Exception {
         return JsonResult.querySuccess(envMonitorService.getDailyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
     }
 

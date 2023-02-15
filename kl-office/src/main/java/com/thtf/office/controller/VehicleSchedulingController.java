@@ -34,6 +34,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/vehicle/scheduling")
+@Validated
 public class VehicleSchedulingController {
 
     @Resource

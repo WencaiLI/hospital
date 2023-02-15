@@ -6,6 +6,7 @@ import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -22,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/vehicle/statistics")
 @Slf4j
+@Validated
 public class VehicleStatisticsController {
 
     @Resource
