@@ -248,24 +248,23 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
     @Transactional(rollbackFor = Exception.class)
     public boolean updateInfoStatus() {
         LocalDateTime now = LocalDateTime.now();
-        /* 更新为出车中状态 */
+        /* 1.应处于调度状态的调度记录 */
         QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("status",0).lt("start_time",now).gt("end_time",now).orderByAsc("end_time");
+        queryWrapper.isNull("delete_time").and(e->e.eq("status",1).or().eq("status",2).or().eq("status",0)).lt("start_time",now).gt("end_time",now).orderByAsc("end_time");
         List<TblVehicleScheduling> schedulingList = vehicleSchedulingMapper.selectList(queryWrapper);
-
+        // 1.1 修改公车状态为正在调度(出车中)
         for (TblVehicleScheduling tblVehicleScheduling : schedulingList) {
-            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,getOperatorName(),null));
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,SecurityContextHolder.getUserName(),null));
         }
-
-        /* 查询应调度目的待命中的出车中或维修中的车辆 */
+        /* 2. 查询应结束公车调度的调度 查询应调度目的待命中的出车中或维修中的车辆 */
         QueryWrapper<TblVehicleScheduling> queryWrapper_1 = new QueryWrapper<>();
+        // 已经结束的调度
         queryWrapper_1.isNull("delete_time").eq("status",0).le("end_time",now)
                 .and(e->e.eq("purpose",0).or().eq("purpose",1).or()
                 .eq("purpose",2));
         List<TblVehicleScheduling> tblVehicleSchedulingList = vehicleSchedulingMapper.selectList(queryWrapper_1);
-
         for (TblVehicleScheduling tblVehicleScheduling : tblVehicleSchedulingList) {
-            // 只有调度用途为出车状态的调度
+            // 2.1 只有调度用途为出车 的调度
             if(tblVehicleScheduling.getPurpose() == 0){
                 // 修改公车为待命中状态
                 vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),tblVehicleScheduling.getWorkingDuration()));
@@ -286,6 +285,15 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
                 log.error("报废车车辆的调度状态存在问题！");
             }
         }
+        /* 3.尚未开始调度的调度 修改公车为待命中状态，修改调度状态为尚未开始调度 */
+        QueryWrapper<TblVehicleScheduling> queryWrapper_2 = new QueryWrapper<>();
+        queryWrapper_2.isNull("delete_time").eq("status",0).gt("start_time",now)
+                .and(e->e.eq("purpose",0).or().eq("purpose",1).or()
+                        .eq("purpose",2));
+        List<TblVehicleScheduling> tblVehicleSchedulingList2 = vehicleSchedulingMapper.selectList(queryWrapper_2);
+        tblVehicleSchedulingList2.forEach(e->{
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(e.getVehicleInfoId(),0,SecurityContextHolder.getUserName(),null));
+        });
         return true;
     }
 
