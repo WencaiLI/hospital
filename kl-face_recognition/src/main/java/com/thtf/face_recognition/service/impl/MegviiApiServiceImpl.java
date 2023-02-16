@@ -324,6 +324,7 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         tblItem.setPageSize(paramVO.getPageSize());
         tblItem.setPageNumber(paramVO.getPageNumber());
         if(StringUtils.isNotBlank(paramVO.getKeyword())){
+            tblItem.setKeyword(paramVO.getKeyword());
             tblItem.setKeyAreaName(paramVO.getKeyword());
             tblItem.setKeyName(paramVO.getKeyword());
             tblItem.setKeyCode(paramVO.getKeyword());
