@@ -1,15 +1,14 @@
-package com.thtf.face_recognition.vo;
+package com.thtf.face_recognition.vo.app;
 
 import lombok.Data;
 
 /**
  * @Author: liwencai
- * @Date: 2022/11/7 10:06
+ * @Date: 2023/2/17 19:17
  * @Description:
  */
 @Data
-public class FaceRecognitionDisplayVO {
-
+public class AppFaceRecognitionDisplayVO {
     /**
      * 设备总数
      */
@@ -23,12 +22,16 @@ public class FaceRecognitionDisplayVO {
     /**
      * 报警总数
      */
-    private Integer alarmNum;
+    private Integer alarmItemNum;
 
     /**
      * 故障总数
      */
-    private Integer faultNum;
+    private Integer faultItemNum;
+
+    private Long alarmNum;
+
+    private Long faultNum;
 
     /**
      * 离线设备总数
