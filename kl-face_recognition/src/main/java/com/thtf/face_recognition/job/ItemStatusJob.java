@@ -1,15 +1,8 @@
 package com.thtf.face_recognition.job;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.thtf.common.dto.itemserver.ItemParameterUpdateDTO;
-import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
 import com.thtf.face_recognition.common.constant.MegviiConfig;
-import com.thtf.face_recognition.common.constant.ParameterConstant;
 import com.thtf.face_recognition.common.enums.MegviiItemStatus;
-import com.thtf.face_recognition.common.util.HttpUtil;
 import com.thtf.face_recognition.dto.MegviiDeviceDTO;
 import com.thtf.face_recognition.dto.MegviiListDeviceParamDTO;
 import com.thtf.face_recognition.dto.MegviiPage;
@@ -21,24 +14,27 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
  * @Date: 2022/12/29 09:51
- * @Description:
+ * @Description: 旷世人脸识别数据推送
  */
 @Component
 @Slf4j
 public class ItemStatusJob {
+
     @Autowired
     private ItemAPI itemAPI;
+
     @Autowired
     MegviiConfig megviiConfig;
+
     @Resource
     MegviiApiServiceImpl megviiApiServiceImpl;
+
     // 更新设备状态
     // @Scheduled(cron = "0/10 * * * * ?")  // 十秒执行一次
     public void updateItemStatus(){
@@ -64,15 +60,24 @@ public class ItemStatusJob {
             String offlineItemCodeLists = String.join(",",offlineItemCodeList);
             itemAPI.updateAlarmOrFaultStatus(offlineItemCodeLists,null,1);
         }
+        // todo 向前端推送编码数据
     }
 
-    @Scheduled(cron = "0 0/1 * * * ?")  // 十分钟执行一次
+    /**
+     * @Author: liwencai
+     * @Description: 拉取报警信息,并向数据库写入报警信息
+     * @Date: 2023/2/20
+     * @Return: void
+     */
+    @Scheduled(cron = "0/30 * * * * ?") // 30秒执行一次
     public void pullMegviiAlarm() throws Exception {
         megviiApiServiceImpl.listPushIntelligentData();
     }
+
+
     /**
      * @Author: liwencai
-     * @Description: 测试修改状态
+     * @Description: （测试）测试修改状态
      * @Date: 2023/1/7
      * @Return: void
      */
