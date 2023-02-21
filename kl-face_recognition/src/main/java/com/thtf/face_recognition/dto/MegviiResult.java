@@ -1,16 +1,19 @@
 package com.thtf.face_recognition.dto;
 
+import lombok.Data;
+
 /**
  * @Author: liwencai
  * @Date: 2022/12/6 22:50
  * @Description:
  */
+@Data
 public class MegviiResult {
 
     /**
      * 编码
      */
-    private String code;
+    private Integer code;
 
     /**
      * 数据

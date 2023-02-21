@@ -40,11 +40,11 @@ import com.thtf.face_recognition.service.ManufacturerApiService;
 import com.thtf.face_recognition.service.MegviiAlarmDataService;
 import com.thtf.face_recognition.vo.*;
 import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
 import java.time.Instant;
@@ -958,4 +958,172 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         // 输出结果
         return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
     }
+    /* ***************************** 视频控制相关接口 *********************************** */
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 云台控制
+     * @Date: 2023/2/21
+     * @Param param:
+     * @Return: boolean
+     */
+    public boolean ptzControl(MegviiPTZControlParam param){
+        String uri = "/v1/api/video/realtime/ptzControl";
+        String jsonResult = megviiHttpPostJSON(uri, param);
+        MegviiResult megviiResult = JSON.parseObject(jsonResult, MegviiResult.class);
+        if(0 == megviiResult.getCode()){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备的websocket的路径，用于视频实时预览
+     * @Date: 2023/2/21
+     * @Param uuids: 对应设备编码 code
+     * @Return: java.util.Map<java.lang.String,java.lang.String>
+     */
+    public Map<String, String> getWsUrlForPreview(List<String> uuids){
+        Map<String, String> resultMap = new HashMap<>();
+        String uri = "/v1/api/video/realtime/preview";
+        for (String uuid : uuids) {
+            Map<String, String> requestBodyMap = new HashMap<>();
+            requestBodyMap.put("deviceUuid",uuid);
+            String s = megviiHttpPostJSON(uri, requestBodyMap);
+            JSONObject jsonObject = JSONObject.parseObject(s);
+            if(null != jsonObject){
+                String data = jsonObject.getString("data");
+                if(StringUtils.isNotBlank(data)){
+                    JSONObject dataResult = JSONObject.parseObject(data);
+                    String url = dataResult.getString("url");
+                    resultMap.put(uuid,url);
+                }
+            }
+        }
+        return resultMap;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 立即抓拍
+     * @Date: 2023/2/21
+     * @Param uuid: 旷世设备uuid 对应 ibs5.0 设备编码
+     * @Return: java.lang.String
+     */
+    public String capture(String uuid){
+        String uri = "/v1/api/video/realtime/capture";
+        Map<String, String> requestBodyMap = new HashMap<>();
+        requestBodyMap.put("deviceUuid",uuid);
+        String s = megviiHttpPostJSON(uri, requestBodyMap);
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        if(null != jsonObject){
+            String data = jsonObject.getString("data");
+            if(StringUtils.isNotBlank(data)){
+                JSONObject dataResult = JSONObject.parseObject(data);
+                String captureUrl = dataResult.getString("captureUrl");
+                return captureUrl;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取设备的回放列表
+     * @Date: 2023/2/21
+     * @Param uuid: 旷世设备uuid 对应 ibs5.0 设备编码
+     * @Param startTime: 开始时间 单位毫秒（下载使用）
+     * @Param endTime: 结束时间 单位毫秒（下载使用）
+     * @Return: com.thtf.face_recognition.dto.MegviiPage
+     */
+    public MegviiPage listPlaybackInfo(String uuid,Long startTime,Long endTime){
+        String uri = "/v1/api/video/playback/list";
+        Map<String, Object> requestBodyMap = new HashMap<>();
+        requestBodyMap.put("deviceUuid",uuid);
+        requestBodyMap.put("startTime",startTime);
+        requestBodyMap.put("endTime", endTime);
+        String s = megviiHttpPostJSON(uri, requestBodyMap);
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        if(null != jsonObject){
+            String data = jsonObject.getString("data");
+            MegviiPage megviiPage = JSON.parseObject(data, MegviiPage.class);
+            return megviiPage;
+        }else {
+            return null;
+        }
+    }
+
+    /* 视频回放下载 */
+    /**
+     * @Author: liwencai
+     * @Description: 获取下载任务id
+     * @Date: 2023/2/21
+     * @Param uuid:
+     * @Param startTime:
+     * @Param endTime:
+     * @Return: java.lang.String
+     */
+    public String getDownloadTaskUuid(String uuid,Long startTime,Long endTime){
+        String uri = "/v1/api/video/playback/download";
+        Map<String, Object> requestBodyMap = new HashMap<>();
+        requestBodyMap.put("deviceUuid",uuid);
+        requestBodyMap.put("startTime",startTime);
+        requestBodyMap.put("endTime", endTime);
+        String s = megviiHttpPostJSON(uri, requestBodyMap);
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        if(null != jsonObject){
+            String data = jsonObject.getString("data");
+            if(StringUtils.isNotBlank(data)){
+                JSONObject dataResult = JSONObject.parseObject(data);
+                String taskUuid = dataResult.getString("taskUuid");
+                return taskUuid;
+            }
+        }
+        return null;
+    }
+
+    public String getDownloadUrl(String taskUuid){
+        String uri = "/v1/api/video/playback/open";
+        Map<String, Object> requestBodyMap = new HashMap<>();
+        requestBodyMap.put("taskUuid",taskUuid);
+        String s = megviiHttpPostJSON(uri, requestBodyMap);
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        if(null != jsonObject){
+            String data = jsonObject.getString("data");
+            if(StringUtils.isNotBlank(data)){
+                JSONObject dataResult = JSONObject.parseObject(data);
+                String url = dataResult.getString("url");
+                return url;
+            }
+        }
+        return null;
+    }
+
+
+    /* ************************** 复用代码 ******************************** */
+    /**
+     * @Author: liwencai
+     * @Description: 旷世人脸识别接口 http post请求
+     * @Date: 2023/2/21
+     * @Param uri: 路径
+     * @Param requestBody: 负载 请求体 JSON
+     * @Return: java.lang.String
+     */
+    String megviiHttpPostJSON(String uri, Object requestBody){
+        String jsonParam = JSON.toJSONString(requestBody);
+        Map<String, Object> headers = MegviiAuth.getAuthHeaders(uri, "POST", null, requestBody);
+        try {
+            String jsonResult = HttpUtil.httpPostJSON(megviiConfig.getBaseUrl() + uri, headers, jsonParam);
+            return jsonResult;
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+
+
+
+
 }
