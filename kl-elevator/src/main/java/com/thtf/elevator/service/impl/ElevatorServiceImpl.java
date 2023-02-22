@@ -498,6 +498,9 @@ public class ElevatorServiceImpl implements ElevatorService {
             elevatorInfoResult.setItemCode(item.getCode());
             elevatorInfoResult.setItemName(item.getName());
             elevatorInfoResult.setAreaName(item.getAreaName());
+            elevatorInfoResult.setAreaCode(item.getAreaCode());
+            elevatorInfoResult.setBuildingCode(item.getBuildingCode());
+            elevatorInfoResult.setAlarmStatus(String.valueOf(alarmCategory));
             // 匹配报警信息
             for (TblAlarmRecordUnhandle alarmRecordUnhandle : recordUnhandles) {
                 if(item.getCode().equals(alarmRecordUnhandle.getItemCode())){
