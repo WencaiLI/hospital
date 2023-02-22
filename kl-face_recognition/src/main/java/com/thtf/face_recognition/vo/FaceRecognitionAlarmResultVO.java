@@ -43,6 +43,10 @@ public class FaceRecognitionAlarmResultVO {
      */
     private String areaName;
 
+    private String areaCode;
+
+    private String buildingCode;
+
     /**
      * IP地址
      */
