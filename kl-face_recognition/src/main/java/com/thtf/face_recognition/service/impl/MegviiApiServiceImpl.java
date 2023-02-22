@@ -164,6 +164,8 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             innerResult.setItemName(item.getName());
             innerResult.setItemDescription(item.getDescription());
             innerResult.setAreaName(item.getAreaName());
+            innerResult.setAreaCode(item.getAreaCode());
+            innerResult.setBuildingCode(item.getBuildingCode());
             innerResult.setIpAddress("127.0.0.1");
 
             x.forEach(e->{
