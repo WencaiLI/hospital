@@ -98,8 +98,4 @@ public class AppFaceRecognition {
         param.setStatus(1);
         return alarmAPI.listAlarm(param);
     }
-
-
-
-
 }

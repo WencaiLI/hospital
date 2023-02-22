@@ -203,7 +203,18 @@ public class HttpUtil {
         httpPost.addHeader("Content-Type", "application/json; charset=UTF-8");
         // 设置请求参数
         httpPost.setEntity(new StringEntity(param, StandardCharsets.UTF_8.name()));
- 
+
+        return doHttp(httpPost);
+    }
+
+    public static String httpPostJSON(String url, Map<String, Object> headers, String param) throws Exception {
+        HttpPost httpPost = new HttpPost(url);
+        // 设置Content——TYPE 为JSON
+        httpPost.addHeader("Content-Type", "application/json; charset=UTF-8");
+        // 设置请求头
+        for (Map.Entry<String, Object> header : headers.entrySet())
+            httpPost.addHeader(header.getKey(), String.valueOf(header.getValue()));
+        httpPost.setEntity(new StringEntity(param, StandardCharsets.UTF_8.name()));
         return doHttp(httpPost);
     }
  
@@ -492,4 +503,6 @@ public class HttpUtil {
  
         return result;
     }
+
+
 }

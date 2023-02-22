@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 public class SignUtlis {
     private static final String SIGN_FORMAT = "%s-%s-%s-%s-%s-%s-%s-%s";
     /**
-     签名算法生成卡密昂
+     签名算法生成
      @param ctimestamp
      @param cnonce
      @param requestBody 请求体对象
@@ -36,7 +36,7 @@ public class SignUtlis {
                 requestBodyMd5 = DigestUtil.encryptMd5(requestBodyJson);
             }
         }
-        String signStr = String.format(SIGN_FORMAT, url, method, requestParam, requestBodyMd5, cappKey, ctimestamp, cnonce ,secret);
+        String signStr = String.format(SIGN_FORMAT, url, method, requestParam, requestBodyMd5, secret, ctimestamp, cnonce ,cappKey);
         return DigestUtil.encryptMd5(signStr);
     }
 }
