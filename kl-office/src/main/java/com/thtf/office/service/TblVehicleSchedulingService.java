@@ -4,6 +4,7 @@ package com.thtf.office.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
+import com.thtf.office.vo.VehicleSchedulingQueryVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface TblVehicleSchedulingService extends IService<TblVehicleScheduli
 
     boolean deleteById(Long sid);
 
-    List<TblVehicleScheduling> select(VehicleSchedulingParamVO paramVO);
+    List<VehicleSchedulingQueryVO> select(VehicleSchedulingParamVO paramVO);
 
     Map<String, Object> insert(VehicleSchedulingParamVO paramVO);
 

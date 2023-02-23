@@ -12,6 +12,7 @@ import com.thtf.office.common.valid.VehicleParamValid;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.service.TblVehicleSchedulingService;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
+import com.thtf.office.vo.VehicleSchedulingQueryVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,8 +104,7 @@ public class VehicleSchedulingController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List<com.thtf.entity.TblVehicleScheduling>>
      */
     @PostMapping("/select")
-    public JsonResult<PageInfo<TblVehicleScheduling>> select(@RequestBody VehicleSchedulingParamVO paramVO){
-        System.out.println(paramVO);
+    public JsonResult<PageInfo<VehicleSchedulingQueryVO>> select(@RequestBody VehicleSchedulingParamVO paramVO){
         if(null != paramVO.getPageNumber() && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
         }
