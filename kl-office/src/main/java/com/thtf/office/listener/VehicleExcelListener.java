@@ -89,23 +89,26 @@ public class VehicleExcelListener extends AnalysisEventListener<VehicleInfoExcel
         /* ************数据验证开始************* */
 
         /* 车牌小写变大写 */
-        if(StringUtils.isNotBlank(dto.getCarNumber())){
+        if(StringUtils.isBlank(dto.getCarNumber())){
+            errorColumnNum ++;
+            stringBuilder.append("车牌号必填;");
+        }else {
             dto.setCarNumber(StringUtils.upperCase(dto.getCarNumber()));
-        }
 
-        if(! RegexVerifyUtil.verify(dto.getCarNumber(),RegexVerifyUtil.carNumberRegex)){
-            errorColumnNum ++;
-            stringBuilder.append("车牌号格式不正确;");
-        }else if(hadInsertDataCarNumber.contains(dto.getCarNumber())){
-            errorColumnNum ++;
-            stringBuilder.append("车牌号已经在Excel中存在");
-        } else {
-            // 验证车牌号是否在数据库中存在
-            if(! vehicleInfoService.verifyCarNumberForInsert(dto.getCarNumber())){
+            if(! RegexVerifyUtil.verify(dto.getCarNumber(),RegexVerifyUtil.carNumberRegex)){
                 errorColumnNum ++;
-                stringBuilder.append("车牌号已存在;");
-            }else{
-                hadInsertDataCarNumber.add(dto.getCarNumber());
+                stringBuilder.append("车牌号格式不正确;");
+            }else if(hadInsertDataCarNumber.contains(dto.getCarNumber())){
+                errorColumnNum ++;
+                stringBuilder.append("车牌号已经在Excel中存在");
+            } else {
+                // 验证车牌号是否在数据库中存在
+                if(! vehicleInfoService.verifyCarNumberForInsert(dto.getCarNumber())){
+                    errorColumnNum ++;
+                    stringBuilder.append("车牌号已存在;");
+                }else{
+                    hadInsertDataCarNumber.add(dto.getCarNumber());
+                }
             }
         }
 
