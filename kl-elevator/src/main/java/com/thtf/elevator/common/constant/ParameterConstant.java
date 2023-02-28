@@ -20,6 +20,11 @@ public class ParameterConstant {
     public static final String ELEVATOR_RUN_STATUS = "State";
 
     /**
+     * 运行状态
+     */
+    public static final String ELEVATOR_RUN_TRUE = "1";
+
+    /**
      * 电梯楼层
      */
     public static final String ELEVATOR_CURRENT_FLOOR = "CurrentFloor";
