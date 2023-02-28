@@ -28,9 +28,25 @@ public class EnvMonitorItemResultVO {
      */
     private String itemName;
 
+    /**
+     * 设备类别编码
+     */
     private String itemTypeCode;
 
+    /**
+     * 设备类别名称
+     */
     private String itemTypeName;
+
+    /**
+     * 建筑编码
+     */
+    private String buildingCode;
+
+    /**
+     * 建筑名称
+     */
+    private String buildingName;
 
     /**
      * 区域编程
