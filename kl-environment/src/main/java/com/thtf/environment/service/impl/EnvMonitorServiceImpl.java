@@ -3,10 +3,7 @@ package com.thtf.environment.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.adminserver.AreaNestBuildingDTO;
-import com.thtf.common.dto.alarmserver.EChartsHourlyVO;
-import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
-import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
-import com.thtf.common.dto.alarmserver.TwentyFourHourAlarmStatisticsDTO;
+import com.thtf.common.dto.alarmserver.*;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
@@ -30,6 +27,7 @@ import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import com.thtf.environment.service.EnvMonitorService;
 import com.thtf.environment.vo.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.api.hint.HintManager;
 import org.springframework.beans.BeanUtils;
@@ -155,6 +153,26 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         result.setKeys(data.getKeys());
         result.setValues(values);
         return result;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2023/2/28
+     * @Param param:
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO>>
+     */
+    @Override
+    public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(ItemAlarmInfoVO param) {// 获取所有的数据统计
+        if(CollectionUtils.isEmpty(param.getItemTypeCodeList())){
+            List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+            if(null == parameterInfo || parameterInfo.size() == 0){
+                return null;
+            }
+            List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+            param.setItemTypeCodeList(itemTypeCodeList);
+        }
+        return itemAPI.listTypeCodeItemAlarmInfo(param);
     }
 
     /**

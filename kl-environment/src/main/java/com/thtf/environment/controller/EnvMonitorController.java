@@ -1,5 +1,7 @@
 package com.thtf.environment.controller;
 
+import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
+import com.thtf.common.dto.alarmserver.ItemAlarmInfoVO;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
@@ -236,5 +238,17 @@ public class EnvMonitorController {
                                                          @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
                                                          @RequestParam("date") String date){
         return JsonResult.querySuccess(envMonitorService.getMonthlyHistoryMoment(itemCode,itemTypeCode,parameterCode,date));
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 获取指定区域不同设备的报警情况（如感烟探测器、温感探测器、手动火灾报警按钮）
+     * @Date: 2022/8/16
+     * @Param param:
+     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO>>
+     */
+    @PostMapping("/alarm_items_area")
+    public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(@RequestBody ItemAlarmInfoVO param){
+        return envMonitorService.getItemsAlarmInfo(param);
     }
 }

@@ -1,9 +1,12 @@
 package com.thtf.environment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
+import com.thtf.common.dto.alarmserver.ItemAlarmInfoVO;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
+import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.EChartsMoreVO;
 import com.thtf.environment.dto.EnvItemMonitorDTO;
 import com.thtf.environment.dto.PageInfoVO;
@@ -157,4 +160,13 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Return: com.thtf.environment.dto.EChartsMoreVO
      */
     EChartsMoreVO getTotalAlarmHourly(String sysCode, String buildingCodes, String areaCode, Boolean isHandled, String startTime, String endTime);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2023/2/28
+     * @Param param:
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO>>
+     */
+    JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(ItemAlarmInfoVO param);
 }
