@@ -479,19 +479,24 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
 
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
-        // List<String> itemCodeList;
-        // 设备编码集
-        // itemCodeList = pageInfo.getList().stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
-        // 查询设备的最新报警信息
-        // List<TblAlarmRecordUnhandle> alarmList = alarmAPI.getAlarmInfoByItemCodeListLimitOne(itemCodeList).getData();
-        // 匹配分组信息集
+
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        Map<String, String> buildingInfoMap= new HashMap<>();
+        if(!CollectionUtils.isEmpty(pageInfo.getList())){
+            List<String> buildingCodeListInResult = pageInfo.getList().stream().map(ItemNestedParameterVO::getBuildingCode).distinct().collect(Collectors.toList());
+            buildingInfoMap = adminAPI.getBuildingMap(buildingCodeListInResult).getData();
+        }else {
+            buildingInfoMap = new HashMap<>();
+        }
+
         for (ItemNestedParameterVO item : pageInfo.getList()) {
             EnvMonitorItemResultVO envMonitorItemResultVO = new EnvMonitorItemResultVO();
             envMonitorItemResultVO.setItemCode(item.getCode());
             envMonitorItemResultVO.setItemTypeCode(item.getTypeCode());
             envMonitorItemResultVO.setItemName(item.getName());
             envMonitorItemResultVO.setAreaCode(item.getAreaCode());
+            envMonitorItemResultVO.setBuildingCode(item.getBuildingCode());
+            envMonitorItemResultVO.setBuildingName(buildingInfoMap.get(item.getBuildingCode()));
             envMonitorItemResultVO.setAreaName(item.getAreaName());
             envMonitorItemResultVO.setGroupId(item.getGroupId());
             envMonitorItemResultVO.setGroupName(item.getGroupName());
