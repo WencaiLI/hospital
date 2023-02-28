@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -248,7 +249,17 @@ public class EnvMonitorController {
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO>>
      */
     @PostMapping("/alarm_items_area")
-    public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(@RequestBody ItemAlarmInfoVO param){
+    public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(@RequestParam("sysCode")String sysCode,
+                                                                @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                                @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                                @RequestParam(value = "itemTypeCodes",required = false) String itemTypeCodes){
+        ItemAlarmInfoVO param = new ItemAlarmInfoVO();
+        if(StringUtils.isNotBlank(itemTypeCodes)){
+            param.setItemTypeCodeList(Arrays.asList(itemTypeCodes.split(",")));
+        }
+        param.setSysCode(sysCode);
+        param.setBuildingCodes(buildingCodes);
+        param.setAreaCode(areaCode);
         return envMonitorService.getItemsAlarmInfo(param);
     }
 }
