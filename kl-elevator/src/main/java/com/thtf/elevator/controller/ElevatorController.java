@@ -26,7 +26,7 @@ import java.util.List;
 public class ElevatorController {
 
     @Resource
-    ElevatorService elevatorService;
+    private ElevatorService elevatorService;
 
     /**
      * @Author: liwencai
