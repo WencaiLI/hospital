@@ -77,7 +77,7 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
             kvList.add(keyValueDTO3);
             // 故障总数
             KeyValueDTO keyValueDTO4 = new KeyValueDTO();
-            keyValueDTO4.setKey("报警总数");
+            keyValueDTO4.setKey("故障总数");
             keyValueDTO4.setValue(0);
             keyValueDTO4.setValue(itemTypeInfo.getMalfunctionAlarmNumber());
             kvList.add(keyValueDTO4);
