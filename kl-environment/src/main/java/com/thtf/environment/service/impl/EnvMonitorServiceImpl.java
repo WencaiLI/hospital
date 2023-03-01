@@ -806,8 +806,8 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         /* 获取全部的设备编码 */
         List<String> itemCodeList = new ArrayList<>();
         for (TblGroup group : pageInfo.getList()) {
-            if(StringUtils.isNotBlank(group.getContainItemCodes())){
-                itemCodeList.addAll(Arrays.asList(group.getContainItemCodes().split(",")));
+            if(!CollectionUtils.isEmpty(group.getItemCodeList())){
+                itemCodeList.addAll(group.getItemCodeList());
             }
         }
         /* 获取全部区域编码 */
@@ -1090,7 +1090,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         Map<Long,Map<String,Object>> result = new HashMap<>();
         for (TblGroup group : groupList) {
             // 该组的设备编码
-            List<String> itemCodeList = Arrays.asList(group.getContainItemCodes().split(","));
+            List<String> itemCodeList = group.getItemCodeList();
             // 遍历parameterCode
             Map<String, Object> map = new HashMap<>();
             for (String parameterCode : parameterCodeList) {
