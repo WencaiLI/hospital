@@ -94,7 +94,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         if(null != paramDTO.getGroupIds() && paramDTO.getGroupIds().size() > 0){
             List<TblGroup> data = itemAPI.searchGroupByIdList(paramDTO.getGroupIds()).getData();
             for (TblGroup group : data) {
-                itemCodeList.addAll(Arrays.stream(group.getContainItemCodes().split(",")).collect(Collectors.toList()));
+                itemCodeList.addAll(group.getItemCodeList());
             }
         }
         listAlarmPageParamDTO.setItemCodeList(itemCodeList);
