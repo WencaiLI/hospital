@@ -78,7 +78,15 @@ public class AppElevatorController {
     public JsonResult<PageInfoVO<ItemAlarmDetailDTO>> getItemInfoByItemStatusAndType(@RequestBody ItemListVisitVO param){
         try {
             param.setCategory("1");
-            return itemAPI.getItemInfoByItemStatusAndType(param);
+            PageInfoVO<ItemAlarmDetailDTO> data = itemAPI.getItemInfoByItemStatusAndType(param).getData();
+            if(null != data && null != data.getList()){
+                data.getList().forEach(e->{
+                    e.setParameterList(null);
+                    e.setEye(null);
+                    e.setCenter(null);
+                });
+            }
+            return JsonResult.success(data);
         }catch (Exception e){
             return  JsonResult.error("服务器错误");
         }

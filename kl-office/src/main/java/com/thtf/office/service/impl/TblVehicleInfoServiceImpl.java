@@ -250,18 +250,28 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         LocalDateTime now = LocalDateTime.now();
         /* 1.应处于调度状态的调度记录 */
         QueryWrapper<TblVehicleScheduling> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").and(e->e.eq("status",1).or().eq("status",2).or().eq("status",0)).lt("start_time",now).gt("end_time",now).orderByAsc("end_time");
+        queryWrapper.lambda().isNull(TblVehicleScheduling::getDeleteTime)
+                .lt(TblVehicleScheduling::getStartTime,now)
+                .gt(TblVehicleScheduling::getEndTime,now).orderByAsc(TblVehicleScheduling::getStartTime)
+                .and(e->e.eq(TblVehicleScheduling::getStatus,1).or().eq(TblVehicleScheduling::getStatus,2));
+        ;
         List<TblVehicleScheduling> schedulingList = vehicleSchedulingMapper.selectList(queryWrapper);
         // 1.1 修改公车状态为正在调度(出车中)
+        System.out.println(schedulingList);
         for (TblVehicleScheduling tblVehicleScheduling : schedulingList) {
+            // 修改调度状态
+            UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
+            tblVehicleScheduling.setStatus(0);
+            updateWrapper.lambda().isNull(TblVehicleScheduling::getDeleteTime).eq(TblVehicleScheduling::getId,tblVehicleScheduling.getId());
+            vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
+            // 修改公车状态
             vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),1,SecurityContextHolder.getUserName(),null));
         }
         /* 2. 查询应结束公车调度的调度 查询应调度目的待命中的出车中或维修中的车辆 */
         QueryWrapper<TblVehicleScheduling> queryWrapper_1 = new QueryWrapper<>();
         // 已经结束的调度
-        queryWrapper_1.isNull("delete_time").eq("status",0).le("end_time",now)
-                .and(e->e.eq("purpose",0).or().eq("purpose",1).or()
-                .eq("purpose",2));
+        queryWrapper_1.lambda().isNull(TblVehicleScheduling::getDeleteTime).le(TblVehicleScheduling::getEndTime,now)
+                .and(e->e.eq(TblVehicleScheduling::getStatus,0).or().eq(TblVehicleScheduling::getStatus,2));
         List<TblVehicleScheduling> tblVehicleSchedulingList = vehicleSchedulingMapper.selectList(queryWrapper_1);
         for (TblVehicleScheduling tblVehicleScheduling : tblVehicleSchedulingList) {
             // 2.1 只有调度用途为出车 的调度
@@ -276,7 +286,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             }else if (tblVehicleScheduling.getPurpose() == 1 || tblVehicleScheduling.getPurpose() == 2){
                 // 修改为待命中状态
                 vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,getOperatorName(),null));
-                // 修改公车个调度状态为结束调度状态
+                // 修改公车个调!度状态为结束调度状态
                 UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
                 tblVehicleScheduling.setStatus(1);
                 updateWrapper.isNull("delete_time").eq("id",tblVehicleScheduling.getId());
@@ -287,12 +297,15 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         }
         /* 3.尚未开始调度的调度 修改公车为待命中状态，修改调度状态为尚未开始调度 */
         QueryWrapper<TblVehicleScheduling> queryWrapper_2 = new QueryWrapper<>();
-        queryWrapper_2.isNull("delete_time").eq("status",0).gt("start_time",now)
-                .and(e->e.eq("purpose",0).or().eq("purpose",1).or()
-                        .eq("purpose",2));
+        queryWrapper_2.lambda().isNull(TblVehicleScheduling::getDeleteTime).gt(TblVehicleScheduling::getStartTime,now)
+                .and(e->e.eq(TblVehicleScheduling::getStatus,0).or().eq(TblVehicleScheduling::getStatus,1));;
         List<TblVehicleScheduling> tblVehicleSchedulingList2 = vehicleSchedulingMapper.selectList(queryWrapper_2);
-        tblVehicleSchedulingList2.forEach(e->{
-            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(e.getVehicleInfoId(),0,SecurityContextHolder.getUserName(),null));
+        tblVehicleSchedulingList2.forEach(tblVehicleScheduling->{
+            UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
+            tblVehicleScheduling.setStatus(2);
+            updateWrapper.lambda().isNull(TblVehicleScheduling::getDeleteTime).eq(TblVehicleScheduling::getId,tblVehicleScheduling.getId());
+            vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(tblVehicleScheduling.getVehicleInfoId(),0,SecurityContextHolder.getUserName(),null));
         });
         return true;
     }
