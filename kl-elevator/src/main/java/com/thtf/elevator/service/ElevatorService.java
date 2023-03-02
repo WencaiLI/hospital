@@ -2,11 +2,11 @@ package com.thtf.elevator.service;
 
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.CodeAndNameDTO;
+import com.thtf.common.dto.itemserver.PageInfoVO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.FloorInfoDTO;
-import com.thtf.elevator.vo.PageInfoVO;
 
 import java.util.List;
 
@@ -76,7 +76,7 @@ public interface ElevatorService {
      * @Param: pageSize:
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
-    PageInfoVO getAllAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode, Integer alarmCategory, Integer pageNumber, Integer pageSize);
+    PageInfoVO getAllAlarmPage(String sysCode, String buildingCodes, String areaCode, String itemTypeCode, Integer alarmCategory, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai
