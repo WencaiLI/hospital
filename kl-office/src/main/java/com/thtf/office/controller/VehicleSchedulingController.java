@@ -55,7 +55,7 @@ public class VehicleSchedulingController {
     @OperateLog(content = "新增调度记录",operateType = OperateType.INSERT,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> insert(@RequestBody @Validated(VehicleParamValid.Insert.class) VehicleSchedulingParamVO paramVO){
         Map<String, Object> resultMap = vehicleSchedulingService.insert(paramVO);
-        if(resultMap.get("status").equals("error")){
+        if("error".equals(resultMap.get("status"))){
             return JsonResult.error(resultMap.get("errorCause").toString());
         }else {
             return JsonResult.success(true);

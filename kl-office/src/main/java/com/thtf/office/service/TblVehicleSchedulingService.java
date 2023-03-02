@@ -20,14 +20,48 @@ import java.util.Map;
  */
 public interface TblVehicleSchedulingService extends IService<TblVehicleScheduling> {
 
+    /**
+     * @Author: liwencai
+     * @Description: 删除调度信息
+     * @Date: 2022-07-28
+     * @Param sid:
+     * @Return: boolean
+     */
     boolean deleteById(Long sid);
 
+    /**
+     * @Author: liwencai
+     * @Description: 筛选调度信息
+     * @Date: 2022-07-28
+     * @Param paramVO:
+     * @Return: java.util.List<com.thtf.office.vo.VehicleSchedulingQueryVO>
+     */
     List<VehicleSchedulingQueryVO> select(VehicleSchedulingParamVO paramVO);
 
+    /**
+     * @Author: liwencai
+     * @Description: 新增调度信息
+     * @Date: 2022-07-28
+     * @Param paramVO:
+     * @Return: java.util.Map<java.lang.String,java.lang.Object>
+     */
     Map<String, Object> insert(VehicleSchedulingParamVO paramVO);
 
+    /**
+     * @Author: liwencai
+     * @Description: 更新调度信息
+     * @Date: 2022-07-28
+     * @Param paramVO:
+     * @Return: java.util.Map<java.lang.String,java.lang.Object>
+     */
     Map<String, Object> updateSpec(VehicleSchedulingParamVO paramVO);
 
+    /**
+     * @Author: liwencai
+     * @Description: 查询司机的调度情况
+     * @Date: 2022-07-28
+     * @Return: java.util.List<com.thtf.office.vo.VehicleSelectByDateResult>
+     */
     List<VehicleSelectByDateResult> selectInfoAboutDri();
 
     /**

@@ -16,11 +16,11 @@ import java.io.Serializable;
 @Data
 public class VehicleCategoryParamVO implements Serializable {
 
-    @NotNull(groups = {VehicleParamValid.Update.class})
+    @NotNull(groups = {VehicleParamValid.Update.class},message = "请填写类别信息！")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id; // 公车类别id
 
-    @NotBlank(groups = {VehicleParamValid.Insert.class, VehicleParamValid.Update.class})
+    @NotBlank(groups = {VehicleParamValid.Insert.class, VehicleParamValid.Update.class},message = "请填写类别名称！")
     private String name; // 公车类别名臣
 
     private String description; // 公车类别描述

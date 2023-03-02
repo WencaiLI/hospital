@@ -29,7 +29,7 @@ public class VehicleMaintenanceParamVO {
     /**
      * 车辆id
      */
-    @NotNull(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    @NotNull(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请填写车辆信息！")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long vehicleInfoId;
 
