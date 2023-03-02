@@ -122,11 +122,11 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         }
         /* 尚未开始的调度 修改为待命中状态 todo 逻辑可能存在问题*/
         if(paramVO.getStartTime().isAfter(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
-            Map<String,Object> map = new HashMap<>();
-            map.put("vid", paramVO.getVehicleInfoId());
-            map.put("status",0);
-            map.put("updateBy",getOperatorName());
-            vehicleInfoMapper.changeVehicleStatus(map);
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("vid", paramVO.getVehicleInfoId());
+//            map.put("status",0);
+//            map.put("updateBy",getOperatorName());
+//            vehicleInfoMapper.changeVehicleStatus(map);
             scheduling.setStatus(2);
             log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
         }
@@ -226,12 +226,29 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             log.warn("{}，{}，系统时间在两者之间所以，修改该公车状态为正在调度",paramVO.getStartTime(),paramVO.getEndTime());
         }
 
-        /* 修改信息 */
+
+
+        /* 修改调度信息 */
         TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
+
+        /* 如果该调度的开始时间小于系统时间，结束时间大于系统时间，将公车状态修改为出车中 */
+        if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
+            scheduling.setStatus(0);
+        }
+
+        /* 调度已经结束的调度 */
+        if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isBefore(nowTime)){
+            scheduling.setStatus(1);
+        }
+
+        /* 尚未开始的调度 修改为待命中状态 todo 逻辑可能存在问题*/
+        if(paramVO.getStartTime().isAfter(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
+            scheduling.setStatus(2);
+        }
         scheduling.setUpdateTime(LocalDateTime.now());
         scheduling.setUpdateBy(getOperatorName());
-        QueryWrapper<TblVehicleScheduling> queryWrapper_update = new QueryWrapper<>();
-        queryWrapper_update.isNull("delete_time").eq("id",paramVO.getId());
+        QueryWrapper<TblVehicleScheduling> queryWrapperUpdate = new QueryWrapper<>();
+        queryWrapperUpdate.lambda().isNull(TblVehicleScheduling::getDeleteTime).eq(TblVehicleScheduling::getId,paramVO.getId());
         // 计算改调度的秒数
         try {
             Long seconds = Math.abs(scheduling.getEndTime().until(scheduling.getStartTime(), ChronoUnit.SECONDS));
@@ -239,7 +256,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         }catch (Exception e){
             log.error(e.getMessage());
         }
-        if(vehicleSchedulingMapper.update(scheduling,queryWrapper_update) == 1){
+        if(vehicleSchedulingMapper.update(scheduling,queryWrapperUpdate) == 1){
             return getServiceResultMap("success",null,null);
         }else {
             return getServiceResultMap("error","新增调度信息失败",null);
