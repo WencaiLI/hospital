@@ -27,21 +27,21 @@ public class VehicleInfoParamVO implements Serializable {
     private Long id; // 公车id
 
     // 异常BindException
-    @Pattern(regexp = "^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]$",groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
-//    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    @Pattern(regexp = "^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[a-zA-Z](([DF]((?![IO])[a-zA-Z0-9](?![IO]))[0-9]{4})|([0-9]{5}[DF]))|[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1})$",
+            groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请正确填写车牌号！")
     private String carNumber; // 车牌号
 
-    @NotNull(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    @NotNull(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请填写车辆类别！")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long vehicleCategoryId; // 联的车辆类别id
 
-    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请填写厂牌号！")
     private String model; // 厂牌型号
 
-    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请填写发动机号！")
     private String engineNumber; // 发动机号
 
-    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class})
+    @NotBlank(groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请填写车架号！")
     private String frameNumber; // 车架号
 
     private String color; // 车身颜色
