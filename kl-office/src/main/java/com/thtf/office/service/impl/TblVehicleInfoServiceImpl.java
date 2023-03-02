@@ -257,7 +257,6 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         ;
         List<TblVehicleScheduling> schedulingList = vehicleSchedulingMapper.selectList(queryWrapper);
         // 1.1 修改公车状态为正在调度(出车中)
-        System.out.println(schedulingList);
         for (TblVehicleScheduling tblVehicleScheduling : schedulingList) {
             // 修改调度状态
             UpdateWrapper<TblVehicleScheduling> updateWrapper = new UpdateWrapper<>();
