@@ -85,6 +85,8 @@ public class AppElevatorController {
                     e.setEye(null);
                     e.setCenter(null);
                 });
+            }else {
+                return JsonResult.success(data);
             }
             return JsonResult.success(data);
         }catch (Exception e){
