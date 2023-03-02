@@ -24,13 +24,12 @@ import com.thtf.elevator.dto.convert.ItemConverter;
 import com.thtf.elevator.dto.convert.PageInfoConvert;
 import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorService;
-import com.thtf.elevator.vo.PageInfoVO;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
