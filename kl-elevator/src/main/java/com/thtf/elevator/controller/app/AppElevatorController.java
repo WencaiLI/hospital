@@ -111,6 +111,21 @@ public class AppElevatorController {
             parameter.setParameterTypeCode(ParameterConstant.ELEVATOR_RUN_STATUS);
             parameter.setParameterValue(String.valueOf(param.getRunStatus()));
             parameters.add(parameter);
+            
+            ParameterTypeCodeAndValueDTO parameter1 = new ParameterTypeCodeAndValueDTO();
+            parameter.setParameterTypeCode(ParameterConstant.RUN_STATUS1);
+            parameter.setParameterValue(String.valueOf(param.getRunStatus()));
+            parameters.add(parameter1);
+            
+            ParameterTypeCodeAndValueDTO parameter2 = new ParameterTypeCodeAndValueDTO();
+            parameter.setParameterTypeCode(ParameterConstant.RUN_STATUS2);
+            parameter.setParameterValue(String.valueOf(param.getRunStatus()));
+            parameters.add(parameter2);
+            
+            ParameterTypeCodeAndValueDTO parameter3 = new ParameterTypeCodeAndValueDTO();
+            parameter.setParameterTypeCode(ParameterConstant.RUN_STATUS3);
+            parameter.setParameterValue(String.valueOf(param.getRunStatus()));
+            parameters.add(parameter3);
         }
         listItemNestedParametersPageParamDTO.setParameterList(parameters);
 
