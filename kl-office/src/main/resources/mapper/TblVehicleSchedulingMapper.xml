@@ -57,7 +57,7 @@
             <if test="null != endTime">
                 and end_time = #{endTime}
             </if>
-            order by start_time,create_time desc
+            order by start_time desc,create_time desc
         </where>
     </select>
     <!-- 按日、月查询空闲司机的每周月的出车情况 -->

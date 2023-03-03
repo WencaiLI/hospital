@@ -1,7 +1,10 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.adminserver.UserInfo;
+import com.thtf.common.dto.itemserver.PageInfoVO;
 import com.thtf.common.entity.adminserver.TblBasicData;
 import com.thtf.common.entity.adminserver.TblUser;
 import com.thtf.common.feign.AdminAPI;
@@ -21,6 +24,7 @@ import com.thtf.office.vo.VehicleSchedulingQueryVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -275,9 +279,9 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         if(StringUtils.isNotBlank(paramVO.getKeywords())){
             paramVO.setKeyCarNumber(paramVO.getKeywords());
             paramVO.setKeyDestination(paramVO.getKeywords());
-            // paramVO.setKeyDescription(paramVO.getKeyword());
         }
-        return vehicleSchedulingConverter.toVehicleSchedulingQueryVOList(vehicleSchedulingMapper.select(paramVO));
+        List<TblVehicleScheduling> select = vehicleSchedulingMapper.select(paramVO);
+        return vehicleSchedulingConverter.toVehicleSchedulingQueryVOList(select);
     }
 
     /**
@@ -341,6 +345,16 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         TblBasicData basicData = basicDatas.stream().filter(obj -> obj.getBasicName().contains("入库")).findFirst().get();
         String num = basicData.getBasicCode();
         return CodeGeneratorUtil.getCode(num);
+    }
+
+    @Override
+    public PageInfo<VehicleSchedulingQueryVO> selectPage(VehicleSchedulingParamVO paramVO) {
+        PageInfo<VehicleSchedulingQueryVO> result = new PageInfo<>();
+        PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
+        PageInfo<TblVehicleScheduling> of = PageInfo.of(vehicleSchedulingMapper.select(paramVO));
+        BeanUtils.copyProperties(of,result);
+        result.setList(vehicleSchedulingConverter.toVehicleSchedulingQueryVOList(of.getList()));
+        return result;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.thtf.office.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.vo.VehicleSchedulingQueryVO;
@@ -72,4 +73,6 @@ public interface TblVehicleSchedulingService extends IService<TblVehicleScheduli
      * @date 2022-07-28
      */
     String createSerialNumber();
+
+    PageInfo<VehicleSchedulingQueryVO> selectPage(VehicleSchedulingParamVO paramVO);
 }
