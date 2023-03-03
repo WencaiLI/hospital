@@ -1,21 +1,19 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.common.dto.adminserver.UserInfo;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
-import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
 import com.thtf.office.dto.converter.VehicleCategoryConverter;
-import com.thtf.office.entity.TblVehicleInfo;
-import com.thtf.office.vo.VehicleCategoryChangeBindVO;
-import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.entity.TblVehicleCategory;
+import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.service.TblVehicleCategoryService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.office.vo.VehicleCategoryChangeBindVO;
+import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.vo.VehicleCategoryResultVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,8 +54,6 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
     @Resource
     private TblVehicleInfoMapper vehicleInfoMapper;
 
-    @Autowired
-    private AdminAPI adminAPI;
     /**
      * @Author: liwencai
      * @Description: 新增公车类别
@@ -70,12 +66,12 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
     public Map<String,Object> insert(VehicleCategoryParamVO vehicleCategoryParamVO) {
         // 查询公车名称是否重复
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("name",vehicleCategoryParamVO.getName());
+        queryWrapper.lambda().isNull(TblVehicleCategory::getDeleteTime).eq(TblVehicleCategory::getName,vehicleCategoryParamVO.getName());
         // 名称不重复则新增
         if(vehicleCategoryMapper.selectList(queryWrapper).size() == 0){
             TblVehicleCategory vehicleCategory = vehicleCategoryConverter.toVehicleCategory(vehicleCategoryParamVO);
             vehicleCategory.setCreateTime(LocalDateTime.now());
-            vehicleCategory.setCreateBy(getOperatorName());
+            vehicleCategory.setCreateBy( SecurityContextHolder.getUserName());
             vehicleCategory.setId(this.idGeneratorSnowflake.snowflakeId());
             if(vehicleCategoryMapper.insert(vehicleCategory) == 1){
                 return getServiceResultMap("success",null,null);
@@ -98,9 +94,9 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         TblVehicleCategory category = vehicleCategoryMapper.selectById(cid);
         if(null != category){
             category.setDeleteTime(LocalDateTime.now());
-            category.setDeleteBy(getOperatorName());
+            category.setDeleteBy( SecurityContextHolder.getUserName());
             QueryWrapper<TblVehicleCategory> queryWrapper_category = new QueryWrapper<>();
-            queryWrapper_category.isNull("delete_time").eq("id",cid);
+            queryWrapper_category.lambda().isNull(TblVehicleCategory::getDeleteTime).eq(TblVehicleCategory::getId,cid);
             int effortRow = vehicleCategoryMapper.update(category, queryWrapper_category);
             // 同时将所有相关公车的关联的类别id和类别名称置为null
             List<TblVehicleInfo> tblVehicleInfos = vehicleInfoMapper.selectList(new QueryWrapper<TblVehicleInfo>().lambda().eq(TblVehicleInfo::getVehicleCategoryId, cid));
@@ -108,11 +104,9 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             tblVehicleInfos.forEach(e->{
                 e.setVehicleCategoryId(null);
                 e.setDeleteTime(LocalDateTime.now());
-                e.setDeleteBy(getOperatorName());
+                e.setDeleteBy( SecurityContextHolder.getUserName());
                 vehicleInfoMapper.updateById(e);
             });
-
-            // vehicleInfoMapper.setCidToNull(cid);
             return effortRow == 1;
         }else {
             return false;
@@ -131,16 +125,16 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
     public boolean updateSpec(VehicleCategoryParamVO vehicleCategoryParamVO) {
         // 查找修改的名称是否存在
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("name",vehicleCategoryParamVO.getName()).ne("id",vehicleCategoryParamVO.getId());
+        queryWrapper.lambda().isNull(TblVehicleCategory::getDeleteTime).eq(TblVehicleCategory::getName,vehicleCategoryParamVO.getName()).ne(TblVehicleCategory::getId,vehicleCategoryParamVO.getId());
         List<TblVehicleCategory> categoryList = vehicleCategoryMapper.selectList(queryWrapper);
         if(categoryList.size() >= 1){
             return false;
         }
         TblVehicleCategory category = vehicleCategoryConverter.toVehicleCategory(vehicleCategoryParamVO);
         category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateBy(getOperatorName());
+        category.setUpdateBy( SecurityContextHolder.getUserName());
         QueryWrapper<TblVehicleCategory> queryWrapper_update = new QueryWrapper<>();
-        queryWrapper_update.isNull("delete_time").eq("id", vehicleCategoryParamVO.getId());
+        queryWrapper_update.lambda().isNull(TblVehicleCategory::getDeleteTime).eq(TblVehicleCategory::getId, vehicleCategoryParamVO.getId());
         return vehicleCategoryMapper.update(category, queryWrapper_update) == 1;
     }
 
@@ -180,7 +174,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
     public List<SelectAllInfoResultDTO> selectInfoNumberByCategory() {
         // 查询所有类别
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").groupBy("id").orderByAsc("id");
+        queryWrapper.lambda().isNull(TblVehicleCategory::getDeleteTime).groupBy(TblVehicleCategory::getId).orderByAsc(TblVehicleCategory::getId);
         List<TblVehicleCategory> categories = vehicleCategoryMapper.selectList(queryWrapper);
         // 返回值对象
         List<SelectAllInfoResultDTO> resultDTOS = new ArrayList<>();
@@ -189,7 +183,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             selectAllInfoResultDTO.setCategoryName(o.getName());
             // 类别对应的查询数量
             QueryWrapper<TblVehicleInfo> queryWrapper_info = new QueryWrapper<>();
-            queryWrapper_info.isNull("delete_time").eq("vehicle_category_id",o.getId()).groupBy("vehicle_category_id");
+            queryWrapper_info.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId()).groupBy(TblVehicleInfo::getVehicleCategoryId);
             Integer totalNumber = vehicleInfoMapper.selectCount(queryWrapper_info);
             if(totalNumber == null){
                 selectAllInfoResultDTO.setTotalNumber(0);
@@ -230,7 +224,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         // 查询该类别集合分别对应的汽车总数
         for (VehicleCategoryResultVO o : vehicleCategoryResultVOS) {
             QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.isNull("delete_time").eq("vehicle_category_id",o.getId());
+            queryWrapper.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId());
             o.setTotalNumber(vehicleInfoMapper.selectCount(queryWrapper));
         }
         return vehicleCategoryResultVOS;
@@ -253,28 +247,6 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
         map.put("newCid",newCid);
         map.put("oldCid",oldCid);
         return map;
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取操作人姓名
-     * @Date: 2022/8/2
-     * @return: null
-     */
-    public String getOperatorName(){
-        UserInfo userInfo = null;
-        String realName = null;
-        try {
-            userInfo = adminAPI.userInfo(HttpUtil.getToken());
-        }catch (Exception e){
-            log.info("远程调用根据token查询用户信息失败失败");
-        }
-        if(null !=  userInfo){
-            realName = userInfo.getRealname();
-        }
-        /*String userName = SecurityContextHolder.getUserName();
-        System.out.println("XXXXXXX"+userName);*/
-        return realName;
     }
 
     /**

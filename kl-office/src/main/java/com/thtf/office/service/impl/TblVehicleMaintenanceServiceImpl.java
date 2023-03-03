@@ -1,21 +1,20 @@
 package com.thtf.office.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thtf.common.dto.adminserver.UserInfo;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
-import com.thtf.office.common.util.HttpUtil;
 import com.thtf.office.dto.converter.VehicleMaintenanceConverter;
-import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.mapper.TblVehicleMaintenanceMapper;
 import com.thtf.office.service.TblVehicleMaintenanceService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,9 +39,6 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
 
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
-    
-    @Autowired
-    private AdminAPI adminAPI;
 
     /**
      * @Author: liwencai 
@@ -56,7 +52,7 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
         TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
         maintenance.setId(idGeneratorSnowflake.snowflakeId());
         maintenance.setCreateTime(LocalDateTime.now());
-        maintenance.setCreateBy(getOperatorName());
+        maintenance.setCreateBy( SecurityContextHolder.getUserName());
         return vehicleMaintenanceMapper.insert(maintenance) == 1;
     }
 
@@ -72,9 +68,9 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
         TblVehicleMaintenance maintenance = vehicleMaintenanceMapper.selectById(mid);
         if(null != maintenance){
             maintenance.setDeleteTime(LocalDateTime.now());
-            maintenance.setDeleteBy(getOperatorName());
+            maintenance.setDeleteBy( SecurityContextHolder.getUserName());
             QueryWrapper<TblVehicleMaintenance> queryWrapper = new QueryWrapper<>();
-            queryWrapper.isNull("delete_time").eq("id",mid);
+            queryWrapper.lambda().isNull(TblVehicleMaintenance::getDeleteTime).eq(TblVehicleMaintenance::getId,mid);
             return vehicleMaintenanceMapper.update(maintenance,queryWrapper) == 1;
         }
         return false;
@@ -92,9 +88,9 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
     public boolean updateSpec(VehicleMaintenanceParamVO vehicleMaintenanceParamVO) {
         TblVehicleMaintenance maintenance = vehicleMaintenanceConverter.toVehicleMaintenance(vehicleMaintenanceParamVO);
         maintenance.setUpdateTime(LocalDateTime.now());
-        maintenance.setUpdateBy(getOperatorName());
+        maintenance.setUpdateBy( SecurityContextHolder.getUserName());
         QueryWrapper<TblVehicleMaintenance> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("id",vehicleMaintenanceParamVO.getId());
+        queryWrapper.lambda().isNull(TblVehicleMaintenance::getDeleteTime).eq(TblVehicleMaintenance::getId,vehicleMaintenanceParamVO.getId());
         return vehicleMaintenanceMapper.update(maintenance,queryWrapper) == 1;
     }
 
@@ -108,27 +104,5 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
     @Override
     public List<TblVehicleMaintenance> select(VehicleMaintenanceParamVO vehicleMaintenanceParamVO) {
         return vehicleMaintenanceMapper.select(vehicleMaintenanceParamVO);
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取操作人姓名
-     * @Date: 2022/8/2
-     * @return: null
-     */
-    public String getOperatorName(){
-        UserInfo userInfo = null;
-        String realName = null;
-        try {
-            userInfo = adminAPI.userInfo(HttpUtil.getToken());
-        }catch (Exception e){
-            log.info("远程调用根据token查询用户信息失败失败");
-        }
-        if(null !=  userInfo){
-            realName = userInfo.getRealname();
-        }
-        /*String userName = SecurityContextHolder.getUserName();
-        System.out.println("XXXXXXX"+userName);*/
-        return realName;
     }
 }

@@ -40,7 +40,10 @@
     <!-- 修改公车状态 -->
     <update id="changeVehicleStatus" parameterType="java.util.Map">
         update tbl_vehicle_info
-        set status = #{status},update_time = CURRENT_TIMESTAMP,update_by = #{updateBy}
+        set update_by = #{updateBy},update_time = CURRENT_TIMESTAMP
+          <if test="null != status">
+              ,status = #{status}
+          </if>
           <if test="workingDuration != null">
               ,working_duration = working_duration + #{workingDuration}
           </if>
