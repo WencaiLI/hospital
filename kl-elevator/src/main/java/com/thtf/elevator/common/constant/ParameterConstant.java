@@ -18,6 +18,9 @@ public class ParameterConstant {
      * 运行状态
      */
     public static final String ELEVATOR_RUN_STATUS = "State";
+    public static final String RUN_STATUS1 = "Status";
+    public static final String RUN_STATUS2 = "FAN_STA";
+    public static final String RUN_STATUS3 = "OnlineStatus";
 
     /**
      * 运行状态
