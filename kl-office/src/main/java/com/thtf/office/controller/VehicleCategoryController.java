@@ -115,7 +115,7 @@ public class VehicleCategoryController {
     @GetMapping("/totalNumber")
     public JsonResult<Integer> totalNumber(){
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time");
+        queryWrapper.lambda().isNull(TblVehicleCategory::getDeleteTime);
         return JsonResult.querySuccess(vehicleCategoryService.count(queryWrapper));
     }
 
@@ -129,7 +129,7 @@ public class VehicleCategoryController {
     @GetMapping("/correlationNumber")
     public JsonResult<Integer> correlationNumber(@RequestParam(value = "cid") @NotNull Long cid){
         QueryWrapper<TblVehicleInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("delete_time").eq("vehicle_category_id",cid);
+        queryWrapper.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,cid);
         return JsonResult.querySuccess(vehicleInfoService.count(queryWrapper));
     }
 

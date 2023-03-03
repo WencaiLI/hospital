@@ -25,11 +25,11 @@ import java.util.stream.Stream;
 @Service
 public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     @Resource
-    TblVehicleInfoMapper vehicleInfoMapper;
+    private TblVehicleInfoMapper vehicleInfoMapper;
     @Resource
-    TblVehicleMaintenanceMapper vehicleMaintenanceMapper;
+    private TblVehicleMaintenanceMapper vehicleMaintenanceMapper;
     @Resource
-    TblVehicleSchedulingMapper vehicleSchedulingMapper;
+    private TblVehicleSchedulingMapper vehicleSchedulingMapper;
 
     /**
      * @Author: liwencai

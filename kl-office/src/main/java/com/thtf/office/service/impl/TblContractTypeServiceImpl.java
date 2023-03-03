@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import javax.annotation.Resource;
 
 
 /**
@@ -36,14 +37,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
  */
 @Service
 public class TblContractTypeServiceImpl extends ServiceImpl<TblContractTypeMapper, TblContractType> implements TblContractTypeService {
-	@Autowired
+	@Resource
 	private TblContractTypeMapper contractTypeMapper ;
 	
-	@Autowired
+	@Resource
 	private TblContractMapper contractMapper ;
 	
     @Autowired
     private IdGeneratorSnowflake idGeneratorSnowflake;
+
 	/* (non-Javadoc)
 	 * @see com.thtf.service.TblContractTypeService#countContractType()
 	 */
