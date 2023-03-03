@@ -134,7 +134,6 @@ public class AppElevatorController {
             data.getList().forEach(e->{
                 AppItemSortVO appItemSortVO = new AppItemSortVO();
                 appItemSortVO.setItemName(e.getName());
-                System.out.println(e.getParameterList());
                 e.getParameterList().forEach(parameter -> {
                     if (ParameterConstant.ELEVATOR_RUN_STATUS.equals(parameter.getParameterType())){
                         appItemSortVO.setRunStatus(parameter.getValue());

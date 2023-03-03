@@ -108,7 +108,7 @@ public class VehicleSchedulingController {
         if(null != paramVO.getPageNumber() && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
         }
-        return JsonResult.querySuccess(PageInfo.of(vehicleSchedulingService.select(paramVO)));
+        return JsonResult.querySuccess(vehicleSchedulingService.selectPage(paramVO));
     }
 
     /**
