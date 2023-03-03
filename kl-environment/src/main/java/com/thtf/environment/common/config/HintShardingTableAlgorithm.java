@@ -1,7 +1,7 @@
 package com.thtf.environment.common.config;
 
 import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;;
+import cn.hutool.core.date.DateTime;
 import com.thtf.environment.common.utils.DateUtil;
 import com.thtf.environment.mapper.TblHistoryMomentMapper;
 import lombok.extern.slf4j.Slf4j;
