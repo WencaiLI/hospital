@@ -228,9 +228,10 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
 
         long workingDuration = 0;
         /* 如果该调度的开始时间小于系统时间，结束时间大于系统时间，将公车状态修改为出车中 */
+        Integer newVehicleStatus = null;
         LocalDateTime nowTime= LocalDateTime.now();
         if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
-            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap( paramVO.getVehicleInfoId(),VehicleStatusEnum.OUT.getStatus(),SecurityContextHolder.getUserName(),null));
+            newVehicleStatus = VehicleStatusEnum.OUT.getStatus();
             scheduling.setStatus(VehicleSchedulingStatusEnum.IN_SCHEDULING.getStatus());
             if(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus().equals(originalScheduling.getStatus())){
                 workingDuration = -(originalScheduling.getWorkingDuration());
@@ -239,6 +240,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
 
         /* 调度已经结束的调度 */
         if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isBefore(nowTime)){
+            newVehicleStatus = VehicleStatusEnum.STANDBY.getStatus();
             scheduling.setStatus(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus());
             workingDuration = seconds - originalScheduling.getWorkingDuration();
         }
@@ -251,8 +253,8 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         }
         QueryWrapper<TblVehicleScheduling> queryWrapperUpdate = new QueryWrapper<>();
         queryWrapperUpdate.lambda().isNull(TblVehicleScheduling::getDeleteTime).eq(TblVehicleScheduling::getId,paramVO.getId());
-        // 计算改调度的秒数
-        vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(paramVO.getVehicleInfoId(),null,SecurityContextHolder.getUserName(),workingDuration));
+        // 计算改调度的总秒数
+        vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(paramVO.getVehicleInfoId(),newVehicleStatus,SecurityContextHolder.getUserName(),workingDuration));
 
         if(vehicleSchedulingMapper.update(scheduling,queryWrapperUpdate) == 1){
             return getServiceResultMap("success",null,null);
