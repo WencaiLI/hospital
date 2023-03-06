@@ -174,7 +174,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
     public List<SelectAllInfoResultDTO> selectInfoNumberByCategory() {
         // 查询所有类别
         QueryWrapper<TblVehicleCategory> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().isNull(TblVehicleCategory::getDeleteTime).groupBy(TblVehicleCategory::getId).orderByAsc(TblVehicleCategory::getId);
+        queryWrapper.lambda().isNull(TblVehicleCategory::getDeleteTime).orderByAsc(TblVehicleCategory::getId);
         List<TblVehicleCategory> categories = vehicleCategoryMapper.selectList(queryWrapper);
         // 返回值对象
         List<SelectAllInfoResultDTO> resultDTOS = new ArrayList<>();
@@ -183,7 +183,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             selectAllInfoResultDTO.setCategoryName(o.getName());
             // 类别对应的查询数量
             QueryWrapper<TblVehicleInfo> queryWrapper_info = new QueryWrapper<>();
-            queryWrapper_info.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId()).groupBy(TblVehicleInfo::getVehicleCategoryId);
+            queryWrapper_info.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId());
             Integer totalNumber = vehicleInfoMapper.selectCount(queryWrapper_info);
             if(totalNumber == null){
                 selectAllInfoResultDTO.setTotalNumber(0);
