@@ -123,6 +123,12 @@ public class VehicleSchedulingParamVO {
     private String destination;
 
     /**
+     * 调度状态 0 调度尚未结束 1 调度结束 2 尚未开始调度
+     */
+    private Integer status;
+
+
+    /**
      * 关键词
      */
     private String keywords;
