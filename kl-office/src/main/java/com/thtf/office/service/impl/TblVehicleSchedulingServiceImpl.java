@@ -189,9 +189,11 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                 .eq(TblVehicleScheduling::getCarNumber,paramVO.getCarNumber())
                 .ge(TblVehicleScheduling::getStartTime,paramVO.getStartTime())
                 .le(TblVehicleScheduling::getEndTime,paramVO.getEndTime());
-        long l = vehicleSchedulingMapper.selectCount(queryWrapper1).longValue();
-        if(l > 0){
-            return getServiceResultMap("error","存在调度处于调度时间段之间，调度时间冲突",null);
+        TblVehicleScheduling tblVehicleScheduling = vehicleSchedulingMapper.selectOne(queryWrapper1);
+        if(null != tblVehicleScheduling){
+            if(!tblVehicleScheduling.getId().equals(paramVO.getId())){
+                return getServiceResultMap("error","存在调度处于调度时间段之间，调度时间冲突",null);
+            }
         }
 
 
@@ -209,9 +211,11 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                                         .gt(TblVehicleScheduling::getEndTime,paramVO.getEndTime())
                                 )
                 );
-        long l1 = vehicleSchedulingMapper.selectCount(queryWrapper2).longValue();
-        if(l1 > 0){
-            return getServiceResultMap("error","新增的调度信息的开始时间或结束时间处于别的调度中间",null);
+        TblVehicleScheduling tblVehicleScheduling1 = vehicleSchedulingMapper.selectOne(queryWrapper2);
+        if(null != tblVehicleScheduling1){
+            if(!tblVehicleScheduling1.getId().equals(paramVO.getId())){
+                return getServiceResultMap("error","新增的调度信息的开始时间或结束时间处于别的调度中间",null);
+            }
         }
         /* Bean映射 */
         TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
@@ -232,7 +236,6 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                 workingDuration = -(originalScheduling.getWorkingDuration());
             }
         }
-
 
         /* 调度已经结束的调度 */
         if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isBefore(nowTime)){
