@@ -89,7 +89,7 @@ public class VehicleSchedulingController {
     @OperateLog(content = "修改调度信息",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> update(@RequestBody @Validated(VehicleParamValid.Update.class) VehicleSchedulingParamVO paramVO){
         Map<String, Object> resultMap = vehicleSchedulingService.updateSpec(paramVO);
-        if(resultMap.get("status").equals("error")){
+        if("error".equals(resultMap.get("status"))){
             return JsonResult.error(resultMap.get("errorCause").toString());
         }else {
             return JsonResult.success(true);
