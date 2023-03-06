@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -172,6 +173,20 @@ public class AppElevatorController {
             return JsonResult.querySuccess(pageInfoVO);
         }
     }
+
+
+    /**
+     * itemcode 查询item信息 包含关联的摄像头
+     * @param itemCode
+     * @return
+     * @author lvgch
+     * @date 2022-11-10
+     */
+    @GetMapping("/getItemInfoByItemCode")
+    public JsonResult<TblItemDTO> getItemDTOByItemCode(@RequestParam("itemCode")String  itemCode) {
+        return this.itemAPI.getItemDTOByItemCode(itemCode).getBody();
+    }
+
 
     /**
      * @Author: liwencai
