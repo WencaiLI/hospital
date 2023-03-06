@@ -117,7 +117,8 @@ public class VehicleInfoController {
     @PutMapping("/update")
     @OperateLog(content = "修改公车信息",operateType = OperateType.UPDATE,systemCode = "servers.office-server.code",systemName = "servers.office-server.name")
     public JsonResult<Boolean> update(@Validated(VehicleParamValid.Update.class) VehicleInfoParamVO paramVO,
-                                                      @ModelAttribute List<MultipartFile> carImageFile,@ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
+                                      @ModelAttribute List<MultipartFile> carImageFile,
+                                      @ModelAttribute List<MultipartFile> drivingBookImageFile) throws Exception {
 
 
         //上传文件后获取文件名字符串和url字符串

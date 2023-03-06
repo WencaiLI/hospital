@@ -26,7 +26,6 @@ public class VehicleInfoParamVO implements Serializable {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id; // 公车id
 
-    // 异常BindException
     @Pattern(regexp = "^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4,5}[A-HJ-NP-Z0-9挂学警港澳]$",
             groups = {VehicleParamValid.Update.class,VehicleParamValid.Insert.class},message = "请正确填写车牌号！")
     private String carNumber; // 车牌号
