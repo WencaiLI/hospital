@@ -424,6 +424,10 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
     public PageInfo<VehicleSchedulingQueryVO> selectPage(VehicleSchedulingParamVO paramVO) {
         PageInfo<VehicleSchedulingQueryVO> result = new PageInfo<>();
         PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
+        if(StringUtils.isNotBlank(paramVO.getKeywords())){
+            paramVO.setKeyCarNumber(paramVO.getKeywords());
+            paramVO.setKeyDestination(paramVO.getKeywords());
+        }
         PageInfo<TblVehicleScheduling> of = PageInfo.of(vehicleSchedulingMapper.select(paramVO));
         BeanUtils.copyProperties(of,result);
         result.setList(vehicleSchedulingConverter.toVehicleSchedulingQueryVOList(of.getList()));
