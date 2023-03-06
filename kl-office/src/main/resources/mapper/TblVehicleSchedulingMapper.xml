@@ -48,6 +48,9 @@
             <if test="null != driverId">
                 and driver_id = #{driverId}
             </if>
+            <if test="null != status">
+                and `status` = #{status}
+            </if>
             <if test="null != driverName">
                 and driver_name = #{driverName}
             </if>

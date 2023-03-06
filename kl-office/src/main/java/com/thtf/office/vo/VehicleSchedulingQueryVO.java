@@ -102,7 +102,7 @@ public class VehicleSchedulingQueryVO {
     private String organizationName;
 
     /**
-     * 调度状态 0 调度尚未结束 1 调度结束
+     * 调度状态 0 调度尚未结束 1 调度结束 2 尚未开始调度
      */
     private Integer status;
 
