@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.vo.VehicleMaintenanceParamVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,4 +24,6 @@ public interface TblVehicleMaintenanceService extends IService<TblVehicleMainten
     Boolean insert(VehicleMaintenanceParamVO vehicleMaintenanceParamVO);
 
     boolean updateSpec(VehicleMaintenanceParamVO vehicleMaintenanceParamVO);
+
+    Boolean deleteByVidAndMtime(Long vehicleInfoId, LocalDateTime startTime);
 }

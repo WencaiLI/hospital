@@ -1,6 +1,8 @@
 package com.thtf.office.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.security.SecurityContextHolder;
@@ -76,6 +78,24 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
         return false;
     }
 
+    @Override
+    public Boolean deleteByVidAndMtime(Long vehicleInfoId, LocalDateTime startTime) {
+        LambdaQueryWrapper<TblVehicleMaintenance> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.isNull(TblVehicleMaintenance::getDeleteTime);
+        lambdaQueryWrapper.eq(TblVehicleMaintenance::getVehicleInfoId,vehicleInfoId);
+        lambdaQueryWrapper.eq(TblVehicleMaintenance::getMaintenanceTime,startTime);
+        List<TblVehicleMaintenance> tblVehicleMaintenances = vehicleMaintenanceMapper.selectList(lambdaQueryWrapper);
+        tblVehicleMaintenances.forEach(e->{
+            e.setDeleteBy(SecurityContextHolder.getUserName());
+            e.setDeleteTime(startTime);
+            UpdateWrapper<TblVehicleMaintenance> updateQueryWrapper = new UpdateWrapper<>();
+            updateQueryWrapper.lambda().eq(TblVehicleMaintenance::getVehicleInfoId,vehicleInfoId);
+            updateQueryWrapper.lambda().eq(TblVehicleMaintenance::getMaintenanceTime,startTime);
+            vehicleMaintenanceMapper.update(e,updateQueryWrapper);
+        });
+        return true;
+    }
+
     /**
      * @Author: liwencai
      * @Description: 修改维保信息
@@ -93,6 +113,8 @@ public class TblVehicleMaintenanceServiceImpl extends ServiceImpl<TblVehicleMain
         queryWrapper.lambda().isNull(TblVehicleMaintenance::getDeleteTime).eq(TblVehicleMaintenance::getId,vehicleMaintenanceParamVO.getId());
         return vehicleMaintenanceMapper.update(maintenance,queryWrapper) == 1;
     }
+
+
 
     /**
      * @Author: liwencai

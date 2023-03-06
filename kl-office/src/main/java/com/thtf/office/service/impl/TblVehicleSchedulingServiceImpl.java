@@ -1,6 +1,8 @@
 package com.thtf.office.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -10,18 +12,23 @@ import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.office.common.enums.VehicleSchedulingPurposeEnum;
 import com.thtf.office.common.enums.VehicleSchedulingStatusEnum;
 import com.thtf.office.common.enums.VehicleStatusEnum;
 import com.thtf.office.common.util.CodeGeneratorUtil;
 import com.thtf.office.dto.converter.VehicleSchedulingConverter;
+import com.thtf.office.entity.TblVehicleMaintenance;
 import com.thtf.office.entity.TblVehicleScheduling;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
+import com.thtf.office.service.TblVehicleMaintenanceService;
 import com.thtf.office.service.TblVehicleSchedulingService;
+import com.thtf.office.vo.VehicleMaintenanceParamVO;
 import com.thtf.office.vo.VehicleSchedulingParamVO;
 import com.thtf.office.vo.VehicleSchedulingQueryVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +52,9 @@ import java.util.*;
 @Service
 @Slf4j
 public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSchedulingMapper, TblVehicleScheduling> implements TblVehicleSchedulingService {
+
+    @Resource
+    private TblVehicleMaintenanceService vehicleMaintenanceService;
 
     @Resource
     private TblVehicleSchedulingMapper vehicleSchedulingMapper;
@@ -71,6 +81,16 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
     @Override
     @Transactional
     public Map<String, Object> insert(VehicleSchedulingParamVO paramVO) {
+
+        /* Bean映射 */
+        TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
+        scheduling.setId(this.idGeneratorSnowflake.snowflakeId());
+        scheduling.setCreateTime(LocalDateTime.now());
+        scheduling.setCreateBy( SecurityContextHolder.getUserName());
+
+        // 计算改调度的秒数
+        Long workSeconds = Math.abs(scheduling.getEndTime().until(scheduling.getStartTime(), ChronoUnit.SECONDS));
+        scheduling.setWorkingDuration(workSeconds);
 
         /* 查询这么一种调度：它的调度时间处于新增调度之间 */
         QueryWrapper<TblVehicleScheduling> queryWrapper1 = new QueryWrapper<>();
@@ -102,37 +122,50 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             return getServiceResultMap("error","新增的调度信息的开始时间或结束时间处于别的调度中间",null);
         }
 
-        /* Bean映射 */
-        TblVehicleScheduling scheduling = vehicleSchedulingConverter.toVehicleScheduling(paramVO);
-        scheduling.setId(this.idGeneratorSnowflake.snowflakeId());
-        scheduling.setCreateTime(LocalDateTime.now());
-        scheduling.setCreateBy( SecurityContextHolder.getUserName());
-
         /* 如果该调度的开始时间小于系统时间，结束时间大于系统时间，将公车状态修改为出车中 */
         LocalDateTime nowTime= LocalDateTime.now();
         if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
-            Map<String,Object> map = new HashMap<>();
-            map.put("vid", paramVO.getVehicleInfoId());
-            map.put("status", VehicleStatusEnum.OUT.getStatus());
-            map.put("updateBy", SecurityContextHolder.getUserName());
-            vehicleInfoMapper.changeVehicleStatus(map);
+            // 修改公车状态
+            Integer newVehicleStatus;
+            // 如果调度用途是维保 修改公车状态为维保中
+            if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(paramVO.getPurpose())){
+                newVehicleStatus = VehicleStatusEnum.MAINTAIN.getStatus();
+            }else {
+                newVehicleStatus = VehicleStatusEnum.OUT.getStatus();
+            }
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(paramVO.getVehicleInfoId(),newVehicleStatus,SecurityContextHolder.getUserName(),null));
+            // 修改调度状态为正在调度
             scheduling.setStatus(VehicleSchedulingStatusEnum.IN_SCHEDULING.getStatus());
         }
-        /* 调度已经结束的调度 */
+
+        /* 应处于结束调度状态的调度 */
         if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isBefore(nowTime)){
+            Integer newVehicleStatus = null;
             scheduling.setStatus(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus());
+            // 如果调度用途是维保 新增一条维保记录
+            if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(paramVO.getPurpose())){
+                // 新增一条维保记录
+                VehicleMaintenanceParamVO vehicleMaintenanceParamVO = new VehicleMaintenanceParamVO();
+                vehicleMaintenanceParamVO.setVehicleInfoId(paramVO.getVehicleInfoId());
+                vehicleMaintenanceParamVO.setMaintenanceTime(paramVO.getStartTime());
+                vehicleMaintenanceParamVO.setHandledBy(paramVO.getDriverName());
+                vehicleMaintenanceParamVO.setDescription(paramVO.getDescription());
+                vehicleMaintenanceParamVO.setName(VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                // todo 花费没有字段表示
+                vehicleMaintenanceParamVO.setMoneySpent(null);
+                vehicleMaintenanceService.insert(vehicleMaintenanceParamVO);
+            }
+            // 如果调度用途是淘汰 修改公车状态为已淘汰@
+            if(VehicleSchedulingPurposeEnum.ELIMINATED.getStatus().equals(paramVO.getPurpose())){
+                newVehicleStatus = VehicleStatusEnum.ELIMINATED.getStatus();
+            }
+            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(paramVO.getVehicleInfoId(),newVehicleStatus,SecurityContextHolder.getUserName(),workSeconds));
         }
         /* 尚未开始的调度 修改为待命中状态*/
         if(paramVO.getStartTime().isAfter(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
             scheduling.setStatus(VehicleSchedulingStatusEnum.NOT_START_SCHEDULING.getStatus());
         }
-        // 计算改调度的秒数
-        try {
-            Long seconds = Math.abs(scheduling.getEndTime().until(scheduling.getStartTime(), ChronoUnit.SECONDS));
-            scheduling.setWorkingDuration(seconds);
-        }catch (Exception e){
-            log.error(e.getMessage());
-        }
+
         if(vehicleSchedulingMapper.insert(scheduling) == 1){
             return getServiceResultMap("success",null,null);
         }else {
@@ -235,6 +268,25 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             scheduling.setStatus(VehicleSchedulingStatusEnum.IN_SCHEDULING.getStatus());
             if(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus().equals(originalScheduling.getStatus())){
                 workingDuration = -(originalScheduling.getWorkingDuration());
+                if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(originalScheduling.getPurpose())){
+                    // 删除维保记录中的维保信息
+                    vehicleMaintenanceService.deleteByVidAndMtime(paramVO.getVehicleInfoId(),originalScheduling.getStartTime());
+                }
+                if(VehicleSchedulingPurposeEnum.ELIMINATED.getStatus().equals(originalScheduling.getPurpose())){
+                    // 淘汰车辆被复活
+                    LambdaQueryWrapper<TblVehicleScheduling> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    lambdaQueryWrapper.isNull(TblVehicleScheduling::getDeleteTime);
+                    lambdaQueryWrapper.eq(TblVehicleScheduling::getVehicleInfoId,paramVO.getVehicleInfoId());
+                    lambdaQueryWrapper.eq(TblVehicleScheduling::getPurpose,VehicleSchedulingPurposeEnum.ELIMINATED.getStatus());
+                    List<TblVehicleScheduling> tblVehicleSchedulingList = vehicleSchedulingMapper.selectList(lambdaQueryWrapper);
+                    if(!CollectionUtils.isEmpty(tblVehicleSchedulingList)){
+                        if(tblVehicleSchedulingList.size() == 1 && VehicleSchedulingPurposeEnum.ELIMINATED.getStatus().equals(tblVehicleSchedulingList.get(0).getPurpose())){
+                            vehicleInfoMapper.changeVehicleStatus(getUpdateInfoStatusMap(paramVO.getVehicleInfoId(),VehicleStatusEnum.STANDBY.getStatus(),SecurityContextHolder.getUserName(),-originalScheduling.getWorkingDuration()));
+                        }
+                    }
+                }
+
+
             }
         }
 
@@ -242,8 +294,33 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
         if(paramVO.getStartTime().isBefore(nowTime) && paramVO.getEndTime().isBefore(nowTime)){
             newVehicleStatus = VehicleStatusEnum.STANDBY.getStatus();
             scheduling.setStatus(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus());
-            workingDuration = seconds - originalScheduling.getWorkingDuration();
+            if(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus().equals(originalScheduling.getStatus())){
+                workingDuration = seconds - originalScheduling.getWorkingDuration();
+                // 调度目的为维保 修改维保记录中的维保信息
+                if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(originalScheduling.getPurpose())){
+                    LambdaQueryWrapper<TblVehicleMaintenance> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    lambdaQueryWrapper.isNull(TblVehicleMaintenance::getDeleteTime);
+                    lambdaQueryWrapper.eq(TblVehicleMaintenance::getVehicleInfoId,paramVO.getVehicleInfoId());
+                    lambdaQueryWrapper.eq(TblVehicleMaintenance::getMaintenanceTime,originalScheduling.getStartTime());
+                    lambdaQueryWrapper.eq(TblVehicleMaintenance::getName,VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                    List<TblVehicleMaintenance> list = vehicleMaintenanceService.list(lambdaQueryWrapper);
+                    list.forEach(e->{
+                        UpdateWrapper<TblVehicleMaintenance> updateWrapper = new UpdateWrapper<>();
+                        updateWrapper.lambda().eq(TblVehicleMaintenance::getVehicleInfoId,paramVO.getVehicleInfoId());
+                        updateWrapper.lambda().eq(TblVehicleMaintenance::getMaintenanceTime,originalScheduling.getStartTime());
+                        updateWrapper.lambda().eq(TblVehicleMaintenance::getName,VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                        e.setUpdateBy(SecurityContextHolder.getUserName());
+                        e.setUpdateTime(LocalDateTime.now());
+                        e.setMaintenanceTime(paramVO.getStartTime());
+                        e.setDescription(paramVO.getDescription());
+                        vehicleMaintenanceService.update(e,updateWrapper);
+                    });
+                }
+            }else {
+                workingDuration = seconds;
+            }
         }
+
         /* 尚未开始的调度 修改为待命中状态*/
         if(paramVO.getStartTime().isAfter(nowTime) && paramVO.getEndTime().isAfter(nowTime)){
             scheduling.setStatus(VehicleSchedulingStatusEnum.NOT_START_SCHEDULING.getStatus());
