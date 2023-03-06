@@ -9,7 +9,8 @@ import lombok.Data;
  */
 @Data
 public class AppItemSortVO {
-    String itemName;
-    String runStatus;
-    String alarmCategory;
+    private String itemName;
+    private String itemCode;
+    private String runStatus;
+    private String alarmCategory;
 }

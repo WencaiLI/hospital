@@ -150,6 +150,7 @@ public class AppElevatorController {
             data.getList().forEach(e->{
                 AppItemSortVO appItemSortVO = new AppItemSortVO();
                 appItemSortVO.setItemName(e.getName());
+                appItemSortVO.setItemCode(e.getCode());
                 e.getParameterList().forEach(parameter -> {
                     if (ParameterConstant.ELEVATOR_RUN_STATUS.equals(parameter.getParameterType())
                     		||ParameterConstant.RUN_STATUS1.equals(parameter.getParameterType())
