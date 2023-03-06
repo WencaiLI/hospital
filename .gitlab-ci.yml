@@ -27,14 +27,28 @@ stages:
     - if [[ "$(docker inspect $CONTAINER_NAME 2> /dev/null)" != "" ]];  then docker rm -f $CONTAINER_NAME || true; fi
     - if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" != "" ]];  then docker rmi -f $IMAGE_NAME || true; fi
     - docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME .
-    - docker run -d --name $CONTAINER_NAME -v /home/logs:/logs --net host -e SERVICE_NAME=$CONTAINER_NAME -e OAP_SERVICE=10.10.49.220:11800 $IMAGE_NAME
+    - docker run --restart=always -d --name $CONTAINER_NAME -v /home/logs:/logs --net host -e SERVICE_NAME=$CONTAINER_NAME -e OAP_SERVICE=10.10.49.220:11800 $IMAGE_NAME
   tags:
     - hospital-220
   only:
     refs:
       - develop
   allow_failure: true
-  
+
+parent-package:
+  image: maven:3.6.3-jdk-8u242
+  stage: package
+  script:
+    - mvn -N clean install
+  tags:
+    - hospital-220
+  only:
+    refs:
+      - develop
+    changes:
+      - pom.xml
+
+
 kl-elevator-package:
   variables:
     MODULE_NAME: kl-elevator

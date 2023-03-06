@@ -11,5 +11,6 @@ import java.util.List;
  */
 @Data
 public class DisplayInfoDTO {
+
     List<KeyValueDTO> results;
 }
