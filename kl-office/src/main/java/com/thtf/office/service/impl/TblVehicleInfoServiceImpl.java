@@ -26,10 +26,8 @@ import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.mapper.TblVehicleSchedulingMapper;
 import com.thtf.office.service.TblVehicleCategoryService;
 import com.thtf.office.service.TblVehicleInfoService;
-import com.thtf.office.vo.VehicleCategoryParamVO;
-import com.thtf.office.vo.VehicleCategoryResultVO;
-import com.thtf.office.vo.VehicleInfoParamVO;
-import com.thtf.office.vo.VehicleSelectByDateResult;
+import com.thtf.office.service.TblVehicleMaintenanceService;
+import com.thtf.office.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +62,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper, TblVehicleInfo> implements TblVehicleInfoService {
+
+    @Resource
+    private TblVehicleMaintenanceService vehicleMaintenanceService;
 
     @Resource
     private TblVehicleInfoMapper vehicleInfoMapper;
@@ -305,14 +306,27 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
             tblVehicleScheduling.setStatus(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus());
             updateWrapper.lambda().isNull(TblVehicleScheduling::getDeleteTime).eq(TblVehicleScheduling::getId,tblVehicleScheduling.getId());
             vehicleSchedulingMapper.update(tblVehicleScheduling,updateWrapper);
+            // 如果调度目的为维保的话，新增维保记录
+            if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(tblVehicleScheduling.getPurpose())){
+                // 新增一条维保记录
+                VehicleMaintenanceParamVO vehicleMaintenanceParamVO = new VehicleMaintenanceParamVO();
+                vehicleMaintenanceParamVO.setVehicleInfoId(tblVehicleScheduling.getVehicleInfoId());
+                vehicleMaintenanceParamVO.setMaintenanceTime(tblVehicleScheduling.getStartTime());
+                vehicleMaintenanceParamVO.setHandledBy(tblVehicleScheduling.getDriverName());
+                vehicleMaintenanceParamVO.setDescription(tblVehicleScheduling.getDescription());
+                vehicleMaintenanceParamVO.setName(VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                // todo 花费没有字段表示
+                vehicleMaintenanceParamVO.setMoneySpent(null);
+                vehicleMaintenanceService.insert(vehicleMaintenanceParamVO);
+            }
         }
         /* 3.尚未开始调度的调度 修改公车为待命中状态，修改调度状态为尚未开始调度 */
         QueryWrapper<TblVehicleScheduling> queryWrapper_2 = new QueryWrapper<>();
         queryWrapper_2.lambda().isNull(TblVehicleScheduling::getDeleteTime)
                 .gt(TblVehicleScheduling::getStartTime,now)
-                .and(e->e.eq(TblVehicleScheduling::getStatus,VehicleSchedulingStatusEnum.IN_SCHEDULING)
+                .and(e->e.eq(TblVehicleScheduling::getStatus,VehicleSchedulingStatusEnum.IN_SCHEDULING.getStatus())
                         .or()
-                        .eq(TblVehicleScheduling::getStatus,VehicleSchedulingStatusEnum.END_OF_SCHEDULING)
+                        .eq(TblVehicleScheduling::getStatus,VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus())
                 );
         List<TblVehicleScheduling> tblVehicleSchedulingList2 = vehicleSchedulingMapper.selectList(queryWrapper_2);
         tblVehicleSchedulingList2.forEach(tblVehicleScheduling->{
@@ -330,6 +344,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         });
         return true;
     }
+
 
     /**
      * @Author: liwencai
