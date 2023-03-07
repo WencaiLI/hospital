@@ -451,6 +451,7 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
         lambdaQueryWrapper.isNull(TblVehicleInfo::getDeleteTime);
         lambdaQueryWrapper.ne(TblVehicleInfo::getStatus, VehicleStatusEnum.ELIMINATED.getStatus());
         lambdaQueryWrapper.eq(TblVehicleInfo::getVehicleCategoryId,vehicleCategoryId);
+        lambdaQueryWrapper.orderByAsc(TblVehicleInfo::getWorkingDuration);
         return vehicleInfoMapper.selectList(lambdaQueryWrapper);
     }
 
