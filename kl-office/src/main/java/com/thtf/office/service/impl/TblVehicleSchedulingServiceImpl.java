@@ -297,25 +297,15 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
             if(VehicleSchedulingStatusEnum.END_OF_SCHEDULING.getStatus().equals(originalScheduling.getStatus())){
                 workingDuration = seconds - originalScheduling.getWorkingDuration();
                 // 调度目的为维保 修改维保记录中的维保信息
-                if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(originalScheduling.getPurpose())){
+                if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(paramVO.getPurpose())){
                     LambdaQueryWrapper<TblVehicleMaintenance> lambdaQueryWrapper = new LambdaQueryWrapper<>();
                     lambdaQueryWrapper.isNull(TblVehicleMaintenance::getDeleteTime);
                     lambdaQueryWrapper.eq(TblVehicleMaintenance::getVehicleInfoId,paramVO.getVehicleInfoId());
                     lambdaQueryWrapper.eq(TblVehicleMaintenance::getMaintenanceTime,originalScheduling.getStartTime());
                     lambdaQueryWrapper.eq(TblVehicleMaintenance::getName,VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
                     List<TblVehicleMaintenance> list = vehicleMaintenanceService.list(lambdaQueryWrapper);
-                    if(list.size() == 0){
-                        // 新增一条维保记录
-                        VehicleMaintenanceParamVO vehicleMaintenanceParamVO = new VehicleMaintenanceParamVO();
-                        vehicleMaintenanceParamVO.setVehicleInfoId(paramVO.getVehicleInfoId());
-                        vehicleMaintenanceParamVO.setMaintenanceTime(paramVO.getStartTime());
-                        vehicleMaintenanceParamVO.setHandledBy(paramVO.getDriverName());
-                        vehicleMaintenanceParamVO.setDescription(paramVO.getDescription());
-                        vehicleMaintenanceParamVO.setName(VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
-                        // todo 花费没有字段表示
-                        vehicleMaintenanceParamVO.setMoneySpent(null);
-                        vehicleMaintenanceService.insert(vehicleMaintenanceParamVO);
-                    }else {
+                    // 如果原调度目的仍是维保
+                    if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(originalScheduling.getPurpose())){
                         list.forEach(e->{
                             UpdateWrapper<TblVehicleMaintenance> updateWrapper = new UpdateWrapper<>();
                             updateWrapper.lambda().eq(TblVehicleMaintenance::getVehicleInfoId,paramVO.getVehicleInfoId());
@@ -328,15 +318,29 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                             vehicleMaintenanceService.update(e,updateWrapper);
                         });
                     }
-
-                }
-                // 调度目的为淘汰 修改公车状态为已淘汰
-                else if(VehicleSchedulingPurposeEnum.ELIMINATED.getStatus().equals(paramVO.getPurpose())){
-                    newVehicleStatus = VehicleStatusEnum.ELIMINATED.getStatus();
                 }
             }else {
+                if(VehicleSchedulingPurposeEnum.MAINTAIN.getStatus().equals(paramVO.getPurpose())){
+                    VehicleMaintenanceParamVO vehicleMaintenanceParamVO = new VehicleMaintenanceParamVO();
+                    vehicleMaintenanceParamVO.setVehicleInfoId(paramVO.getVehicleInfoId());
+                    vehicleMaintenanceParamVO.setMaintenanceTime(paramVO.getStartTime());
+                    vehicleMaintenanceParamVO.setHandledBy(paramVO.getDriverName());
+                    vehicleMaintenanceParamVO.setDescription(paramVO.getDescription()+"(调度产生-请手动修改维保价格)");
+                    vehicleMaintenanceParamVO.setName(VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                    // todo 花费没有字段表示
+                    vehicleMaintenanceParamVO.setMoneySpent(null);
+                    vehicleMaintenanceService.insert(vehicleMaintenanceParamVO);
+                }
+
                 workingDuration = seconds;
             }
+
+
+            // 调度目的为淘汰 修改公车状态为已淘汰
+            if(VehicleSchedulingPurposeEnum.ELIMINATED.getStatus().equals(paramVO.getPurpose())){
+                newVehicleStatus = VehicleStatusEnum.ELIMINATED.getStatus();
+            }
+
         }
 
         /* 尚未开始的调度 修改为待命中状态*/
@@ -346,6 +350,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                 workingDuration = -(originalScheduling.getWorkingDuration());
             }
         }
+
         QueryWrapper<TblVehicleScheduling> queryWrapperUpdate = new QueryWrapper<>();
         queryWrapperUpdate.lambda().isNull(TblVehicleScheduling::getDeleteTime).eq(TblVehicleScheduling::getId,paramVO.getId());
         // 计算改调度的总秒数
