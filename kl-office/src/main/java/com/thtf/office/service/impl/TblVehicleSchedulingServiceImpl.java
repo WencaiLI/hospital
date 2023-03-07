@@ -149,7 +149,7 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                 vehicleMaintenanceParamVO.setVehicleInfoId(paramVO.getVehicleInfoId());
                 vehicleMaintenanceParamVO.setMaintenanceTime(paramVO.getStartTime());
                 vehicleMaintenanceParamVO.setHandledBy(paramVO.getDriverName());
-                vehicleMaintenanceParamVO.setDescription(paramVO.getDescription());
+                vehicleMaintenanceParamVO.setDescription(paramVO.getDescription()+"(调度产生-请手动修改维保价格)");
                 vehicleMaintenanceParamVO.setName(VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
                 // todo 花费没有字段表示
                 vehicleMaintenanceParamVO.setMoneySpent(null);
