@@ -3,6 +3,7 @@ package com.thtf.office.dto.converter;
 import com.thtf.office.dto.VehicleInfoExcelImportDTO;
 import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.vo.VehicleInfoParamVO;
+import com.thtf.office.vo.VehicleInfoVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -32,5 +33,11 @@ public interface VehicleInfoConverter {
                     ),
             }
     )
+
+
     TblVehicleInfo toVehicleInfo(VehicleInfoExcelImportDTO vehicleInfoExcelImportDTO);
+
+    VehicleInfoVO toVehicleInfoVO (TblVehicleInfo tblVehicleInfo);
+
+    List<VehicleInfoVO> toVehicleInfoVOList(List<TblVehicleInfo> tblVehicleInfos);
 }
