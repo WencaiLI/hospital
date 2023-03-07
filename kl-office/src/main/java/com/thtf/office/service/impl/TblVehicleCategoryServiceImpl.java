@@ -184,6 +184,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             // 类别对应的查询数量
             QueryWrapper<TblVehicleInfo> queryWrapper_info = new QueryWrapper<>();
             queryWrapper_info.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId());
+
             Integer totalNumber = vehicleInfoMapper.selectCount(queryWrapper_info);
             if(totalNumber == null){
                 selectAllInfoResultDTO.setTotalNumber(0);
@@ -195,15 +196,25 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             map.put("cid",o.getId());
             List<VehicleStatisticsResultVO> vehicleStatus = vehicleInfoMapper.getVehicleStatus(map);
             ArrayList<String> attributes = vehicleStatus.stream().map(VehicleStatisticsResultVO::getAttribute).collect(Collectors.toCollection(ArrayList::new));
-            Stream.of("待命中","出车中","维修中").forEach(e->{
+
+
+            List<VehicleStatisticsResultVO> resultVOList = new ArrayList<>();
+
+            Stream.of("待命中", "出车中", "维修中", "已淘汰").forEach(e->{
                 if(!attributes.contains(e)){
                     VehicleStatisticsResultVO vehicleStatisticsResultVO = new VehicleStatisticsResultVO();
                     vehicleStatisticsResultVO.setAttribute(e);
                     vehicleStatisticsResultVO.setNumber(0L);
-                    vehicleStatus.add(vehicleStatisticsResultVO);
+                    resultVOList.add(vehicleStatisticsResultVO);
                 }
+                vehicleStatus.forEach(attribute->{
+                    if(attribute.getAttribute().equals(e)){
+                        resultVOList.add(attribute);
+                    }
+                });
             });
-            selectAllInfoResultDTO.setData(vehicleStatus);
+
+            selectAllInfoResultDTO.setData(resultVOList);
             resultDTOS.add(selectAllInfoResultDTO);
         }
         return resultDTOS;
