@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.security.SecurityContextHolder;
 import com.thtf.common.util.IdGeneratorSnowflake;
+import com.thtf.office.common.enums.VehicleStatusEnum;
 import com.thtf.office.dto.SelectAllInfoResultDTO;
 import com.thtf.office.dto.converter.VehicleCategoryConverter;
 import com.thtf.office.entity.TblVehicleCategory;
@@ -182,10 +183,11 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             SelectAllInfoResultDTO selectAllInfoResultDTO = new SelectAllInfoResultDTO();
             selectAllInfoResultDTO.setCategoryName(o.getName());
             // 类别对应的查询数量
-            QueryWrapper<TblVehicleInfo> queryWrapper_info = new QueryWrapper<>();
-            queryWrapper_info.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId());
-
-            Integer totalNumber = vehicleInfoMapper.selectCount(queryWrapper_info);
+            QueryWrapper<TblVehicleInfo> queryWrapperInfo = new QueryWrapper<>();
+            queryWrapperInfo.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId());
+            // 排除已淘汰车辆
+            queryWrapperInfo.lambda().ne(TblVehicleInfo::getStatus, VehicleStatusEnum.ELIMINATED.getStatus());
+            Integer totalNumber = vehicleInfoMapper.selectCount(queryWrapperInfo);
             if(totalNumber == null){
                 selectAllInfoResultDTO.setTotalNumber(0);
             }else {
@@ -200,7 +202,7 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
 
             List<VehicleStatisticsResultVO> resultVOList = new ArrayList<>();
 
-            Stream.of("待命中", "出车中", "维修中", "已淘汰").forEach(e->{
+            Stream.of("待命中", "出车中", "维修中").forEach(e->{
                 if(!attributes.contains(e)){
                     VehicleStatisticsResultVO vehicleStatisticsResultVO = new VehicleStatisticsResultVO();
                     vehicleStatisticsResultVO.setAttribute(e);
