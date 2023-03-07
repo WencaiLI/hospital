@@ -11,11 +11,6 @@ import java.time.LocalDateTime;
  * @Description:
  */
 public class VehicleInfoVO extends TblVehicleInfo {
-    /**
-     * 创建时间
-     */
-    @JsonIgnore
-    private LocalDateTime createTime;
 
     /**
      * 创建人
