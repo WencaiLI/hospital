@@ -440,6 +440,22 @@ public class TblVehicleInfoServiceImpl extends ServiceImpl<TblVehicleInfoMapper,
 
     /**
      * @Author: liwencai
+     * @Description: 查询未淘汰的车辆
+     * @Date: 2023/3/7
+     * @Param vehicleCategoryId: 车辆类别id
+     * @Return: java.util.List<com.thtf.office.entity.TblVehicleInfo>
+     */
+    @Override
+    public List<TblVehicleInfo> listUnEliminate(String vehicleCategoryId) {
+        LambdaQueryWrapper<TblVehicleInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.isNull(TblVehicleInfo::getDeleteTime);
+        lambdaQueryWrapper.ne(TblVehicleInfo::getStatus, VehicleStatusEnum.ELIMINATED.getStatus());
+        lambdaQueryWrapper.eq(TblVehicleInfo::getVehicleCategoryId,vehicleCategoryId);
+        return vehicleInfoMapper.selectList(lambdaQueryWrapper);
+    }
+
+    /**
+     * @Author: liwencai
      * @Description: 查询统计某类公车的当月和当日使用情况
      * @Date: 2022/7/28
      * @Param cid: 公车类别id

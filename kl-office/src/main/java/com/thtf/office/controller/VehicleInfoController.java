@@ -1,6 +1,7 @@
 package com.thtf.office.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.log.OperateLog;
@@ -14,9 +15,11 @@ import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.listener.VehicleExcelListener;
 import com.thtf.office.service.TblVehicleInfoService;
 import com.thtf.office.vo.VehicleInfoParamVO;
+import com.thtf.office.vo.VehicleInfoVO;
 import com.thtf.office.vo.VehicleSelectByDateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,8 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,11 +88,6 @@ public class VehicleInfoController {
         TblVehicleInfo vehicleInfo = vehicleInfoConverter.toVehicleInfo(paramVO);
 
         return JsonResult.success(vehicleInfoService.insert(vehicleInfo));
-//        if(result.get("status").equals("success")){
-//            return JsonResult.success("");
-//        }else {
-//            return JsonResult.error(result.get("errorCause").toString());
-//        }
     }
 
     /**
@@ -147,11 +147,28 @@ public class VehicleInfoController {
      * @return: org.springframework.http.com.thtf.common.response.JsonResult<java.util.List>>
      */
     @PostMapping("/select")
-    public JsonResult<PageInfo<TblVehicleInfo>> select(@RequestBody VehicleInfoParamVO paramVO){
+    public JsonResult<PageInfo<VehicleInfoVO>> select(@RequestBody VehicleInfoParamVO paramVO){
         if(null != paramVO.getPageNumber()  && null != paramVO.getPageSize()){
             PageHelper.startPage(paramVO.getPageNumber(),paramVO.getPageSize());
         }
-        return JsonResult.querySuccess(PageInfo.of(vehicleInfoService.select(paramVO)));
+        PageInfo<TblVehicleInfo> pageInfo = PageInfo.of(vehicleInfoService.select(paramVO));
+        PageInfo<VehicleInfoVO> resultPageInfo = new PageInfo<>();
+        BeanUtils.copyProperties(pageInfo,resultPageInfo);
+        resultPageInfo.setList(vehicleInfoConverter.toVehicleInfoVOList(pageInfo.getList()));
+        return JsonResult.querySuccess(resultPageInfo);
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询未淘汰的车辆
+     * @Date: 2023/3/7
+     * @Param vehicleCategoryId: 车辆类别id
+     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.office.vo.VehicleInfoVO>>
+     */
+    @GetMapping("/listUnEliminate")
+    public JsonResult<List<VehicleInfoVO>> listUnEliminateVehicleInfo(@NotBlank(message = "请填写公车类别！") @RequestParam("vehicleCategoryId") String vehicleCategoryId){
+        List<TblVehicleInfo> tblVehicleInfos = vehicleInfoService.listUnEliminate(vehicleCategoryId);
+        return JsonResult.querySuccess(vehicleInfoConverter.toVehicleInfoVOList(tblVehicleInfos));
     }
 
     /**

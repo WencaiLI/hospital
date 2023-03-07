@@ -65,10 +65,18 @@ public interface TblVehicleInfoService extends IService<TblVehicleInfo> {
      */
     List<TblVehicleInfo> selectByKey(String keywords);
 
-    /**/
     boolean verifyCarNumberForInsert(String carNumber);
 
     boolean verifyCategoryForInsert(String vehicleCategoryName);
 
     void importTemplateDownloadNew(HttpServletResponse response, List<?> list, Class<?> clazz);
+
+    /**
+     * @Author: liwencai
+     * @Description: 查询未淘汰的车辆
+     * @Date: 2023/3/7
+     * @Param vehicleCategoryId: 车辆类别id
+     * @Return: java.util.List<com.thtf.office.entity.TblVehicleInfo>
+     */
+    List<TblVehicleInfo> listUnEliminate(String vehicleCategoryId);
 }
