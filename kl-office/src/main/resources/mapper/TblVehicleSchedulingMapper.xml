@@ -1,66 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.thtf.office.mapper.TblVehicleSchedulingMapper">
+
+    <sql id="selectSql" >
+        scheduling.id as id ,car_number,scheduling.code as `code`,vehicle_info_id,vehicle_category_id,category.name as vehicle_category_name,
+        organization_id,organization_name,driver_id,driver_name,start_time,end_time,scheduling.description as `description`,
+        scheduling.create_time as create_time,scheduling.create_by as create_by,scheduling.update_time as update_time,
+        scheduling.update_by as update_by,scheduling.delete_time as delete_time,scheduling.delete_by as delete_by,
+        purpose,user_name,destination,status,working_duration
+    </sql>
     <select id="select" parameterType="com.thtf.office.vo.VehicleSchedulingParamVO" resultType="com.thtf.office.entity.TblVehicleScheduling">
-        select * from tbl_vehicle_scheduling
+        select <include refid="selectSql"/> from tbl_vehicle_scheduling as scheduling,tbl_vehicle_category as category
         <where>
-            delete_time is null
+            scheduling.vehicle_category_id = category.id and
+            scheduling.delete_time is null and
+            category.delete_time is null
             <if test="id != null">
-                and id = #{id}
+                and scheduling.id = #{id}
             </if>
             <if test="null != keywords">
                 <trim prefix="and (" suffix=")" prefixOverrides="or">
                     <if test="null != keyCarNumber">
-                        or car_number like CONCAT('%',#{keyCarNumber},'%')
+                        or scheduling.car_number like CONCAT('%',#{keyCarNumber},'%')
                     </if>
-                    <if test="null != keyCarNumber">
-                        or description like CONCAT('%',#{keyDescription},'%')
+                    <if test="null != keyDescription">
+                        or scheduling.description like CONCAT('%',#{keyDescription},'%')
                     </if>
                     <if test="null != keyDestination">
-                        or destination like CONCAT('%',#{keyDestination},'%')
+                        or scheduling.destination like CONCAT('%',#{keyDestination},'%')
                     </if>
                 </trim>
             </if>
             <if test="null != carNumber">
-                and car_number = #{carNumber}
+                and scheduling.car_number = #{carNumber}
             </if>
             <if test="null != vehicleInfoId">
-                vehicle_info_id = #{vehicleInfoId}
+                and scheduling.vehicle_info_id = #{vehicleInfoId}
             </if>
             <if test="null != code">
-                and code = #{code}
+                and scheduling.code = #{code}
             </if>
             <if test="null != vehicleCategoryId">
-                and vehicle_category_id = #{vehicleCategoryId}
+                and scheduling.vehicle_category_id = #{vehicleCategoryId}
             </if>
             <if test="null != userName">
-                and user_name = #{userName}
+                and scheduling.user_name = #{userName}
             </if>
             <if test="null != organizationId">
-                and organization_id = #{organizationId}
+                and scheduling.organization_id = #{organizationId}
             </if>
             <if test="null != organizationName">
-                and organization_name = #{organizationName}
+                and scheduling.organization_name = #{organizationName}
             </if>
             <if test="null != purpose">
-                and purpose = #{purpose}
+                and scheduling.purpose = #{purpose}
             </if>
             <if test="null != driverId">
-                and driver_id = #{driverId}
+                and scheduling.driver_id = #{driverId}
             </if>
             <if test="null != status">
-                and `status` = #{status}
+                and scheduling.`status` = #{status}
             </if>
             <if test="null != driverName">
-                and driver_name = #{driverName}
+                and scheduling.driver_name = #{driverName}
             </if>
             <if test="null != startTime">
-                and start_time = #{startTime}
+                and scheduling.start_time = #{startTime}
             </if>
             <if test="null != endTime">
-                and end_time = #{endTime}
+                and scheduling.end_time = #{endTime}
             </if>
-            order by start_time desc,create_time desc
+            order by scheduling.start_time desc,scheduling.create_time desc
         </where>
     </select>
     <!-- 按日、月查询空闲司机的每周月的出车情况 -->
