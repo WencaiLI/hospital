@@ -304,17 +304,35 @@ public class TblVehicleSchedulingServiceImpl extends ServiceImpl<TblVehicleSched
                     lambdaQueryWrapper.eq(TblVehicleMaintenance::getMaintenanceTime,originalScheduling.getStartTime());
                     lambdaQueryWrapper.eq(TblVehicleMaintenance::getName,VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
                     List<TblVehicleMaintenance> list = vehicleMaintenanceService.list(lambdaQueryWrapper);
-                    list.forEach(e->{
-                        UpdateWrapper<TblVehicleMaintenance> updateWrapper = new UpdateWrapper<>();
-                        updateWrapper.lambda().eq(TblVehicleMaintenance::getVehicleInfoId,paramVO.getVehicleInfoId());
-                        updateWrapper.lambda().eq(TblVehicleMaintenance::getMaintenanceTime,originalScheduling.getStartTime());
-                        updateWrapper.lambda().eq(TblVehicleMaintenance::getName,VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
-                        e.setUpdateBy(SecurityContextHolder.getUserName());
-                        e.setUpdateTime(LocalDateTime.now());
-                        e.setMaintenanceTime(paramVO.getStartTime());
-                        e.setDescription(paramVO.getDescription());
-                        vehicleMaintenanceService.update(e,updateWrapper);
-                    });
+                    if(list.size() == 0){
+                        // 新增一条维保记录
+                        VehicleMaintenanceParamVO vehicleMaintenanceParamVO = new VehicleMaintenanceParamVO();
+                        vehicleMaintenanceParamVO.setVehicleInfoId(paramVO.getVehicleInfoId());
+                        vehicleMaintenanceParamVO.setMaintenanceTime(paramVO.getStartTime());
+                        vehicleMaintenanceParamVO.setHandledBy(paramVO.getDriverName());
+                        vehicleMaintenanceParamVO.setDescription(paramVO.getDescription());
+                        vehicleMaintenanceParamVO.setName(VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                        // todo 花费没有字段表示
+                        vehicleMaintenanceParamVO.setMoneySpent(null);
+                        vehicleMaintenanceService.insert(vehicleMaintenanceParamVO);
+                    }else {
+                        list.forEach(e->{
+                            UpdateWrapper<TblVehicleMaintenance> updateWrapper = new UpdateWrapper<>();
+                            updateWrapper.lambda().eq(TblVehicleMaintenance::getVehicleInfoId,paramVO.getVehicleInfoId());
+                            updateWrapper.lambda().eq(TblVehicleMaintenance::getMaintenanceTime,originalScheduling.getStartTime());
+                            updateWrapper.lambda().eq(TblVehicleMaintenance::getName,VehicleSchedulingPurposeEnum.MAINTAIN.getDesc());
+                            e.setUpdateBy(SecurityContextHolder.getUserName());
+                            e.setUpdateTime(LocalDateTime.now());
+                            e.setMaintenanceTime(paramVO.getStartTime());
+                            e.setDescription(paramVO.getDescription());
+                            vehicleMaintenanceService.update(e,updateWrapper);
+                        });
+                    }
+
+                }
+                // 调度目的为淘汰 修改公车状态为已淘汰
+                else if(VehicleSchedulingPurposeEnum.ELIMINATED.getStatus().equals(paramVO.getPurpose())){
+                    newVehicleStatus = VehicleStatusEnum.ELIMINATED.getStatus();
                 }
             }else {
                 workingDuration = seconds;
