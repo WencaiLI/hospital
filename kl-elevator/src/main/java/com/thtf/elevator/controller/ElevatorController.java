@@ -2,12 +2,14 @@ package com.thtf.elevator.controller;
 
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.CodeAndNameDTO;
+import com.thtf.common.dto.itemserver.ListItemNestedParametersResultDTO;
 import com.thtf.common.dto.itemserver.PageInfoVO;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.ItemFaultStatisticsDTO;
 import com.thtf.elevator.service.ElevatorService;
+import com.thtf.elevator.vo.QueryItemParamVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -139,5 +141,17 @@ public class ElevatorController {
         result.setMonitorAlarmNumber(monitorAlarmNumberList);
         result.setMalfunctionAlarmNumber(malfunctionAlarmNumberList);
         return JsonResult.querySuccess(result);
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2023/3/8
+     * @Return: com.thtf.common.response.JsonResult<java.util.List>
+     */
+    @PostMapping("/queryItem")
+    public JsonResult< List<ListItemNestedParametersResultDTO>> queryItem(@RequestBody QueryItemParamVO queryItemParamVO){
+       return JsonResult.querySuccess(elevatorService.queryItem(queryItemParamVO));
     }
 }
