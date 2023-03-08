@@ -82,18 +82,39 @@ public interface TblVehicleInfoMapper extends BaseMapper<TblVehicleInfo> {
      */
     List<VehicleSelectByDateResult> selectByCidByDate(Map<String, Object> selectByCidByDateMap);
 
+    /**
+     * @Author: liwencai
+     * @Description: 给公车重新绑定车辆类别
+     * @Date: 2022/7/28
+     * @Param map:
+     * @Return: java.lang.Integer
+     */
     Integer changeBind(Map<String,Object> map);
 
     /**
      * @Author: liwencai
      * @Description: 模糊查询
      * @Date: 2022/8/4
-     * @Param keywords:
+     * @Param keywords: 关键词
      * @return: java.util.List<com.thtf.office.entity.TblVehicleInfo>
      */
     List<TblVehicleInfo> selectByKey(@Param("keywords") String keywords);
 
+    /**
+     * @Author: liwencai
+     * @Description: 获取工作时长排行
+     * @Date: 2023/3/8
+     * @Param map:
+     * @Return: java.util.List<com.thtf.office.vo.VehicleRankingsResultVO>
+     */
     List<VehicleRankingsResultVO> getWorkingDurationRankings(Map<String, Object> map);
 
+    /**
+     * @Author: liwencai
+     * @Description: 根据车牌号集 分别获取公车对应的类别信息
+     * @Date: 2023/3/8
+     * @Param carNumberList: 车牌号集
+     * @Return: java.util.List<com.thtf.office.dto.VehicleNumberTypeCodeDTO>
+     */
     List<VehicleNumberTypeCodeDTO> listCarTypeCodeList(@Param("carNumberList") List<String> carNumberList);
 }
