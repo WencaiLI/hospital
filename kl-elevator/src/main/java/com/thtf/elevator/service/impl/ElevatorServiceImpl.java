@@ -112,7 +112,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.lang.Object
      */
     @Override
-    public List<ListItemNestedParametersResultDTO> queryItem(QueryItemParamVO queryItemParamVO) {
+    public List<ElevatorInfoResultDTO> queryItem(QueryItemParamVO queryItemParamVO) {
         ListItemNestedParametersParamDTO paramDTO = new ListItemNestedParametersParamDTO();
         paramDTO.setSysCode(queryItemParamVO.getSysCode());
         if(StringUtils.isNotBlank(queryItemParamVO.getBuildingCodes())){
@@ -124,7 +124,29 @@ public class ElevatorServiceImpl implements ElevatorService {
         if (StringUtils.isNotBlank(queryItemParamVO.getItemTypeCodes())){
             paramDTO.setItemTypeCodeList(Arrays.asList(queryItemParamVO.getItemTypeCodes().split(",")));
         }
-        return itemAPI.listItemNestedParameters(paramDTO).getData();
+
+        List<ListItemNestedParametersResultDTO> data = itemAPI.listItemNestedParameters(paramDTO).getData();
+
+        // 结果集
+        List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoResultList(data);
+
+        for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {
+            for (ListItemNestedParametersResultDTO item : data) {
+                if (item.getItemCode().equals(elevatorInfoResultDTO.getItemCode())){
+                    if(item.getAlarm() == 1){
+                        elevatorInfoResultDTO.setAlarmStatus("0");
+                    }
+                    if(item.getAlarm() == 0 && item.getFault() == 1){
+                        elevatorInfoResultDTO.setAlarmStatus("1");
+                    }
+
+
+                    convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
+                }
+            }
+        }
+
+        return resultDTOList;
     }
 
     /**
