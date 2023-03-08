@@ -1,6 +1,7 @@
 package com.thtf.elevator.dto.convert;
 
 import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
+import com.thtf.common.dto.itemserver.ListItemNestedParametersResultDTO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.elevator.dto.ElevatorAlarmResultDTO;
@@ -28,6 +29,15 @@ public interface ItemConverter {
     })
     ElevatorInfoResultDTO toElevatorInfo(ItemNestedParameterVO itemNestedParameterVO);
 
+    List<ElevatorInfoResultDTO> toElevatorInfoList(List<ItemNestedParameterVO> itemNestedParameterVOList);
+
+    @Mappings({
+            @Mapping(source = "buildingAreaCode",target = "areaCode"),
+            @Mapping(source = "buildingAreaName",target = "areaName"),
+    })
+    ElevatorInfoResultDTO toElevatorInfo(ListItemNestedParametersResultDTO itemNestedParameterVO);
+
+    List<ElevatorInfoResultDTO> toElevatorInfoResultList(List<ListItemNestedParametersResultDTO> itemNestedParameterVOList);
 //    @Mappings({
 //            @Mapping(source = "id",target = "itemId"),
 //            @Mapping(source = "code",target = "itemCode"),
@@ -38,5 +48,5 @@ public interface ItemConverter {
 
 //    List<ElevatorAlarmResultDTO> toElevatorAlarmInfoList(List<ItemNestedParameterVO> itemNestedParameterVO);
 
-    List<ElevatorInfoResultDTO> toElevatorInfoList(List<ItemNestedParameterVO> itemNestedParameterVOList);
+
 }

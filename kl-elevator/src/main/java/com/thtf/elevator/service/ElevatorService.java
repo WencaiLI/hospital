@@ -113,5 +113,5 @@ public interface ElevatorService {
      * @Param queryItemParamVO:
      * @Return: java.lang.Object
      */
-    List<ListItemNestedParametersResultDTO> queryItem(QueryItemParamVO queryItemParamVO);
+    List<ElevatorInfoResultDTO> queryItem(QueryItemParamVO queryItemParamVO);
 }

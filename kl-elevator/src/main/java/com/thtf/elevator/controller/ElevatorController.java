@@ -151,7 +151,7 @@ public class ElevatorController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List>
      */
     @PostMapping("/queryItem")
-    public JsonResult< List<ListItemNestedParametersResultDTO>> queryItem(@RequestBody QueryItemParamVO queryItemParamVO){
+    public JsonResult<List<ElevatorInfoResultDTO>> queryItem(@RequestBody QueryItemParamVO queryItemParamVO){
        return JsonResult.querySuccess(elevatorService.queryItem(queryItemParamVO));
     }
 }
