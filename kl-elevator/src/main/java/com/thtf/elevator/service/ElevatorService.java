@@ -2,11 +2,13 @@ package com.thtf.elevator.service;
 
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.CodeAndNameDTO;
+import com.thtf.common.dto.itemserver.ListItemNestedParametersResultDTO;
 import com.thtf.common.dto.itemserver.PageInfoVO;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.FloorInfoDTO;
+import com.thtf.elevator.vo.QueryItemParamVO;
 
 import java.util.List;
 
@@ -103,4 +105,13 @@ public interface ElevatorService {
      * @return: java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>
      */
     List<CodeAndNameDTO> getItemType(String sysCode);
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2023/3/8
+     * @Param queryItemParamVO:
+     * @Return: java.lang.Object
+     */
+    List<ListItemNestedParametersResultDTO> queryItem(QueryItemParamVO queryItemParamVO);
 }

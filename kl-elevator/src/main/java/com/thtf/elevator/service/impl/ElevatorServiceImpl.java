@@ -25,6 +25,7 @@ import com.thtf.elevator.dto.convert.PageInfoConvert;
 import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorService;
 
+import com.thtf.elevator.vo.QueryItemParamVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -101,6 +102,29 @@ public class ElevatorServiceImpl implements ElevatorService {
             result.add(codeAndNameDTO);
         }
         return result;
+    }
+
+    /**
+     * @Author: liwencai
+     * @Description:
+     * @Date: 2023/3/8
+     * @Param queryItemParamVO:
+     * @Return: java.lang.Object
+     */
+    @Override
+    public List<ListItemNestedParametersResultDTO> queryItem(QueryItemParamVO queryItemParamVO) {
+        ListItemNestedParametersParamDTO paramDTO = new ListItemNestedParametersParamDTO();
+        paramDTO.setSysCode(queryItemParamVO.getSysCode());
+        if(StringUtils.isNotBlank(queryItemParamVO.getBuildingCodes())){
+            paramDTO.setBuildingCodeList(Arrays.asList(queryItemParamVO.getBuildingCodes().split(",")));
+        }
+        if(StringUtils.isNotBlank(queryItemParamVO.getAreaCode())){
+            paramDTO.setAreaCodeList(Arrays.asList(queryItemParamVO.getAreaCode().split(",")));
+        }
+        if (StringUtils.isNotBlank(queryItemParamVO.getItemTypeCodes())){
+            paramDTO.setItemTypeCodeList(Arrays.asList(queryItemParamVO.getItemTypeCodes().split(",")));
+        }
+        return itemAPI.listItemNestedParameters(paramDTO).getData();
     }
 
     /**
