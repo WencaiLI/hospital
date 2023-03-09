@@ -17,6 +17,7 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.common.utils.DateUtil;
 import com.thtf.environment.config.ParameterConfigNacos;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.PageInfoVO;
@@ -711,8 +712,8 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         });
         List<TimeValueDTO> hourlyHistoryMoment = null;
         try (HintManager hintManager = HintManager.getInstance()) {
-            // todo liwencai 此处存在bug
             // 日期是当年的开始时间，至本月时间
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date.substring(0,4)+"-01-01"+DAY_START_SUFFIX);
             hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
             if(StringUtils.isBlank(parameterCode)){
                 if(StringUtils.isNotBlank(itemTypeCode)){
@@ -723,14 +724,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                     tblItem.setCode(itemCode);
                     List<TblItem> data = itemAPI.queryAllItems(tblItem).getData();
                     if(null != data && data.size()>0){
-//                        String parameterType = EnvMonitorItemLiveParameterEnum.getMonitorItemLiveEnumByTypeCode(data.get(0).getTypeCode()).getParameterType();
                         String parameterType = this.getParameterType(itemTypeCode,parameterInfo);
                         parameterCode = itemAPI.getParameterCodeByTypeAndItemCode(parameterType,itemCode).getData();
                     }
                 }
             }
             try {
-                // todo liwencai 获取有问题
                 hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, getYearStartAndEndTimeMonthString(newDate).get("startTime"),getYearStartAndEndTimeMonthString(newDate).get("endTime"));
             }catch (Exception ignored){
             }
