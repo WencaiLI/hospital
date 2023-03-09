@@ -573,7 +573,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo>
      */
     @Override
-    public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String buildingCodes,String areaCode, String startTime,String endTime) {
-        return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, buildingCodes,areaCode,null, startTime, endTime).getData();
+    public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String buildingCodes,String areaCode,String itemTypeCode,String startTime,String endTime) {
+        return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, buildingCodes,areaCode,itemTypeCode, startTime, endTime).getData();
     }
 }
