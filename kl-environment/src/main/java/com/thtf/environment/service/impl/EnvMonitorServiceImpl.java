@@ -1,5 +1,7 @@
 package com.thtf.environment.service.impl;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.adminserver.AreaNestBuildingDTO;
@@ -17,7 +19,6 @@ import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.common.util.ArithUtil;
 import com.thtf.environment.common.Constant.ParameterConstant;
-import com.thtf.environment.common.utils.DateUtil;
 import com.thtf.environment.config.ParameterConfigNacos;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.PageInfoVO;
@@ -701,7 +702,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         EChartsVO result = new EChartsVO();
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         Date newDate = YYMMDDStringToDate(date);
-        if(null == date){
+        if(null == newDate){
             log.error("时间格式错误");
             return null;
         }
@@ -713,8 +714,12 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         List<TimeValueDTO> hourlyHistoryMoment = null;
         try (HintManager hintManager = HintManager.getInstance()) {
             // 日期是当年的开始时间，至本月时间
-            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date.substring(0,4)+"-01-01"+DAY_START_SUFFIX);
-            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT,date+DAY_START_SUFFIX);
+            DateTime beginDateTime = DateUtil.beginOfYear(newDate);
+            String startDateTime = DateUtil.format(beginDateTime, "yyyy-MM-dd HH:mm:ss");
+            DateTime lastDateTime = DateUtil.endOfYear(newDate);
+            String endDateTime = DateUtil.format(lastDateTime, "yyyy-MM-dd HH:mm:ss");
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT, startDateTime);
+            hintManager.addTableShardingValue(TBL_HISTORY_MOMENT, endDateTime);
             if(StringUtils.isBlank(parameterCode)){
                 if(StringUtils.isNotBlank(itemTypeCode)){
                     String parameterType = this.getParameterType(itemTypeCode,parameterInfo);
@@ -730,7 +735,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 }
             }
             try {
-                hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, getYearStartAndEndTimeMonthString(newDate).get("startTime"),getYearStartAndEndTimeMonthString(newDate).get("endTime"));
+                hourlyHistoryMoment = tblHistoryMomentMapper.getMonthlyHistoryMoment(parameterCode, startDateTime,endDateTime);
             }catch (Exception ignored){
             }
         }
