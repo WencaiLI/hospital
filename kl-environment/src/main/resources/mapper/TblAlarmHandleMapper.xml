@@ -29,19 +29,19 @@
         </where>
     </select>
     <select id="getHourlyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
-        select HOUR(date_time) as `time`,count(*) as `value`
+        select HOUR(date_time) as `time`,AVG(`value`) as `value`
         from tbl_history_moment
         where date_time BETWEEN #{startTime} AND #{endTime} and code = #{parameterCode}
         group by HOUR(date_time)
     </select>
     <select id="getDailyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
-        select DAY(date_time) as `time`,count(*) as `value`
+        select DAY(date_time) as `time`,AVG(`value`) as `value`
         from tbl_history_moment
         where date_time BETWEEN #{startTime} AND #{endTime} and code = #{parameterCode}
         group by DAY(date_time)
     </select>
     <select id="getMonthlyHistoryMoment" resultType="com.thtf.environment.dto.TimeValueDTO">
-        select MONTH (date_time) as `time`,count(*) as `value`
+        select MONTH (date_time) as `time`,AVG(`value`) as `value`
         from tbl_history_moment
         where date_time BETWEEN #{startTime} AND #{endTime} and code = #{parameterCode}
         group by MONTH (date_time)
