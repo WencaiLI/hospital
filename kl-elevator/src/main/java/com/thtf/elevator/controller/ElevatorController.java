@@ -121,9 +121,10 @@ public class ElevatorController {
     public JsonResult<ItemFaultStatisticsDTO> getItemFaultStatistics(@RequestParam("sysCode")String sysCode,
                                                                      @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
                                                                      @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                                     @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
                                                                      @RequestParam("startTime")String startTime,
                                                                      @RequestParam("endTime")String endTime){
-        List<ItemAlarmNumberInfo> itemFaultStatistics = elevatorService.getItemFaultStatistics(sysCode, buildingCodes, areaCode,startTime, endTime);
+        List<ItemAlarmNumberInfo> itemFaultStatistics = elevatorService.getItemFaultStatistics(sysCode, buildingCodes, areaCode,itemTypeCode,startTime, endTime);
 
         if(null == itemFaultStatistics || itemFaultStatistics.size() == 0){
             return JsonResult.querySuccess(null);
