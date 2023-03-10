@@ -46,10 +46,10 @@ public class EnvMonitorItemParamVO {
     /**
      * 页号
      */
-    private Integer pageNumber; // 页号
+    private Integer pageNumber;
 
     /**
      * 页大小
      */
-    private Integer pageSize; // 页大小
+    private Integer pageSize;
 }
