@@ -105,5 +105,8 @@ public class PageInfoVO implements Serializable {
      */
     private List otherList;
 
+    /**
+     * 总数
+     */
     private Long total;
 }
