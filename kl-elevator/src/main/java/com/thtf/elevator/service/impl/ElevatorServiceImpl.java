@@ -4,10 +4,12 @@ import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.constant.AlarmConstants;
+import com.thtf.common.constant.ItemConstants;
+import com.thtf.common.constant.ItemTypeConstants;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.*;
-import com.thtf.common.entity.adminserver.TblBuildingArea;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
@@ -15,19 +17,18 @@ import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.elevator.common.constant.ItemTypeConstant;
-import com.thtf.elevator.common.constant.ParameterConstant;
-import com.thtf.elevator.dto.*;
+import com.thtf.elevator.config.ItemParameterConfig;
 import com.thtf.elevator.dto.ParameterInfoDTO;
-import com.thtf.elevator.dto.convert.FloorConverter;
+import com.thtf.elevator.dto.*;
 import com.thtf.elevator.dto.convert.ItemConverter;
 import com.thtf.elevator.dto.convert.PageInfoConvert;
 import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorService;
-
 import com.thtf.elevator.vo.QueryItemParamVO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -53,35 +54,26 @@ public class ElevatorServiceImpl implements ElevatorService {
     private AdminAPI adminAPI;
 
     @Resource
-    ItemConverter itemConverter;
+    private CommonService commonService;
 
     @Resource
-    FloorConverter floorConverter;
+    private ItemConverter itemConverter;
 
     @Resource
-    PageInfoConvert pageInfoConvert;
+    private ItemParameterConfig itemParameterConfig;
 
     @Resource
-    ParameterConverter parameterConverter;
+    private PageInfoConvert pageInfoConvert;
+
+    @Resource
+    private ParameterConverter parameterConverter;
 
 
     /**
      * @Author: liwencai
-     * @Description: 获取楼层信息
-     * @Date: 2022/10/8
-     * @Return: java.util.List<com.thtf.elevator.dto.FloorInfoDTO>
-     */
-    @Override
-    public List<FloorInfoDTO> getFloorInfo(String buildingCode,String systemCode){
-        List<TblBuildingArea> resourceList = adminAPI.getFloorInfo(buildingCode,systemCode).getData();
-        return floorConverter.toFloorList(resourceList);
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description:
+     * @Description: 根据子系统编码获取设备类别
      * @Date: 2022/12/1
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @return: java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>
      */
     @Override
@@ -89,10 +81,10 @@ public class ElevatorServiceImpl implements ElevatorService {
         List<CodeAndNameDTO> result;
         TblItemType tblItemType = new TblItemType();
         tblItemType.setSysCode(sysCode);
-        tblItemType.setIsLeaf(ItemTypeConstant.IS_LEAF);
+        tblItemType.setIsLeaf(ItemTypeConstants.IS_LEAF);
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
-        if(null == itemTypeList || itemTypeList.size() == 0){
-            return null;
+        if(CollectionUtils.isEmpty(itemTypeList)){
+            return new ArrayList<>(0);
         }
         result = new ArrayList<>();
         for (TblItemType itemType : itemTypeList) {
@@ -159,6 +151,10 @@ public class ElevatorServiceImpl implements ElevatorService {
      */
     @Override
     public List<DisplayInfoDTO> displayInfo(String sysCode,String buildingCodes, String areaCode) {
+
+        // 获取设备参数为运行时的状态值
+        String parameterValueByStateExplain = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), null, new String[]{"运","行","在"});
+
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
 
@@ -169,19 +165,11 @@ public class ElevatorServiceImpl implements ElevatorService {
                 buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
-
-//        if(StringUtils.isNotBlank(buildingCodes)){
-//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
-//        }else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                areaCodeList = Arrays.asList(areaCode.split(","));
-//            }
-//        }
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
         tblItemType.setSysCode(sysCode);
-        tblItemType.setIsLeaf(ItemTypeConstant.IS_LEAF);
+        tblItemType.setIsLeaf(ItemTypeConstants.IS_LEAF);
         // 父类为itemType的设备类别
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
         // 根据类别查询所有的信息
@@ -200,18 +188,21 @@ public class ElevatorServiceImpl implements ElevatorService {
             keyValueDTO.setValue(itemList.size());
             kvList.add(keyValueDTO);
             // 查询该类型的运行数量
-            String parameterType = ParameterConstant.ELEVATOR_RUN_STATUS;
-            String parameterValue = "1";
+            String parameterType = itemParameterConfig.getState();
             // 运行数量
             List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
             KeyValueDTO runNumberKV = new KeyValueDTO();
             runNumberKV.setKey("运行总数");
             if(itemCodeList.size()>0){
-                Integer runNumber = itemAPI.countParameterNumByItemCodeListAndPtypeAndPvalue(
-                        parameterType,
-                        itemList.stream().map(TblItem::getCode).collect(Collectors.toList()),
-                        parameterValue).getData();
-                runNumberKV.setValue(runNumber);
+                if(StringUtils.isBlank(parameterValueByStateExplain)){
+                    runNumberKV.setValue(0);
+                }else {
+                    Integer runNumber = itemAPI.countParameterNumByItemCodeListAndPtypeAndPvalue(
+                            parameterType,
+                            itemList.stream().map(TblItem::getCode).collect(Collectors.toList()),
+                            parameterValueByStateExplain).getData();
+                    runNumberKV.setValue(runNumber);
+                }
             }else {
                 runNumberKV.setValue(0);
             }
@@ -219,46 +210,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             displayInfoDTO.setResults(kvList);
             result.add(displayInfoDTO);
         }
-        // 报警总数
-//        KeyValueDTO alarmKV = new KeyValueDTO();
-//        alarmKV.setKey("故障设备");
-//        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
-//        param.setSysCode(sysCode);
-//        param.setParameterTypeCode(ParameterConstant.ELEVATOR_FAULT);
-//        param.setParameterValue("1");
-//        alarmKV.setValue(itemAPI.countItemByParameterList(param).getData());
-//        DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
-//        displayInfoDTO.setResults(new ArrayList<KeyValueDTO>(Collections.singleton(alarmKV)));
-//        result.add(displayInfoDTO);
-//
-//        // 报警总数
-//        KeyValueDTO alarmKV = new KeyValueDTO();
-//        alarmKV.setKey("故障设备");
-//        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
-//        param.setSysCode(sysCode);
-//        param.setParameterTypeCode(ParameterConstant.ELEVATOR_FAULT);
-//        param.setParameterValue("1");
-//        alarmKV.setValue(itemAPI.countItemByParameterList(param).getData());
-//        DisplayInfoDTO displayInfoDTO = new DisplayInfoDTO();
-//        displayInfoDTO.setResults(new ArrayList<KeyValueDTO>(Collections.singleton(alarmKV)));
-//        result.add(displayInfoDTO);
         return result;
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取 “故障” 报警数量
-     * @Date: 2022/9/5
-     * @Param sysCode: 子系统编码
-     * @return: java.lang.Integer
-     */
-    @Override
-    public Integer alarmNumber(String sysCode) {
-        CountItemByParameterListDTO param = new CountItemByParameterListDTO();
-        param.setSysCode(sysCode);
-        param.setParameterTypeCode(ParameterConstant.ELEVATOR_FAULT);
-        param.setParameterValue("1");
-        return itemAPI.countItemByParameterList(param).getData();
     }
 
     /**
@@ -283,6 +235,10 @@ public class ElevatorServiceImpl implements ElevatorService {
             elevatorInfoResultDTO.setItemId(itemInfo.getId());
             elevatorInfoResultDTO.setItemCode(itemInfo.getCode());
             elevatorInfoResultDTO.setItemName(itemInfo.getName());
+            elevatorInfoResultDTO.setAreaCode(itemInfo.getAreaCode());
+            Map<String, String> data = adminAPI.getBuildingMap(Collections.singletonList(itemInfo.getBuildingCode())).getData();
+            elevatorInfoResultDTO.setBuildingCode(itemInfo.getBuildingCode());
+            elevatorInfoResultDTO.setBuildingName(data.get(itemInfo.getBuildingCode()));
             if(isNeedAreaName){
                 elevatorInfoResultDTO.setAreaName(adminAPI.searchAreaByCode(itemInfo.getAreaCode()).getData().getName());
             }
@@ -294,29 +250,6 @@ public class ElevatorServiceImpl implements ElevatorService {
         return result;
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 查找item关联设备信息
-     * @Date: 2022/9/5
-     * @Param relationType: 关联设备类别
-     * @Param itemCode: 设备类型
-     * @return: java.util.List<com.thtf.common.entity.itemserver.TblItem>
-     */
-    @Override
-    public List<TblItem> getItemRelInfo(String relationType, String itemCode) {
-        // 查找到关联id
-        TblItem tblItem = itemAPI.searchItemByItemCode(itemCode).getData();
-        String relationItemCode = tblItem.getRelationItemCode();
-        String[] itemCodeList = relationItemCode.split(",");
-        // 查询设备集合
-        List<TblItemDTO> tblItemDTOS = itemAPI.searchItemByItemCodes(Arrays.asList(itemCodeList)).getData();
-        // 筛选设备集
-        if(null == tblItemDTOS){
-            return null;
-        }
-        tblItemDTOS.removeIf(e->! e.getTypeCode().equals(relationType));
-        return itemConverter.toItemList(tblItemDTOS);
-    }
 
     /**
      * @Author: liwencai
@@ -329,7 +262,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
     @Override
-    public PageInfoVO getAllElevatorPage(String sysCode,String buildingCodes, String areaCode,String itemTypeCode, Integer state, Integer pageNum, Integer pageSize) {
+    public PageInfo<ElevatorInfoResultDTO> getAllElevatorPage(String sysCode,String buildingCodes, String areaCode,String itemTypeCode, Integer state, Integer pageNum, Integer pageSize) {
 
         List<String> buildingCodesList = null;
         List<String> areaCodesList = null;
@@ -340,13 +273,6 @@ public class ElevatorServiceImpl implements ElevatorService {
                 buildingCodesList = Arrays.asList(buildingCodes.split(","));
             }
         }
-//        if(StringUtils.isNotBlank(buildingCodes)){
-//            buildingCodesList = Arrays.asList(buildingCodes.split(","));
-//        }else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                areaCodesList = Arrays.asList(areaCode.split(","));
-//            }
-//        }
         ListItemNestedParametersPageParamDTO listItemPage = new ListItemNestedParametersPageParamDTO();
         listItemPage.setSysCode(sysCode);
         listItemPage.setBuildingCodeList(buildingCodesList);
@@ -359,7 +285,17 @@ public class ElevatorServiceImpl implements ElevatorService {
         if(null != state){
             List<ParameterTypeCodeAndValueDTO> parameterList = new ArrayList<>();
             ParameterTypeCodeAndValueDTO param = new ParameterTypeCodeAndValueDTO();
-            param.setParameterTypeCode(ParameterConstant.ELEVATOR_RUN_STATUS);
+            param.setParameterTypeCode(itemParameterConfig.getState());
+            // 获取指定的参数的值
+            String parameterValueByStateExplain;
+            if(state == 0){
+                // 0 离线 停止
+                parameterValueByStateExplain = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), itemTypeCode, new String[]{"离", "停", "止"});
+            }else {
+                // 1 在线 运行
+                parameterValueByStateExplain = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), itemTypeCode, new String[]{"在", "运", "行"});
+            }
+            param.setParameterValue(String.valueOf(parameterValueByStateExplain));
             param.setParameterValue(String.valueOf(state));
             parameterList.add(param);
             listItemPage.setParameterList(parameterList);
@@ -369,9 +305,13 @@ public class ElevatorServiceImpl implements ElevatorService {
         if(null == pageInfo){
             return null;
         }
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
-
+        PageInfo<ElevatorInfoResultDTO> result = new PageInfo<>();
+        BeanUtils.copyProperties(pageInfo,result);
         List<ItemNestedParameterVO> itemNestedParameterList = pageInfo.getList();
+
+        // 建筑编码
+        List<String> buildingCodeListForSelect = itemNestedParameterList.stream().map(ItemNestedParameterVO::getBuildingCode).collect(Collectors.toList());
+        Map<String, String> buildingMap = adminAPI.getBuildingMap(buildingCodeListForSelect).getData();
 
         // 结果集
         List<ElevatorInfoResultDTO> resultDTOList = itemConverter.toElevatorInfoList(itemNestedParameterList);
@@ -380,13 +320,13 @@ public class ElevatorServiceImpl implements ElevatorService {
             for (ItemNestedParameterVO item : pageInfo.getList()) {
                 if (item.getCode().equals(elevatorInfoResultDTO.getItemCode())){
                     convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
+                    elevatorInfoResultDTO.setBuildingName(buildingMap.get(item.getBuildingCode()));
                 }
             }
         }
-        pageInfoVO.setList(resultDTOList);
-        return pageInfoVO;
+        result.setList(resultDTOList);
+        return result;
     }
-
 
     /**
      * @Author: liwencai
@@ -401,7 +341,7 @@ public class ElevatorServiceImpl implements ElevatorService {
         List<ParameterInfoDTO> parameterInnerList = new ArrayList<>();
         for (TblItemParameter parameter : parameterList) {
             // 下行
-            if(ParameterConstant.ELEVATOR_DOWN_GOING_STATUS.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getDownGoing().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setDownGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -409,7 +349,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 上行
-            if(ParameterConstant.ELEVATOR_UP_GOING_STATUS.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getUpGoing().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setUpGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -417,7 +357,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 运行时长
-            if(ParameterConstant.ELEVATOR_RUN_TIME.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getRunTime().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setRunTimeParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -425,7 +365,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 报警状态
-            if(ParameterConstant.ELEVATOR_ALARM.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getAlarm().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setAlarmParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -433,7 +373,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 故障状态
-            if(ParameterConstant.ELEVATOR_FAULT.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getFault().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setFaultParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -441,7 +381,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 锁梯状态
-            if(ParameterConstant.ELEVATOR_LOCK_STATUS.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getLockStatus().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setLockStatusParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -449,15 +389,15 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 当前楼层
-            if(ParameterConstant.ELEVATOR_CURRENT_FLOOR.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getCurrentFloor().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setCurrentFloorValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
 
-            // 当前楼层
-            if(ParameterConstant.ELEVATOR_RUN_STATUS.equals(parameter.getParameterType())){
+            // 运行状态
+            if(itemParameterConfig.getState().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setRunParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -465,7 +405,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             }
 
             // 是否超载
-            if(ParameterConstant.ELEVATOR_OVERLOAD.equals(parameter.getParameterType())){
+            if(itemParameterConfig.getOverLoad().equals(parameter.getParameterType())){
                 if(StringUtils.isNotBlank(parameter.getValue())){
                     elevatorInfoResultDTO.setOverLoadParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
                 }
@@ -483,7 +423,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
     @Override
-    public PageInfoVO getAllAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
+    public PageInfo<ElevatorAlarmResultDTO> getAllAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
         // 故障设备信息
         List<String> buildingCodesList = null;
         List<String> areaCodesList = null;
@@ -494,22 +434,14 @@ public class ElevatorServiceImpl implements ElevatorService {
                 buildingCodesList = Arrays.asList(buildingCodes.split(","));
             }
         }
-//        if(StringUtils.isNotBlank(buildingCodes)){
-//            buildingCodesList = Arrays.asList(buildingCodes.split(","));
-//        }else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                areaCodesList = Arrays.asList(areaCode.split(","));
-//            }
-//        }
         ListItemNestedParametersPageParamDTO paramDTO = new ListItemNestedParametersPageParamDTO();
         if(null != alarmCategory){
-            if (alarmCategory == 0){
-                paramDTO.setAlarm(1);
+            if (AlarmConstants.ALARM_CATEGORY_INTEGER.equals(alarmCategory)){
+                paramDTO.setAlarm(ItemConstants.ITEM_ALARM_TRUE);
             }
-            if(alarmCategory == 1){
-                paramDTO.setAlarm(0);
-                paramDTO.setFault(1);
-
+            if(AlarmConstants.FAULT_CATEGORY_INTEGER.equals(alarmCategory)){
+                paramDTO.setAlarm(ItemConstants.ITEM_ALARM_FALSE);
+                paramDTO.setFault(ItemConstants.ITEM_FAULT_TRUE);
             }
         }
         paramDTO.setSysCode(sysCode);
@@ -521,13 +453,15 @@ public class ElevatorServiceImpl implements ElevatorService {
         paramDTO.setPageNumber(pageNumber);
         paramDTO.setPageSize(pageSize);
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
+        PageInfo<ElevatorAlarmResultDTO> pageInfoVO = new PageInfo<>();
+        BeanUtils.copyProperties(pageInfo,pageInfoVO);
         List<ItemNestedParameterVO> itemList = pageInfo.getList();
-        if(itemList ==  null || itemList.size() == 0){
+        if(CollectionUtils.isEmpty(pageInfo.getList())){
             return null;
         }
         // 报警或故障的设备编码
-        List<String> alarmOrFaultItemCodeList = itemList.stream().filter(e->(e.getAlarm() == 1 || e.getFault() == 1)).map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
+        List<String> alarmOrFaultItemCodeList = itemList.stream().filter(e->(e.getAlarm().equals(ItemConstants.ITEM_ALARM_TRUE) || e.getFault().equals(ItemConstants.ITEM_FAULT_TRUE))).map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
         List<TblAlarmRecordUnhandle> recordUnhandles = new ArrayList<>();
         if(alarmOrFaultItemCodeList.size()>0){
             /* 获取故障报警信息 */

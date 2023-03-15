@@ -1,11 +1,13 @@
 package com.thtf.elevator.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo;
 import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.dto.itemserver.ListItemNestedParametersResultDTO;
 import com.thtf.common.dto.itemserver.PageInfoVO;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
+import com.thtf.elevator.dto.ElevatorAlarmResultDTO;
 import com.thtf.elevator.dto.ElevatorInfoResultDTO;
 import com.thtf.elevator.dto.ItemFaultStatisticsDTO;
 import com.thtf.elevator.service.ElevatorService;
@@ -68,13 +70,13 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>>>
      */
     @PostMapping("/getAllElevatorPage")
-    public JsonResult<PageInfoVO> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
-                                                     @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                     @RequestParam(value = "areaCode",required = false) String areaCode,
-                                                     @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
-                                                     @RequestParam(value = "state",required = false) Integer state,
-                                                     @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
-                                                     @RequestParam(value = "pageSize",required = false)Integer pageSize){
+    public JsonResult<PageInfo<ElevatorInfoResultDTO>> getAllElevatorPage(@RequestParam("sysCode")String sysCode,
+                                                                          @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                                          @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                                          @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                                          @RequestParam(value = "state",required = false) Integer state,
+                                                                          @RequestParam(value = "pageNumber",required = false)Integer pageNumber,
+                                                                          @RequestParam(value = "pageSize",required = false)Integer pageSize){
         return JsonResult.querySuccess(elevatorService.getAllElevatorPage(sysCode,buildingCodes,areaCode,itemTypeCode,state,pageNumber,pageSize));
     }
 
@@ -100,13 +102,13 @@ public class ElevatorController {
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.elevator.dto.ElevatorAlarmResultDTO>>
      */
     @PostMapping("/getAllAlarmPage")
-    public JsonResult<PageInfoVO> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
-                                                  @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                  @RequestParam(value = "areaCode",required = false) String areaCode,
-                                                  @RequestParam("alarmCategory") Integer alarmCategory,
-                                                  @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
-                                                  @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                                  @RequestParam(value = "pageSize",required = false) Integer pageSize){
+    public JsonResult<PageInfo<ElevatorAlarmResultDTO>> getAllAlarmPage(@RequestParam("sysCode") String sysCode,
+                                                                        @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                                        @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                                        @RequestParam("alarmCategory") Integer alarmCategory,
+                                                                        @RequestParam(value = "itemTypeCode",required = false) String itemTypeCode,
+                                                                        @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+                                                                        @RequestParam(value = "pageSize",required = false) Integer pageSize){
         return JsonResult.querySuccess(elevatorService.getAllAlarmPage(sysCode,buildingCodes,areaCode,itemTypeCode,alarmCategory,pageNumber,pageSize));
     }
 
