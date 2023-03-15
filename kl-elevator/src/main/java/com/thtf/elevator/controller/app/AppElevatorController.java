@@ -1,33 +1,26 @@
 package com.thtf.elevator.controller.app;
 
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.constant.ItemTypeConstants;
 import com.thtf.common.dto.adminserver.ResultPage;
 import com.thtf.common.dto.alarmserver.AppAlarmRecordDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmPageParamDTO;
-import com.thtf.common.dto.itemserver.*;
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
+import com.thtf.common.dto.itemserver.TblItemDTO;
 import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
-import com.thtf.elevator.common.constant.ItemTypeConstant;
-import com.thtf.elevator.common.constant.ParameterConstant;
 import com.thtf.elevator.dto.DisplayInfoDTO;
-import com.thtf.elevator.dto.convert.PageInfoConvert;
 import com.thtf.elevator.service.ElevatorAppService;
-import com.thtf.elevator.service.ElevatorService;
 import com.thtf.elevator.vo.AppAlarmInfoVO;
 import com.thtf.elevator.vo.AppItemSortDTO;
 import com.thtf.elevator.vo.AppItemSortVO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,14 +29,9 @@ import java.util.List;
  * @Description:
  */
 @RestController
-@RequestMapping(value ="/elevator/app/")
+@RequestMapping(value ="/elevator/app")
 @Slf4j
 public class AppElevatorController {
-    @Resource
-    private PageInfoConvert pageInfoConvert;
-
-    @Resource
-    private ElevatorService elevatorService;
 
     @Resource
     private ElevatorAppService elevatorAppService;
@@ -89,91 +77,8 @@ public class AppElevatorController {
      * @return: com.thtf.common.response.JsonResult
      */
     @PostMapping("/item_info")
-    public JsonResult<PageInfoVO<AppItemSortVO>> getItemInfoByItemStatusAndType(@RequestBody AppItemSortDTO param){
-
-        ListItemNestedParametersPageParamDTO listItemNestedParametersPageParamDTO = new ListItemNestedParametersPageParamDTO();
-
-        BeanUtils.copyProperties(param,listItemNestedParametersPageParamDTO);
-        if(StringUtils.isNotBlank(param.getAreaCodes())){
-            listItemNestedParametersPageParamDTO.setAreaCodeList(Arrays.asList(param.getAreaCodes().split(",")));
-        }else {
-            if (StringUtils.isNotBlank(param.getBuildingCodes())){
-                listItemNestedParametersPageParamDTO.setBuildingCodeList(Arrays.asList(param.getBuildingCodes().split(",")));
-            }
-        }
-        if (StringUtils.isNotBlank(param.getItemTypeCodes())){
-            listItemNestedParametersPageParamDTO.setItemTypeCodeList(Arrays.asList(param.getItemTypeCodes().split(",")));
-        }
-
-        List<ParameterTypeCodeAndValueDTO> parameters = new ArrayList<>();
-        Integer runStatus = param.getRunStatus();
-        if(null != runStatus){
-            ParameterTypeCodeAndValueDTO parameter = new ParameterTypeCodeAndValueDTO();
-            parameter.setParameterTypeCode(ParameterConstant.ELEVATOR_RUN_STATUS);
-            parameter.setParameterValue(String.valueOf(param.getRunStatus()));
-            parameters.add(parameter);
-            
-            ParameterTypeCodeAndValueDTO parameter1 = new ParameterTypeCodeAndValueDTO();
-            parameter1.setParameterTypeCode(ParameterConstant.RUN_STATUS1);
-            parameter1.setParameterValue(String.valueOf(param.getRunStatus()));
-            parameters.add(parameter1);
-            
-            ParameterTypeCodeAndValueDTO parameter2 = new ParameterTypeCodeAndValueDTO();
-            parameter2.setParameterTypeCode(ParameterConstant.RUN_STATUS2);
-            parameter2.setParameterValue(String.valueOf(param.getRunStatus()));
-            parameters.add(parameter2);
-            
-            ParameterTypeCodeAndValueDTO parameter3 = new ParameterTypeCodeAndValueDTO();
-            parameter3.setParameterTypeCode(ParameterConstant.RUN_STATUS3);
-            parameter3.setParameterValue(String.valueOf(param.getRunStatus()));
-            parameters.add(parameter3);
-        }
-        listItemNestedParametersPageParamDTO.setParameterList(parameters);
-
-        if(StringUtils.isNotBlank(param.getAlarmCategory())){
-            if("0".equals(param.getAlarmCategory())){
-                listItemNestedParametersPageParamDTO.setAlarm(1);
-            }
-            if ("1".equals(param.getAlarmCategory())){
-                listItemNestedParametersPageParamDTO.setAlarm(0);
-                listItemNestedParametersPageParamDTO.setFault(1);
-            }
-        }
-
-
-        PageInfo<ItemNestedParameterVO> data = itemAPI.listItemNestedParametersPage(listItemNestedParametersPageParamDTO).getData();
-
-
-
-        PageInfoVO<AppItemSortVO> pageInfoVO = pageInfoConvert.toPageInfoVO(data);
-        if(null != data && !CollectionUtils.isEmpty(data.getList())){
-            List<AppItemSortVO> resultList = new ArrayList<>();
-            data.getList().forEach(e->{
-                AppItemSortVO appItemSortVO = new AppItemSortVO();
-                appItemSortVO.setItemName(e.getName());
-                appItemSortVO.setItemCode(e.getCode());
-                e.getParameterList().forEach(parameter -> {
-                    if (ParameterConstant.ELEVATOR_RUN_STATUS.equals(parameter.getParameterType())
-                    		||ParameterConstant.RUN_STATUS1.equals(parameter.getParameterType())
-                    		||ParameterConstant.RUN_STATUS2.equals(parameter.getParameterType())
-                    		||ParameterConstant.RUN_STATUS3.equals(parameter.getParameterType())){
-                        appItemSortVO.setRunStatus(parameter.getValue());
-                    }
-                });
-                if (1 == e.getAlarm()){
-                    appItemSortVO.setAlarmCategory("0");
-                }
-                if (1 != e.getAlarm() && 1 == e.getFault()){
-                    appItemSortVO.setAlarmCategory("1");
-                }
-                resultList.add(appItemSortVO);
-
-            });
-            pageInfoVO.setList(resultList);
-            return JsonResult.querySuccess(pageInfoVO);
-        }else {
-            return JsonResult.querySuccess(pageInfoVO);
-        }
+    public JsonResult<PageInfo<AppItemSortVO>> getItemInfoByItemStatusAndType(@RequestBody AppItemSortDTO param){
+        return JsonResult.querySuccess(elevatorAppService.listItem(param));
     }
 
 
@@ -228,7 +133,7 @@ public class AppElevatorController {
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
         tblItemType.setSysCode(sysCode);
-        tblItemType.setIsLeaf(ItemTypeConstant.IS_LEAF);
+        tblItemType.setIsLeaf(ItemTypeConstants.IS_LEAF);
         // 父类为itemType的设备类别
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
         List<CodeAndNameDTO> codeAndNameList = new ArrayList<>();

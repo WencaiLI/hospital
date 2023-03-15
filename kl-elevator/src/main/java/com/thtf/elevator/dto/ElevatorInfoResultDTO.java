@@ -30,21 +30,32 @@ public class ElevatorInfoResultDTO extends ElevatorStatusVO {
     private String itemName;
 
     /**
+     * 区域编码
+     */
+    private String areaCode;
+
+    /**
      * 区域名称
      */
     private String areaName;
 
-    private String areaCode;
-
+    /**
+     * 建筑编码
+     */
     private String buildingCode;
+
+    /**
+     * 建筑名称
+     */
+    private String buildingName;
 
     /**
      * 报警状态
      */
     private String alarmStatus;
 
-//    /**
-//     *
-//     */
-    List<ParameterInfoDTO> parameterList; // 参数列表
+    /**
+     * 参数列表
+     */
+    List<ParameterInfoDTO> parameterList;
 }

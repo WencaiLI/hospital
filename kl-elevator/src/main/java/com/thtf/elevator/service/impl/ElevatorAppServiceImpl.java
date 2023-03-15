@@ -1,32 +1,34 @@
 package com.thtf.elevator.service.impl;
 
+import com.github.pagehelper.PageInfo;
+import com.thtf.common.constant.AlarmConstants;
+import com.thtf.common.constant.ItemConstants;
+import com.thtf.common.constant.ItemTypeConstants;
 import com.thtf.common.dto.alarmserver.CountAlarmParamDTO;
 import com.thtf.common.dto.alarmserver.CountAlarmResultDTO;
+import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
-import com.thtf.common.entity.itemserver.TblItem;
+import com.thtf.common.dto.itemserver.ListItemNestedParametersPageParamDTO;
+import com.thtf.common.dto.itemserver.ParameterTypeCodeAndValueDTO;
 import com.thtf.common.entity.itemserver.TblItemType;
-import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.common.response.JsonResult;
-import com.thtf.elevator.common.constant.ItemTypeConstant;
-import com.thtf.elevator.common.constant.ParameterConstant;
+import com.thtf.elevator.config.ItemParameterConfig;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.dto.KeyValueDTO;
-import com.thtf.elevator.dto.convert.FloorConverter;
-import com.thtf.elevator.dto.convert.ItemConverter;
-import com.thtf.elevator.dto.convert.PageInfoConvert;
-import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorAppService;
 import com.thtf.elevator.vo.AppAlarmInfoVO;
+import com.thtf.elevator.vo.AppItemSortDTO;
+import com.thtf.elevator.vo.AppItemSortVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -42,20 +44,31 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
     @Resource
     private ItemAPI itemAPI;
 
+    @Resource
+    private ItemParameterConfig itemParameterConfig;
+
+    @Resource
+    private CommonService commonService;
+
+
     @Override
     public List<DisplayInfoDTO> displayInfo(String sysCode, String buildingCodes, String areaCode) {
+
+        // 获取设备参数为运行时的状态值
+        String parameterValueByStateExplain = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), null, new String[]{"运","行"});
+
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
         tblItemType.setSysCode(sysCode);
-        tblItemType.setIsLeaf(ItemTypeConstant.IS_LEAF);
+        tblItemType.setIsLeaf(ItemTypeConstants.IS_LEAF);
         // 父类为itemType的设备类别
         List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
         // 根据类别查询所有的信息
         for (TblItemType itemType : itemTypeList) {
 
             ItemTotalAndOnlineAndAlarmNumDTO itemTypeInfo = itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode, areaCode, buildingCodes, itemType.getCode(),
-                    ParameterConstant.ELEVATOR_RUN_STATUS, ParameterConstant.ELEVATOR_RUN_TRUE, false, true).getData();
+                    itemParameterConfig.getState(), parameterValueByStateExplain, false, true).getData();
 
             // 设备总数
             List<KeyValueDTO> kvList = new ArrayList<>();
@@ -90,11 +103,11 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取报警信息
      * @Date: 2023/2/28
-     * @Param sysCode:
-     * @Param buildingCodes:
-     * @Param areaCode:
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Param areaCode: 区域编码
      * @Return: com.thtf.elevator.vo.AppAlarmInfoVO
      */
     @Override
@@ -121,5 +134,73 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
             result.setAlarmHasHandledNum(alarmInfo.getHasHandledAlarmNum());
         }
         return result;
+    }
+
+    @Override
+    public PageInfo<AppItemSortVO> listItem(AppItemSortDTO param) {
+        ListItemNestedParametersPageParamDTO listItemNestedParametersPageParamDTO = new ListItemNestedParametersPageParamDTO();
+
+        BeanUtils.copyProperties(param,listItemNestedParametersPageParamDTO);
+        if(StringUtils.isNotBlank(param.getAreaCodes())){
+            listItemNestedParametersPageParamDTO.setAreaCodeList(Arrays.asList(param.getAreaCodes().split(",")));
+        }else {
+            if (StringUtils.isNotBlank(param.getBuildingCodes())){
+                listItemNestedParametersPageParamDTO.setBuildingCodeList(Arrays.asList(param.getBuildingCodes().split(",")));
+            }
+        }
+        if (StringUtils.isNotBlank(param.getItemTypeCodes())){
+            listItemNestedParametersPageParamDTO.setItemTypeCodeList(Arrays.asList(param.getItemTypeCodes().split(",")));
+        }
+
+        List<ParameterTypeCodeAndValueDTO> parameters = new ArrayList<>();
+        Integer runStatus = param.getRunStatus();
+        if(null != runStatus){
+            ParameterTypeCodeAndValueDTO parameter = new ParameterTypeCodeAndValueDTO();
+            parameter.setParameterTypeCode(itemParameterConfig.getState());
+            parameter.setParameterValue(String.valueOf(param.getRunStatus()));
+            parameters.add(parameter);
+        }
+        listItemNestedParametersPageParamDTO.setParameterList(parameters);
+
+        if(StringUtils.isNotBlank(param.getAlarmCategory())){
+            if(AlarmConstants.ALARM_CATEGORY_INTEGER.toString().equals(param.getAlarmCategory())){
+                listItemNestedParametersPageParamDTO.setAlarm(ItemConstants.ITEM_ALARM_TRUE);
+            }
+            if (AlarmConstants.FAULT_CATEGORY_INTEGER.toString().equals(param.getAlarmCategory())){
+                listItemNestedParametersPageParamDTO.setAlarm(ItemConstants.ITEM_ALARM_FALSE);
+                listItemNestedParametersPageParamDTO.setFault(ItemConstants.ITEM_FAULT_TRUE);
+            }
+        }
+        PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(listItemNestedParametersPageParamDTO).getData();
+
+        // PageInfoVO<AppItemSortVO> pageInfoVO = pageInfoConvert.toPageInfoVO(data);
+
+        PageInfo<AppItemSortVO> pageInfoVO = new PageInfo<>();
+        BeanUtils.copyProperties(pageInfo,pageInfoVO);
+        if(!CollectionUtils.isEmpty(pageInfo.getList())){
+            List<AppItemSortVO> resultList = new ArrayList<>();
+            pageInfo.getList().forEach(e->{
+                AppItemSortVO appItemSortVO = new AppItemSortVO();
+                appItemSortVO.setItemName(e.getName());
+                appItemSortVO.setItemCode(e.getCode());
+                e.getParameterList().forEach(parameter -> {
+                    if (itemParameterConfig.getState().equals(parameter.getParameterType())){
+                        appItemSortVO.setRunStatus(parameter.getValue());
+                    }
+                });
+                if (ItemConstants.ITEM_ALARM_TRUE.equals(e.getAlarm())){
+                    appItemSortVO.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER.toString());
+                }
+                if (!ItemConstants.ITEM_ALARM_FALSE.equals(e.getAlarm()) && ItemConstants.ITEM_FAULT_TRUE.equals(e.getFault())){
+                    appItemSortVO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
+                }
+                resultList.add(appItemSortVO);
+
+            });
+            pageInfoVO.setList(resultList);
+            return pageInfoVO;
+        }else {
+            return pageInfoVO;
+        }
     }
 }
