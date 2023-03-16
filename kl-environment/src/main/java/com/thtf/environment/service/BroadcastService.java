@@ -1,5 +1,6 @@
 package com.thtf.environment.service;
 
+import com.github.pagehelper.PageInfo;
 import com.thtf.environment.dto.*;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public interface BroadcastService {
      * @Param pageSize:
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfBroadcastDTO>
      */
-    PageInfoVO getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize);
+    PageInfo<ItemInfoOfBroadcastDTO> getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai 
@@ -53,7 +54,7 @@ public interface BroadcastService {
      * @Param pageSize:
      * @return: com.thtf.environment.dto.PageInfoVO 
      */
-    PageInfoVO getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize);
+    PageInfo<AlarmInfoOfBroadcastDTO> getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize);
 
     /**
      * @Author: liwencai

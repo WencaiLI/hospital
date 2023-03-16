@@ -1,13 +1,7 @@
 package com.thtf.environment.controller;
 
-
-import com.thtf.common.entity.adminserver.TblBuildingArea;
-import com.thtf.common.entity.alarmserver.TblAlarmRecord;
-import com.thtf.common.feign.AdminAPI;
-import com.thtf.common.feign.AlarmAPI;
-import com.thtf.common.feign.ItemAPI;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.response.JsonResult;
-import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.service.BroadcastService;
 import com.thtf.environment.service.InfoPublishService;
@@ -16,10 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: liwencai
@@ -36,69 +27,6 @@ public class BroadcastController {
 
     @Autowired
     private InfoPublishService infoPublishService;
-
-    @Resource
-    private AlarmAPI alarmAPI;
-
-    @Resource
-    private AdminAPI adminAPI;
-
-
-//    /**
-//     * @Author: liwencai
-//     * @Description: 获取楼层信息
-//     * @Date: 2022/9/22
-//     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.entity.adminserver.TblBuildingArea>>
-//     */
-//    @GetMapping("/getFloorInfo")
-//    public JsonResult<List<TblBuildingArea>> getFloorInfo(@RequestParam(value = "buildingCode",required = false) String buildingCode,
-//                                                          @RequestParam(value = "sysCode",required = false) String systemCode){
-//        try {
-//            return adminAPI.getFloorInfo(buildingCode,systemCode);
-//        }catch (Exception e){
-//            log.error(e.getMessage());
-//            return JsonResult.error("服务器错误");
-//        }
-//    }
-
-//    /**
-//     * @Author: liwencai
-//     * @Description: 获取当前最新报警（当日）
-//     * @Date: 2022/10/7
-//     * @Param sysCode:
-//     * @Param pageNumber:
-//     * @Param pageSize:
-//     * @return: com.thtf.common.response.JsonResult
-//     */
-//    @GetMapping(value = "/getAlarmUnhandledToday")
-//    public JsonResult alarmUnhandledToday(@RequestParam("sysCode") String sysCode,
-//                                          @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-//                                          @RequestParam(value = "pageSize",required = false) Integer pageSize){
-//
-//        try {
-//            return alarmAPI.alarmUnhandledToday(sysCode,null,null,pageNumber,pageSize);
-//        }catch (Exception e){
-//            log.error(e.getMessage());
-//            return JsonResult.error("服务器错误");
-//        }
-//    }
-//
-//    /**
-//     * @Author: liwencai
-//     * @Description: 报警处置
-//     * @Date: 2022/9/2
-//     * @Param param:
-//     * @return: com.thtf.common.response.JsonResult<java.lang.Boolean>
-//     */
-//    @PutMapping(value = "/disposalAlarm")
-//    public JsonResult<Boolean> alarmDisposal(@RequestBody TblAlarmRecord param){
-//        try {
-//            alarmAPI.handleAlarm(param);
-//            return JsonResult.success();
-//        }catch (Exception e){
-//            return JsonResult.error("操作失败");
-//        }
-//    }
 
     /**
      * @Author: liwencai
@@ -142,7 +70,6 @@ public class BroadcastController {
 
     }
 
-
     /**
      * @Author: liwencai
      * @Description: 获取广播设备信息
@@ -154,13 +81,13 @@ public class BroadcastController {
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.environment.dto.ItemInfoOfBroadcastDTO>>
      */
     @PostMapping("/getItemInfo")
-    JsonResult<PageInfoVO> getItemInfo(@RequestParam("sysCode") String sysCode,
-                                       @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                       @RequestParam(value = "areaCode",required = false) String areaCode,
-                                       @RequestParam(value = "onlineValue",required = false) String onlineValue,
-                                       @RequestParam(value = "keyword",required = false) String keyword,
-                                       @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                       @RequestParam(value = "pageSize",required = false) Integer pageSize){
+    JsonResult<PageInfo<ItemInfoOfBroadcastDTO>> getItemInfo(@RequestParam("sysCode") String sysCode,
+                                                             @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
+                                                             @RequestParam(value = "areaCode",required = false) String areaCode,
+                                                             @RequestParam(value = "onlineValue",required = false) String onlineValue,
+                                                             @RequestParam(value = "keyword",required = false) String keyword,
+                                                             @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
+                                                             @RequestParam(value = "pageSize",required = false) Integer pageSize){
         return JsonResult.querySuccess(broadcastService.getItemInfo(sysCode,buildingCodes,areaCode,onlineValue,keyword,pageNumber,pageSize));
     }
 
@@ -175,7 +102,7 @@ public class BroadcastController {
      * @return: com.thtf.common.response.JsonResult<com.thtf.environment.dto.PageInfoVO>
      */
     @PostMapping("/getAlarmInfo")
-    JsonResult<PageInfoVO> getAlarmInfo(@RequestParam(value = "sysCode") String sysCode,
+    JsonResult<PageInfo<AlarmInfoOfBroadcastDTO>> getAlarmInfo(@RequestParam(value = "sysCode") String sysCode,
                                         @RequestParam(value = "areaCode",required = false) String areaCode,
                                         @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
                                         @RequestParam(value = "keyword",required = false) String keyword,
@@ -235,16 +162,4 @@ public class BroadcastController {
             return JsonResult.error("请传入设备编码");
         }
     }
-
-//    /**
-//     * @Author: liwencai
-//     * @Description: 分组的相关数据
-//     * @Date: 2022/11/4
-//     * @Param: sysCode: 子系统编码
-//     * @Return: com.thtf.common.response.JsonResult
-//     */
-//    @PostMapping("/group_count")
-//    public JsonResult countGroup(@RequestParam("sysCode") String sysCode){
-//        return itemAPI.countGroupByParameter(sysCode, ParameterConstant.GB_TASK,ParameterConstant.GB_TASK_ON_VALUE);
-//    }
 }

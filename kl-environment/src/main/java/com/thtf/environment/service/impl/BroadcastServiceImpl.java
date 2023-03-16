@@ -1,10 +1,10 @@
 package com.thtf.environment.service.impl;
 
-
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.constant.AlarmConstants;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
@@ -12,14 +12,15 @@ import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.environment.common.Constant.ParameterConstant;
-import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.environment.config.ItemParameterConfig;
 import com.thtf.environment.dto.ParameterInfoDTO;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.dto.convert.ParameterConverter;
 import com.thtf.environment.service.BroadcastService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -39,17 +40,25 @@ import java.util.stream.Collectors;
 public class BroadcastServiceImpl implements BroadcastService {
 
     @Resource
-    ItemAPI itemAPI;
-    @Resource
-    AlarmAPI alarmAPI;
-    @Resource
-    PageInfoConvert pageInfoConvert;
+    private ItemAPI itemAPI;
 
     @Resource
-    ParameterConverter parameterConverter;
+    private AlarmAPI alarmAPI;
 
     @Resource
-    RedisOperationService redisOperationService;
+    private PageInfoConvert pageInfoConvert;
+
+    @Resource
+    private ParameterConverter parameterConverter;
+
+    @Resource
+    private RedisOperationService redisOperationService;
+
+    @Resource
+    private CommonService commonService;
+
+    @Resource
+    private ItemParameterConfig itemParameterConfig;
 
     /**
      * @Author: liwencai
@@ -71,13 +80,6 @@ public class BroadcastServiceImpl implements BroadcastService {
                 buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
-//        if(StringUtils.isNotBlank(buildingCodes)){
-//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
-//        } else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                areaCodeList = Arrays.asList(areaCode.split(","));
-//            }
-//        }
         // 设备总数 报警设备数 故障设备总数
         CountItemInfoParamDTO countItemInfoParam = new CountItemInfoParamDTO();
         countItemInfoParam.setSysCode(sysCode);
@@ -87,8 +89,6 @@ public class BroadcastServiceImpl implements BroadcastService {
         result.setItemNum(itemInfo.getItemNumber());
         result.setMonitorNum(itemInfo.getAlarmItemNumber());
         result.setFaultItemNum(itemInfo.getFaultItemNumber());
-
-
         // 在线数
         CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
         if(null != buildingCodeList && buildingCodeList.size()>0){
@@ -97,12 +97,13 @@ public class BroadcastServiceImpl implements BroadcastService {
             countItemByParameterListDTO.setAreaCode(areaCode);
         }
         countItemByParameterListDTO.setSysCode(sysCode);
-        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.BROADCAST_ONLINE);
-        countItemByParameterListDTO.setParameterValue(ParameterConstant.BROADCAST_TASK_ON_VALUE);
+        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getBroadcastOnline());
+        String parameterValueOnline = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getBroadcastOnline(), null, new String[]{"在线","在","上"});
+        countItemByParameterListDTO.setParameterValue(parameterValueOnline);
         result.setRunningItemNum(itemAPI.countItemByParameterList(countItemByParameterListDTO).getData());
         // 群控分组信息
         // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
-        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode,buildingCodes,areaCode, ParameterConstant.BROADCAST_TASK_STATUS, ParameterConstant.BROADCAST_TASK_ON_VALUE).getData();
+        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode,buildingCodes,areaCode, itemParameterConfig.getBroadcastOnline(), parameterValueOnline).getData();
         if(null == data){
             result.setAreaNum(0);
             result.setRunningAreaNum(0);
@@ -151,16 +152,20 @@ public class BroadcastServiceImpl implements BroadcastService {
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     @Override
-    public PageInfoVO getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize) {
+    public PageInfo<ItemInfoOfBroadcastDTO> getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize) {
+        PageInfo<ItemInfoOfBroadcastDTO> pageInfoVO = new PageInfo<>();
         String parameterCode = null;
         String parameterValue = null;
         if(StringUtils.isNotBlank(runVale)){
-            parameterCode = ParameterConstant.BROADCAST_ONLINE;
-            parameterValue = runVale;
+
+            String parameterValueOnline = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getBroadcastOnline(), null, new String[]{"在线","在","上"});
+            parameterCode = itemParameterConfig.getBroadcastOnline();
+            parameterValue = parameterValueOnline;
         }
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
                 sysCode, null, buildingCodes ,areaCode,parameterCode, parameterValue, keyword,pageNumber,pageSize).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
+        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
+        BeanUtils.copyProperties(itemPageInfo,pageInfoVO);
         // 获取设备报警信息
         List<ItemInfoOfBroadcastDTO> resultList = new ArrayList<>();
         // 获取设备基本信息
@@ -192,65 +197,66 @@ public class BroadcastServiceImpl implements BroadcastService {
         List<ParameterInfoDTO> parameterInnerList = new ArrayList<>();
         for (TblItemParameter parameter : parameterList) {
             // 运行状态
-            if (ParameterConstant.BROADCAST_STATE.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getState().equals(parameter.getParameterType())) {
                 innerResult.setRunParameterCode(parameter.getCode());
                 innerResult.setRunValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
-            // 在线状态
-            if (ParameterConstant.BROADCAST_ONLINE.equals(parameter.getParameterType())) {
-                innerResult.setOnlineParameterCode(parameter.getCode());
-                innerResult.setOnlineValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-            // 任务状态
-            if (ParameterConstant.BROADCAST_TASK_STATUS.equals(parameter.getParameterType())) {
-                innerResult.setTaskStatusParameterCode(parameter.getCode());
-                innerResult.setTaskStatusValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-            // 任务队列
-            if (ParameterConstant.BROADCAST_TASK_QUEUE.equals(parameter.getParameterType())) {
-                innerResult.setTaskQueueParameterCode(parameter.getCode());
-                innerResult.setTaskQueueValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-            // 音量
-            if (ParameterConstant.BROADCAST_AUDIO.equals(parameter.getParameterType())) {
-                innerResult.setAudioParameterCode(parameter.getCode());
-                innerResult.setAudioValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-            // 对讲状态
-            if (ParameterConstant.BROADCAST_INTERCOM_STATUS.equals(parameter.getParameterType())) {
-                innerResult.setIntercomStatusParameterCode(parameter.getCode());
-                innerResult.setIntercomStatusValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-            // 消防播报端口
-            if (ParameterConstant.BROADCAST_PLAY_PORT.equals(parameter.getParameterType())) {
-                innerResult.setPlayPortParameterCode(parameter.getCode());
-                innerResult.setPlayPortValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-            // 音量控制
-            if (ParameterConstant.BROADCAST_AUDIO_CONTROL.equals(parameter.getParameterType())) {
-                innerResult.setAudioReceiveParameterCode(parameter.getCode());
-                innerResult.setAudioReceiveValue(parameter.getValue());
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
             // 报警
-            if (ParameterConstant.BROADCAST_ALARM.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getAlarm().equals(parameter.getParameterType())) {
                 innerResult.setAlarmParameterCode(parameter.getCode());
                 innerResult.setAlarmValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 故障
-            if (ParameterConstant.BROADCAST_FAULT.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getFault().equals(parameter.getParameterType())) {
                 innerResult.setFaultParameterCode(parameter.getCode());
                 innerResult.setFaultValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
+            // 在线状态
+            if (itemParameterConfig.getBroadcastOnline().equals(parameter.getParameterType())) {
+                innerResult.setOnlineParameterCode(parameter.getCode());
+                innerResult.setOnlineValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 任务状态
+            if (itemParameterConfig.getBroadcastTaskStatus().equals(parameter.getParameterType())) {
+                innerResult.setTaskStatusParameterCode(parameter.getCode());
+                innerResult.setTaskStatusValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 任务队列
+            if (itemParameterConfig.getBroadcastTaskQueue().equals(parameter.getParameterType())) {
+                innerResult.setTaskQueueParameterCode(parameter.getCode());
+                innerResult.setTaskQueueValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 音量
+            if (itemParameterConfig.getBroadcastAudio().equals(parameter.getParameterType())) {
+                innerResult.setAudioParameterCode(parameter.getCode());
+                innerResult.setAudioValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 对讲状态
+            if (itemParameterConfig.getBroadcastIntercomStatus().equals(parameter.getParameterType())) {
+                innerResult.setIntercomStatusParameterCode(parameter.getCode());
+                innerResult.setIntercomStatusValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 消防播报端口
+            if (itemParameterConfig.getBroadcastPlayPort().equals(parameter.getParameterType())) {
+                innerResult.setPlayPortParameterCode(parameter.getCode());
+                innerResult.setPlayPortValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+            // 音量控制
+            if (itemParameterConfig.getBroadcastAudioCtrl().equals(parameter.getParameterType())) {
+                innerResult.setAudioReceiveParameterCode(parameter.getCode());
+                innerResult.setAudioReceiveValue(parameter.getValue());
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
         }
         innerResult.setParameterList(parameterInnerList);
     }
@@ -267,8 +273,8 @@ public class BroadcastServiceImpl implements BroadcastService {
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     @Override
-    public PageInfoVO getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize) {
-
+    public PageInfo<AlarmInfoOfBroadcastDTO> getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize) {
+        PageInfo<AlarmInfoOfBroadcastDTO> pageInfoVO = new PageInfo<>();
         List<String> buildingCodeList = null;
         List<String> areaCodeList = null;
         if(StringUtils.isNotBlank(areaCode)){
@@ -278,27 +284,20 @@ public class BroadcastServiceImpl implements BroadcastService {
                 buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
-//        if(StringUtils.isNotBlank(buildingCodes)){
-//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
-//        }else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                areaCodeList = Arrays.asList(areaCode.split(","));
-//            }
-//        }
         TblItem tblItem = new TblItem();
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
         tblItem.setSystemCode(sysCode);
         tblItem.setFault(1);
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
-        if(itemList ==  null || itemList.size() == 0){
-            return null;
+        if(CollectionUtils.isEmpty(itemList)){
+            return pageInfoVO;
         }
         List<String> itemCodeList = itemList.stream().map(TblItem::getCode).collect(Collectors.toList());
 
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
         listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
-        listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
+        listAlarmInfoLimitOneParamDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
         listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
         listAlarmInfoLimitOneParamDTO.setKeyword(keyword);
         listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(keyword);
@@ -308,7 +307,8 @@ public class BroadcastServiceImpl implements BroadcastService {
         listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
 
         PageInfo<TblAlarmRecordUnhandle> tblAlarmRecordUnhandlePageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
+        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(tblAlarmRecordUnhandlePageInfo);
+        BeanUtils.copyProperties(tblAlarmRecordUnhandlePageInfo,pageInfoVO);
         List<String> collect = tblAlarmRecordUnhandlePageInfo.getList().stream().map(TblAlarmRecordUnhandle::getItemCode).collect(Collectors.toList());
         itemList.removeIf(e->!collect.contains(e.getCode()));
         List<AlarmInfoOfBroadcastDTO> resultList = new ArrayList<>();
@@ -375,7 +375,7 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     public ItemInfoOfBroadcastDTO getMonitorPoint(String sysCode, String itemCode) {
         List<ItemNestedParameterVO> itemNestedParameterVOList = itemAPI.searchItemNestedParametersBySysCodeAndItemCodeList(sysCode, Collections.singletonList(itemCode)).getData();
-        if(null == itemNestedParameterVOList || itemNestedParameterVOList.size()<1){
+        if(CollectionUtils.isEmpty(itemNestedParameterVOList)){
             return null;
         }
         ItemNestedParameterVO itemNestedParameterVO = itemNestedParameterVOList.get(0);
