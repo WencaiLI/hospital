@@ -1,15 +1,17 @@
 package com.thtf.environment.service;
 
+import com.github.pagehelper.PageInfo;
 import com.thtf.environment.dto.InfoPublishDisplayDTO;
 import com.thtf.environment.dto.ItemInfoOfLargeScreenDTO;
 import com.thtf.environment.dto.ItemPlayInfoDTO;
 import com.thtf.environment.dto.PageInfoVO;
+import com.thtf.environment.vo.ListLargeScreenInfoParamVO;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/9/21 17:22
  * @Description:
  */
@@ -25,7 +27,7 @@ public interface InfoPublishService {
      * @Param pageSize: 页大小
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfLargeScreenDTO>
      */
-    PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap);
+    PageInfo<ItemInfoOfLargeScreenDTO> getLargeScreenInfo(ListLargeScreenInfoParamVO paramVO);
 
     /**
      * @Author: liwencai

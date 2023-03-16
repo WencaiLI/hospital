@@ -16,23 +16,25 @@ import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.config.ItemParameterConfig;
 import com.thtf.environment.dto.*;
 import com.thtf.environment.dto.convert.AlarmConvert;
 import com.thtf.environment.dto.convert.PageInfoConvert;
 import com.thtf.environment.dto.convert.ParameterConverter;
 import com.thtf.environment.service.InfoPublishService;
+import com.thtf.environment.vo.ListLargeScreenInfoParamVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -51,13 +53,17 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Resource
     private AdminAPI adminAPI;
     @Resource
-    PageInfoConvert pageInfoConvert;
+    private PageInfoConvert pageInfoConvert;
     @Resource
-    ParameterConverter parameterConverter;
+    private ParameterConverter parameterConverter;
     @Resource
-    AlarmConvert alarmConvert;
+    private AlarmConvert alarmConvert;
     @Resource
-    RedisOperationService redisOperationService;
+    private RedisOperationService redisOperationService;
+    @Resource
+    private ItemParameterConfig itemParameterConfig;
+    @Resource
+    private CommonService commonService;
 
     /**
      * @Author: liwencai
@@ -71,22 +77,21 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfLargeScreenDTO>
      */
     @Override
-    public PageInfoVO getLargeScreenInfo(Map<String, Object> paramMap) {
+    public PageInfo<ItemInfoOfLargeScreenDTO> getLargeScreenInfo(ListLargeScreenInfoParamVO paramVO) {
         String parameterCode = null;
         String parameterValue = null;
         // 运行状态筛选
-        if(null != paramMap.get(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS)){
-            parameterCode = ParameterConstant.INFO_PUBLISH_ONLINE_STATUS;
-            parameterValue = (String) paramMap.get(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS);
+        if(null != paramVO.getOnlineValue()){
+            parameterCode = itemParameterConfig.getInfoPublishOnline();
+            parameterValue = commonService.getParameterValueByStateExplain(paramVO.getSysCode(), itemParameterConfig.getInfoPublishOnline(), null, new String[]{"在线", "上"});
         }
         // 查询所有设备信息
         PageInfo<ItemNestedParameterVO> itemPageInfo = itemAPI.listItemNestedParametersBySysCodeAndItemCodeListAndParameterKeyAndValueAndKeywordPage(
-                (String) paramMap.get("sysCode"), null, (String) paramMap.get("buildingCodes") ,(String) paramMap.get("areaCode"),
-                parameterCode, parameterValue , (String) paramMap.get("keyword"),
-                (Integer) paramMap.get("pageNumber"), (Integer) paramMap.get("pageSize")
-        ).getData();
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(itemPageInfo);
+                paramVO.getSysCode(), null, paramVO.getBuildingCodes() ,paramVO.getAreaCodes(),
+                parameterCode, parameterValue , paramVO.getKeyword(), paramVO.getPageNumber(), paramVO.getPageSize()).getData();
+        PageInfo<ItemInfoOfLargeScreenDTO> pageInfoVO = new PageInfo<>();
         List<ItemNestedParameterVO> list = itemPageInfo.getList();
+
         // 获取所有设备报警信息
         List<ItemInfoOfLargeScreenDTO> resultList = new ArrayList<>();
         for (ItemNestedParameterVO itemNestedParameterVO : list) {
@@ -115,44 +120,44 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     public void convertToItemInfoOfLargeScreenDTO(ItemInfoOfLargeScreenDTO innerResult ,List<TblItemParameter> parameterList){
         List<ParameterInfoDTO> parameterInnerList = new ArrayList<>();
         for (TblItemParameter parameter : parameterList) {
-            // 容量百分比
-            if (ParameterConstant.INFO_PUBLISH_RUN_STATUS.equals(parameter.getParameterType())) {
+            // 运行状态
+            if (itemParameterConfig.getState().equals(parameter.getParameterType())) {
                 innerResult.setRunParameterCode(parameter.getCode());
                 innerResult.setRunValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 在线状态
-            if (ParameterConstant.INFO_PUBLISH_ONLINE_STATUS.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getInfoPublishOnline().equals(parameter.getParameterType())) {
                 innerResult.setOnlineParameterCode(parameter.getCode());
                 innerResult.setOnlineValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 亮度
-            if (ParameterConstant.INFO_PUBLISH_LUMINANCE.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getInfoPublishLuminance().equals(parameter.getParameterType())) {
                 innerResult.setLuminanceParameterCode(parameter.getCode());
                 innerResult.setLuminanceValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 音量
-            if (ParameterConstant.INFO_PUBLISH_VOLUME.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getInfoPublishVolume().equals(parameter.getParameterType())) {
                 innerResult.setVolumeParameterCode(parameter.getCode());
                 innerResult.setVolumeValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 放映时长
-            if (ParameterConstant.INFO_PUBLISH_RUN_TIME.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getInfoPublishRunTime().equals(parameter.getParameterType())) {
                 innerResult.setShowDurationParameterCode(parameter.getCode());
                 innerResult.setShowDurationValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 总容量
-            if (ParameterConstant.INFO_PUBLISH_CAPACITY.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getInfoPublishCapacity().equals(parameter.getParameterType())) {
                 innerResult.setCapacityParameterCode(parameter.getCode());
                 innerResult.setCapacityValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
             }
             // 已使用容量和所占百分比
-            if (ParameterConstant.INFO_PUBLISH_STORED_CAPACITY.equals(parameter.getParameterType())) {
+            if (itemParameterConfig.getInfoPublishStoredCapacity().equals(parameter.getParameterType())) {
                 innerResult.setStorageStatusParameterCode(parameter.getCode());
                 innerResult.setStorageStatusValue(parameter.getValue());
                 parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
@@ -182,13 +187,6 @@ public class InfoPublishServiceImpl implements InfoPublishService {
                 buildingCodeList = Arrays.asList(buildingCodes.split(","));
             }
         }
-//        if(StringUtils.isNotBlank(buildingCodes)){
-//            buildingCodeList = Arrays.asList(buildingCodes.split(","));
-//        }else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                areaCodeList = Arrays.asList(areaCode.split(","));
-//            }
-//        }
         TblItem tblItem = new TblItem();
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
@@ -247,10 +245,11 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      */
     @Override
     @Transactional
+    // todo liwencai 和前端了解控制原理并修改接口
     public Boolean remoteSwitch(String sysCode, String itemCodes) {
-        if( itemAPI.negateBooleanParameter(itemCodes,ParameterConstant.INFO_PUBLISH_RUN_STATUS).getData()){
-            redisOperationService.remoteSwitchItemStatusByItemCodeList(Arrays.stream(itemCodes.split(",")).collect(Collectors.toList()));
-        }
+//        if( itemAPI.negateBooleanParameter(itemCodes,itemParameterConfig.getState()).getData()){
+//            redisOperationService.remoteSwitchItemStatusByItemCodeList(Arrays.stream(itemCodes.split(",")).collect(Collectors.toList()));
+//        }
         return true;
     }
 
@@ -393,7 +392,6 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         result.setAlarmNumber(itemInfo.getAlarmItemNumber());
         result.setFaultNumber(itemInfo.getFaultItemNumber());
 
-
         CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
         countItemByParameterListDTO.setSysCode(sysCode);
         countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
@@ -403,30 +401,19 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         countItemByParameterListDTO.setItemTypeCodeList(itemTypeCodeList);
 
         // 查看在线数量
-        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.INFO_PUBLISH_ONLINE_STATUS);
-        countItemByParameterListDTO.setParameterValue("1");
+        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getInfoPublishOnline());
+        String parameterValue = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getInfoPublishOnline(), itemTypeCodes, new String[]{"在线", "上"});
+        countItemByParameterListDTO.setParameterValue(parameterValue);
         Integer onlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
         result.setOnlineCount(onlineCount);
 
         // 查看开启数量
-        countItemByParameterListDTO.setParameterTypeCode(ParameterConstant.INFO_PUBLISH_RUN_STATUS);
-        countItemByParameterListDTO.setParameterValue("1");
+        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getState());
+        countItemByParameterListDTO.setParameterValue(null);
+        String parameterValueState = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getInfoPublishOnline(), itemTypeCodes, new String[]{"运行", "运" ,"行"});
+        countItemByParameterListDTO.setParameterValue(parameterValueState);
         Integer onCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
         result.setOnCount(onCount);
-
-//        CountItemInfoParamDTO countItemInfoParamDTO = new CountItemInfoParamDTO();
-//        countItemInfoParamDTO.setSysCode(sysCode);
-//        if(null != buildingCodeList){
-//            countItemInfoParamDTO.setBuildingCodeList(buildingCodeList);
-//        }else {
-//            if(StringUtils.isNotBlank(areaCode)){
-//                countItemInfoParamDTO.setAreaCodeList(Collections.singletonList(areaCode));
-//            }
-//        }
-//        CountItemInfoResultDTO itemInfo = itemAPI.countItemInfo(countItemInfoParamDTO).getData();
-//        result.setTotalCount(itemInfo.getItemNumber());
-//        result.setFaultNumber(itemInfo.getFaultItemNumber());
-//        result.setAlarmNumber(itemInfo.getAlarmItemNumber());
         return result;
     }
 
@@ -465,52 +452,6 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         } else {
             return buildAreaName;
         }
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description: 计算两时间的差值（单位/秒）
-     * @Date: 2022/8/31
-     * @Param startTime: 开始时间
-     * @Param endTime: 结束时间
-     * @return: java.lang.Long
-     */
-    public Long timeGap(LocalDateTime startTime,LocalDateTime endTime,ChronoUnit chronoUnit){
-        try {
-            return Math.abs(endTime.until(startTime, chronoUnit));
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取时间差（*天*小时*分*秒）
-     * @Date: 2022/10/27
-     * @Param: startTime: 开始时间
-     * @Param: endTime: 结束使劲按
-     * @Return: java.lang.String
-     */
-    public String getTimeGap(LocalDateTime startTime,LocalDateTime endTime){
-        Date nowDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
-        Date alarmTimeStartTime = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
-        long nd = 1000 * 24 * 60 * 60;
-        long nh = 1000 * 60 * 60;
-        long nm = 1000 * 60;
-        long ns = 1000;
-        // 获得两个时间的毫秒时间差异
-        long diff = nowDate.getTime() - alarmTimeStartTime.getTime();
-        // 计算差多少天
-        long day = diff / nd;
-        // 计算差多少小时
-        long hour = diff % nd / nh;
-        // 计算差多少分钟
-        long min = diff % nd % nh / nm;
-        // 计算差多少秒
-        long sec = diff % nd % nh % nm /ns;
-        // 输出结果
-        return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
     }
     /* *************************** 复用代码区域 结束 ************************** */
 }

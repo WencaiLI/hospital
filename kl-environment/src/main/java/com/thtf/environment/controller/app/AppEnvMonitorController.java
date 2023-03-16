@@ -1,4 +1,4 @@
-package com.thtf.environment.app;
+package com.thtf.environment.controller.app;
 
 import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.AppEnvMonitorDisplayDTO;

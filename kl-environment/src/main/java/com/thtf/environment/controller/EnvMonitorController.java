@@ -1,5 +1,6 @@
 package com.thtf.environment.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoVO;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
@@ -163,7 +164,7 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.EnvMonitorItemResultVO>
      */
     @PostMapping("/item_info")
-    public JsonResult<PageInfoVO> listItemInfo(@RequestBody EnvMonitorItemParamVO paramVO){
+    public JsonResult<PageInfo<EnvMonitorItemResultVO>> listItemInfo(@RequestBody EnvMonitorItemParamVO paramVO){
         return JsonResult.querySuccess(envMonitorService.listItemInfo(paramVO));
     }
 

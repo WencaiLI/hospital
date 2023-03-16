@@ -9,7 +9,7 @@ import org.mapstruct.Mappings;
 import java.util.List;
 
 /**
- * @Auther: liwencai
+ * @Author: liwencai
  * @Date: 2022/9/23 13:15
  * @Description:
  */

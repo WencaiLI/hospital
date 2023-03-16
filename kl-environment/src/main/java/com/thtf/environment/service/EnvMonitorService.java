@@ -1,6 +1,7 @@
 package com.thtf.environment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoVO;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
@@ -59,16 +60,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param: paramVO: 
      * @Return: java.util.List<com.thtf.environment.vo.EnvMonitorItemResultVO>
      */
-    PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO);
-
-    /**
-     * @Author: liwencai
-     * @Description:
-     * @Date: 2022/10/27
-     * @Param: itemCode:
-     * @Return: java.util.List<com.thtf.environment.vo.ItemParameterInfoVO>
-     */
-    List<ItemParameterInfoVO> listParameter(String itemCode);
+    PageInfo<EnvMonitorItemResultVO> listItemInfo(EnvMonitorItemParamVO paramVO);
 
     /**
      * @Author: liwencai

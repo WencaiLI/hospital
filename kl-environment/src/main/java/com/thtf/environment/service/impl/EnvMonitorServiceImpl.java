@@ -20,7 +20,7 @@ import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.GroupAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
-import com.thtf.environment.common.Constant.ParameterConstant;
+import com.thtf.environment.config.ItemParameterConfig;
 import com.thtf.environment.config.ParameterConfigNacos;
 import com.thtf.environment.dto.PageInfoVO;
 import com.thtf.environment.dto.*;
@@ -54,12 +54,6 @@ import java.util.stream.Collectors;
 @Service
 public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, TblHistoryMoment> implements EnvMonitorService {
 
-    @Autowired
-    private TblHistoryMomentMapper tblHistoryMomentMapper;
-
-    @Resource
-    private ParameterConfigNacos parameterConfigNacos;
-
     @Resource
     private ItemAPI itemAPI;
 
@@ -81,6 +75,18 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Resource
     private ParameterConverter itemParameterConvert;
 
+    @Autowired
+    private TblHistoryMomentMapper tblHistoryMomentMapper;
+
+    @Resource
+    private CommonService commonService;
+
+    @Resource
+    private ItemParameterConfig itemParameterConfig;
+
+    @Resource
+    private ParameterConfigNacos parameterConfigNacos;
+
     private final static String TBL_HISTORY_MOMENT = "tbl_history_moment";
     private final static String DAY_START_SUFFIX = " 00:00:00";
     private final static String DAY_END_SUFFIX = " 23:59:59";
@@ -98,8 +104,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     public ItemTotalAndOnlineAndAlarmNumDTO getDisplayInfo(String sysCode, String areaCode,String buildingCodes) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         String itemTypeCodes = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).distinct().collect(Collectors.joining(","));
-        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,itemTypeCodes,ParameterConstant.ENV_MONITOR_ONLINE,ParameterConstant.ENV_MONITOR_ONLINE_VALUE,true,true).getData();
+        String parameterValueByStateExplain = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), itemTypeCodes, new String[]{"运", "行", "在"});
+        return itemAPI.getItemOnlineAndTotalAndAlarmItemNumber(sysCode,areaCode,buildingCodes,itemTypeCodes,itemParameterConfig.getState(),parameterValueByStateExplain,true,true).getData();
     }
+
     /**
      * @Author: liwencai
      * @Description: 以24小时为维度统计报警总数,每日的每小时累加
@@ -115,7 +123,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Override
     public EChartsMoreVO getTotalAlarmHourly(String sysCode, String buildingCodes, String areaCode, Boolean isHandled, String startTime, String endTime) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-        if(null == parameterInfo || parameterInfo.size() == 0){
+        if(CollectionUtils.isEmpty(parameterInfo)){
             return null;
         }
         EChartsMoreVO result = new EChartsMoreVO();
@@ -157,16 +165,16 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取所有报警的数据统计
      * @Date: 2023/2/28
      * @Param param:
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO>>
      */
     @Override
-    public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(ItemAlarmInfoVO param) {// 获取所有的数据统计
+    public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(ItemAlarmInfoVO param) {
         if(CollectionUtils.isEmpty(param.getItemTypeCodeList())){
             List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-            if(null == parameterInfo || parameterInfo.size() == 0){
+            if(CollectionUtils.isEmpty(parameterInfo)){
                 return null;
             }
             List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
@@ -249,25 +257,25 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Override
     public List<CodeNameVO> getItemTypeList(String sysCode) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-        if(null == parameterInfo || parameterInfo.size() == 0){
+        if(CollectionUtils.isEmpty(parameterInfo)){
             return null;
         }
-        List<String> collect = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+        List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
 
         List<CodeNameVO> codeNameVOS = itemTypeConvert.toCodeNameVO(Objects.requireNonNull(itemAPI.getItemTypesBySysId(sysCode).getBody()).getData());
-        codeNameVOS.removeIf(e->!collect.contains(e.getCode()));
+        codeNameVOS.removeIf(e->!itemTypeCodeList.contains(e.getCode()));
         return codeNameVOS;
     }
 
     /**
      * @Author: liwencai
-     * @Description:
+     * @Description: 获取设备信息
      * @Date: 2022/11/24
      * @Param paramVO:
      * @return: com.thtf.environment.dto.PageInfoVO
      */
     @Override
-    public PageInfoVO listItemInfo(EnvMonitorItemParamVO paramVO) {
+    public PageInfo<EnvMonitorItemResultVO> listItemInfo(EnvMonitorItemParamVO paramVO) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
         if(CollectionUtils.isEmpty(parameterInfo)){
             return null;
@@ -303,22 +311,23 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         if(null != paramVO.getAlarmCategory()){
             // 报警
             if(AlarmConstants.ALARM_CATEGORY_INTEGER.equals(paramVO.getAlarmCategory())){
-                paramDTO.setAlarm(1);
+                paramDTO.setAlarm(ItemConstants.ITEM_ALARM_TRUE);
             }
             // 故障
             if(AlarmConstants.FAULT_CATEGORY_INTEGER.equals(paramVO.getAlarmCategory())){
-                paramDTO.setAlarm(0);
-                paramDTO.setFault(1);
+                paramDTO.setAlarm(ItemConstants.ITEM_ALARM_FALSE);
+                paramDTO.setFault(ItemConstants.ITEM_FAULT_TRUE);
             }
         }
         paramDTO.setPageNumber(paramVO.getPageNumber());
         paramDTO.setPageSize(paramVO.getPageSize());
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
 
+        PageInfo<EnvMonitorItemResultVO> pageInfoVO = new PageInfo<>();
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
-
-        PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         Map<String, String> buildingInfoMap;
+
+        // 建筑编码和建筑名称的映射
         if(!CollectionUtils.isEmpty(pageInfo.getList())){
             List<String> buildingCodeListInResult = pageInfo.getList().stream().map(ItemNestedParameterVO::getBuildingCode).distinct().collect(Collectors.toList());
             buildingInfoMap = adminAPI.getBuildingMap(buildingCodeListInResult).getData();
@@ -346,16 +355,19 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             }
             // 匹配参数信息
             this.convertToParameter(envMonitorItemResultVO,item.getParameterList(),parameterInfo,itemTypeCodeList);
+
             // 匹配报警信息  0 正常 1 报警 2 故障 此处的报警信息的设备取决于前端取哪个字段
             if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
                 envMonitorItemResultVO.setAlarmCategory(1);
-                envMonitorItemResultVO.setAlarmParameterValue("1");
+                String parameterValue = commonService.getParameterValueByStateExplain(itemParameterConfig.getAlarm(), item.getParameterList(), new String[]{"报警", "警"});
+                envMonitorItemResultVO.setAlarmParameterValue(parameterValue);
             }else if (ItemConstants.ITEM_ALARM_FALSE.equals(item.getAlarm()) && ItemConstants.ITEM_FAULT_TRUE.equals(item.getFault())){
                 envMonitorItemResultVO.setAlarmCategory(2);
-                envMonitorItemResultVO.setFaultParameterCode("1");
+                String parameterValue = commonService.getParameterValueByStateExplain(itemParameterConfig.getFault(), item.getParameterList(), new String[]{"故障", "障"});
+                envMonitorItemResultVO.setFaultParameterCode(parameterValue);
             }else {
                 envMonitorItemResultVO.setAlarmCategory(0);
-                envMonitorItemResultVO.setAlarmParameterValue("0");
+                envMonitorItemResultVO.setAlarmParameterValue(null);
             }
             resultVOList.add(envMonitorItemResultVO);
         }
@@ -378,21 +390,21 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         itemParameterList.forEach(parameter->{
             if(parameter.getItemCode().equals(envMonitorItemResultVO.getItemCode())){
                 // 在线状态
-                if(ParameterConstant.ENV_MONITOR_ONLINE.equals(parameter.getParameterType())){
+                if(itemParameterConfig.getState().equals(parameter.getParameterType())){
                     envMonitorItemResultVO.setOnlineParameterCode(parameter.getCode());
                     if(null != parameter.getValue()){
                         envMonitorItemResultVO.setOnlineParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
                     }
                 }
                 // 故障
-                if(ParameterConstant.ENV_MONITOR_FAULT.equals(parameter.getParameterType())){
+                if(itemParameterConfig.getFault().equals(parameter.getParameterType())){
                     envMonitorItemResultVO.setFaultParameterCode(parameter.getCode());
                     if(null != parameter.getValue()){
                         envMonitorItemResultVO.setFaultParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
                     }
                 }
                 // 报警
-                if(ParameterConstant.ENV_MONITOR_ALARM.equals(parameter.getParameterType())){
+                if(itemParameterConfig.getAlarm().equals(parameter.getParameterType())){
                     envMonitorItemResultVO.setAlarmParameterCode(parameter.getCode());
                     if(null != parameter.getValue()){
                         envMonitorItemResultVO.setAlarmParameterValue(Optional.ofNullable(parameter.getValue()).orElse("")+Optional.ofNullable(parameter.getUnit()).orElse(""));
@@ -412,18 +424,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     /**
      * @Author: liwencai
-     * @Description: 查询设备参数
-     * @Date: 2022/10/27
-     * @Param: itemCode: 设备编码
-     * @Return: java.util.List<com.thtf.environment.vo.ItemParameterInfoVO>
-     */
-    @Override
-    public List<ItemParameterInfoVO> listParameter(String itemCode) {
-        return itemParameterConvert.toItemParameterInfoVOList(itemAPI.searchParameterByItemCodes(Collections.singletonList(itemCode)).getData());
-    }
-
-    /**
-     * @Author: liwencai
      * @Description: 获取每小时的历史统计数据
      * @Date: 2022/10/27
      * @Param: itemCode: 设备编码
@@ -435,7 +435,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Override
     public EChartsVO getHourlyHistoryMoment(String itemCode,String itemTypeCode, String parameterCode, String date) {
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-        if(null == parameterInfo){
+        if(CollectionUtils.isEmpty(parameterInfo)){
             return null;
         }
 
@@ -445,6 +445,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
                 result.setUnit(e.getUnit());
             }
         });
+
         List<TimeValueDTO> hourlyHistoryMoment = null;
         if(StringUtils.isBlank(parameterCode)){
             if(StringUtils.isNotBlank(itemTypeCode)){
@@ -861,7 +862,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             List<TblItemParameter> resultParameterList = new ArrayList<>();
             List<TblItemParameter> parameterList = listItemNestedParametersResultDTO.getParameterList();
             parameterList.forEach(e->{
-                if(ParameterConstant.ENV_MONITOR_ALARM.equals(e.getParameterType())){
+                if(itemParameterConfig.getAlarm().equals(e.getParameterType())){
                     result.setAlarmParameterCode(e.getCode());
                     result.setAlarmParameterValue(e.getValue());
                     resultParameterList.add(e);

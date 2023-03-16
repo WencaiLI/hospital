@@ -2,13 +2,11 @@ package com.thtf.environment.service.impl;
 
 import com.thtf.common.dto.alarmserver.ListAlarmPageParamDTO;
 import com.thtf.common.dto.itemserver.ItemGroupParamVO;
-import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ParameterTemplateAndDetailDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.environment.common.Constant.ParameterConstant;
 import com.thtf.environment.dto.AppEnvMonitorDisplayDTO;
 import com.thtf.environment.dto.AppListAlarmParamDTO;
 import com.thtf.environment.dto.KeyValueDTO;
@@ -17,12 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -36,9 +32,18 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
 
     @Autowired
     private AlarmAPI alarmAPI;
+
     @Autowired
     private EnvMonitorServiceImpl envMonitorServiceImpl;
 
+    /**
+     * @Author: liwencai
+     * @Description: 前端信息
+     * @Date: 2023/3/15
+     * @Param sysCode:
+     * @Param buildingCodes:
+     * @Return: com.thtf.environment.dto.AppEnvMonitorDisplayDTO
+     */
     @Override
     public AppEnvMonitorDisplayDTO getDisplayInfo(String sysCode, String buildingCodes) {
         ItemGroupParamVO itemGroupParamVO = new ItemGroupParamVO();
@@ -49,6 +54,14 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         return result;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 报警数量统计
+     * @Date: 2023/3/15
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO>
+     */
     @Override
     public List<KeyValueDTO> getAlarmCount(String sysCode, String buildingCodes){
         List<KeyValueDTO> result = new ArrayList<>();
@@ -74,6 +87,13 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         return result;
     }
 
+    /**
+     * @Author: liwencai
+     * @Description: 未处理报警信息
+     * @Date: 2023/3/15
+     * @Param paramDTO:
+     * @Return: java.lang.Object
+     */
     @Override
     public Object listAlarmUnhandled(AppListAlarmParamDTO paramDTO){
         ListAlarmPageParamDTO listAlarmPageParamDTO = new ListAlarmPageParamDTO();
@@ -107,7 +127,12 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
     }
 
     /**
-     * 获取组信息
+     * @Author: liwencai
+     * @Description: 获取组信息
+     * @Date: 2023/3/15
+     * @Param sysCode:
+     * @Param buildingCodes:
+     * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO>
      */
     @Override
     public List<KeyValueDTO> listGroupInfo(String sysCode, String buildingCodes){
@@ -125,7 +150,11 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
     }
 
     /**
-     * 获取类别信息
+     * @Author: liwencai
+     * @Description: 获取类别信息
+     * @Date: 2023/3/15
+     * @Param sysCode:
+     * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO>
      */
     @Override
     public List<KeyValueDTO> listTypeInfo(String sysCode){
