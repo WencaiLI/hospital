@@ -52,7 +52,7 @@ public class ElevatorInfoResultDTO extends ElevatorStatusVO {
     /**
      * 报警状态
      */
-    private Integer alarmCategory;
+    private String alarmCategory;
 
     /**
      * 参数列表
