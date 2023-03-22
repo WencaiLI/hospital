@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 public class ElevatorAlarmResultDTO extends ElevatorInfoResultDTO{
     private Integer alarmLevel;
-    private Integer alarmCategory;
+    private String alarmCategory;
     private String stayTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime alarmTime;

@@ -123,10 +123,10 @@ public class ElevatorServiceImpl implements ElevatorService {
             for (ListItemNestedParametersResultDTO item : data) {
                 if (item.getItemCode().equals(elevatorInfoResultDTO.getItemCode())){
                     if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
-                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER);
+                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER.toString());
                     }
                     if (ItemConstants.ITEM_ALARM_FALSE.equals(item.getAlarm()) && ItemConstants.ITEM_FAULT_TRUE.equals(item.getFault())) {
-                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER);
+                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
                     }
                     convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
                 }
@@ -317,10 +317,10 @@ public class ElevatorServiceImpl implements ElevatorService {
                     convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
                     elevatorInfoResultDTO.setBuildingName(buildingMap.get(item.getBuildingCode()));
                     if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
-                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER);
+                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER.toString());
                     }
                     if (ItemConstants.ITEM_ALARM_FALSE.equals(item.getAlarm()) && ItemConstants.ITEM_FAULT_TRUE.equals(item.getFault())) {
-                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER);
+                        elevatorInfoResultDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
                     }
                 }
             }
@@ -481,10 +481,10 @@ public class ElevatorServiceImpl implements ElevatorService {
             elevatorInfoResult.setAreaCode(item.getAreaCode());
             elevatorInfoResult.setBuildingCode(item.getBuildingCode());
             if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
-                elevatorInfoResult.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER);
+                elevatorInfoResult.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER.toString());
             }
             if (ItemConstants.ITEM_ALARM_FALSE.equals(item.getAlarm()) && ItemConstants.ITEM_FAULT_TRUE.equals(item.getFault())) {
-                elevatorInfoResult.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER);
+                elevatorInfoResult.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
             }
             // 匹配报警信息
             for (TblAlarmRecordUnhandle alarmRecordUnhandle : recordUnhandles) {
@@ -493,7 +493,6 @@ public class ElevatorServiceImpl implements ElevatorService {
                     elevatorInfoResult.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
                     elevatorInfoResult.setAlarmLevel(alarmRecordUnhandle.getAlarmLevel());
                     elevatorInfoResult.setAlarmTime(alarmRecordUnhandle.getAlarmTime());
-                    elevatorInfoResult.setAlarmCategory(alarmRecordUnhandle.getAlarmCategory());
                 }
             }
             convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResult,item.getParameterList());
