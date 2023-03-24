@@ -1,18 +1,17 @@
 package com.thtf.elevator.controller.app;
 
 import com.github.pagehelper.PageInfo;
-import com.thtf.common.constant.ItemTypeConstants;
 import com.thtf.common.dto.adminserver.ResultPage;
 import com.thtf.common.dto.alarmserver.AppAlarmRecordDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmPageParamDTO;
 import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.dto.itemserver.TblItemDTO;
-import com.thtf.common.entity.itemserver.TblItemType;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.service.ElevatorAppService;
+import com.thtf.elevator.service.ElevatorService;
 import com.thtf.elevator.vo.AppAlarmInfoVO;
 import com.thtf.elevator.vo.AppItemSortDTO;
 import com.thtf.elevator.vo.AppItemSortVO;
@@ -20,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +33,8 @@ public class AppElevatorController {
 
     @Resource
     private ElevatorAppService elevatorAppService;
+
+    @Resource ElevatorService elevatorService;
 
     @Resource
     private ItemAPI itemAPI;
@@ -130,21 +130,7 @@ public class AppElevatorController {
      */
     @GetMapping("/getElevatorType")
     public JsonResult<List<CodeAndNameDTO>> getElevatorType(@RequestParam("sysCode") String sysCode){
-        // 获取电梯的所有子类,这里假设只有一级父级
-        TblItemType tblItemType = new TblItemType();
-        tblItemType.setSysCode(sysCode);
-        tblItemType.setIsLeaf(ItemTypeConstants.IS_LEAF);
-        // 父类为itemType的设备类别
-        List<TblItemType> itemTypeList = itemAPI.queryAllItemTypes(tblItemType).getData();
-        List<CodeAndNameDTO> codeAndNameList = new ArrayList<>();
-        for (TblItemType itemType : itemTypeList) {
-            CodeAndNameDTO codeAndNameDTO  =  new CodeAndNameDTO();
-            codeAndNameDTO.setCode(itemType.getCode());
-            codeAndNameDTO.setName(itemType.getName());
-            codeAndNameList.add(codeAndNameDTO);
-        }
-
-        return JsonResult.querySuccess(codeAndNameList);
+        return JsonResult.querySuccess(elevatorService.listItemTypeLeaf(sysCode));
     }
 
 }

@@ -11,6 +11,7 @@ import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListItemNestedParametersPageParamDTO;
 import com.thtf.common.dto.itemserver.ParameterTypeCodeAndValueDTO;
 import com.thtf.common.entity.itemserver.TblItemType;
+import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.elevator.config.ItemParameterConfig;
@@ -40,6 +41,9 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
 
     @Resource
     private AlarmAPI alarmAPI;
+
+    @Resource
+    private AdminAPI adminAPI;
 
     @Resource
     private ItemAPI itemAPI;
@@ -112,16 +116,10 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
      */
     @Override
     public AppAlarmInfoVO getAlarmInfo(String sysCode, String buildingCodes, String areaCode) {
-        AppAlarmInfoVO result = new AppAlarmInfoVO();
-        List<String> areaCodeList = null;
-        List<String> buildingCodeList = null;
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList = Arrays.asList(areaCode.split(","));
-        }else {
-            if (StringUtils.isNotBlank(buildingCodes)){
-                buildingCodeList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
+
+        List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes)?Arrays.asList(buildingCodes.split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(areaCode)?Arrays.asList(areaCode.split(",")):null;
+
         CountAlarmParamDTO countAlarmParamDTO = new CountAlarmParamDTO();
         countAlarmParamDTO.setSysCode(sysCode);
         countAlarmParamDTO.setAreaCodeList(areaCodeList);
@@ -129,6 +127,8 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
         countAlarmParamDTO.setIsNeedUnHandle(true);
         countAlarmParamDTO.setIsNeedHasHandled(true);
         CountAlarmResultDTO alarmInfo = alarmAPI.countAlarmAll(countAlarmParamDTO).getData();
+
+        AppAlarmInfoVO result = new AppAlarmInfoVO();
         if(null != alarmInfo){
             result.setAlarmUnHandleNum(alarmInfo.getUnhandledAlarmNum());
             result.setAlarmHasHandledNum(alarmInfo.getHasHandledAlarmNum());
@@ -172,8 +172,6 @@ public class ElevatorAppServiceImpl implements ElevatorAppService {
             }
         }
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(listItemNestedParametersPageParamDTO).getData();
-
-        // PageInfoVO<AppItemSortVO> pageInfoVO = pageInfoConvert.toPageInfoVO(data);
 
         PageInfo<AppItemSortVO> pageInfoVO = new PageInfo<>();
         BeanUtils.copyProperties(pageInfo,pageInfoVO);

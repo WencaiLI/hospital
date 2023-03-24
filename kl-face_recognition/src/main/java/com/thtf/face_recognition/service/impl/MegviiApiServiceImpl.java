@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageInfo;
 
+import com.thtf.common.constant.ItemConstants;
 import com.thtf.common.dto.adminserver.ResultPage;
 import com.thtf.common.dto.alarmserver.AppAlarmRecordDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
@@ -19,6 +20,7 @@ import com.thtf.common.dto.itemserver.ListItemByKeywordPageResultDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblVideoItem;
+import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.common.response.JsonResult;
@@ -80,6 +82,9 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
     private AlarmAPI alarmAPI;
 
     @Autowired
+    private AdminAPI adminAPI;
+
+    @Autowired
     MegviiConfig megviiConfig;
 
     @Resource
@@ -102,22 +107,14 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
     public MegviiPage<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarm(FaceRecognitionAlarmParamVO paramVO) {
         MegviiPage<FaceRecognitionAlarmResultVO> result = new MegviiPage<>();
 
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-
-        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
-            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
-        }else {
-            if(StringUtils.isNotBlank(paramVO.getAreaCodes())){
-                areaCodeList = Arrays.asList(paramVO.getAreaCodes().split(","));
-            }
-        }
+        List<String> buildingCodeList = StringUtils.isNotBlank(paramVO.getBuildingCodes())?Arrays.asList(paramVO.getBuildingCodes().split(",")):adminAPI.listBuildingCodeUserSelf().getData();;
+        List<String> areaCodeList = StringUtils.isNotBlank(paramVO.getAreaCodes())?Arrays.asList(paramVO.getAreaCodes().split(",")):null;;;
 
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(paramVO.getSysCode());
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
-        tblItem.setAlarm(1);
+        tblItem.setAlarm(ItemConstants.ITEM_ALARM_TRUE);
         if(StringUtils.isNoneBlank(paramVO.getKeyword())){
             tblItem.setKeyword(paramVO.getKeyword());
             tblItem.setKeyName(paramVO.getKeyword());
@@ -314,16 +311,8 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
     @Override
     public MegviiPage<FaceRecognitionFaultResultVO> listFaceRecognitionFault(FaceRecognitionAlarmParamVO paramVO) {
         MegviiPage<FaceRecognitionFaultResultVO> result = new MegviiPage<>();
-
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
-            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
-        }else {
-            if(StringUtils.isNotBlank(paramVO.getAreaCodes())){
-                areaCodeList = Arrays.asList(paramVO.getAreaCodes().split(","));
-            }
-        }
+        List<String> buildingCodeList = StringUtils.isNotBlank(paramVO.getBuildingCodes())?Arrays.asList(paramVO.getBuildingCodes().split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(paramVO.getAreaCodes())?Arrays.asList(paramVO.getAreaCodes().split(",")):null;
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(paramVO.getSysCode());
         tblItem.setPageSize(paramVO.getPageSize());
@@ -334,15 +323,14 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
             tblItem.setKeyName(paramVO.getKeyword());
             tblItem.setKeyCode(paramVO.getKeyword());
         }
-        tblItem.setAlarm(0); // 有报警显示，报警优先
-        tblItem.setFault(1);
+        tblItem.setAlarm(ItemConstants.ITEM_ALARM_FALSE); // 有报警显示，报警优先
+        tblItem.setFault(ItemConstants.ITEM_FAULT_TRUE);
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
         PageInfo<TblItem> pageInfo = itemAPI.queryAllItemsPage(tblItem).getData();
         result.setPageNum(pageInfo.getPageNum());
         result.setPageSize(pageInfo.getPageSize());
         result.setTotal(pageInfo.getTotal());
-
         // 设备集
         List<TblItem> itemList = pageInfo.getList();
         // 设备编码集

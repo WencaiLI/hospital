@@ -1,11 +1,13 @@
 package com.thtf.face_recognition.service.impl;
 
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.constant.ItemConstants;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.entity.itemserver.TblVideoItem;
+import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
@@ -45,6 +47,9 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
     private ItemAPI itemAPI;
 
     @Resource
+    private AdminAPI adminAPI;
+
+    @Resource
     private AlarmAPI alarmAPI;
 
     @Resource
@@ -66,34 +71,25 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
     public FaceRecognitionDisplayVO getDisplayInfo(DisplayParamDTO displayParamDTO) {
         FaceRecognitionDisplayVO result = new FaceRecognitionDisplayVO();
 
-        List<String> buildingCodeList = null;
-        String areaCode = null;
+        List<String> buildingCodeList = StringUtils.isNotBlank(displayParamDTO.getBuildingCodes())?Arrays.asList(displayParamDTO.getBuildingCodes().split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(displayParamDTO.getAreaCode())?Arrays.asList(displayParamDTO.getAreaCode().split(",")):null;
+        String areaCode = StringUtils.isNotBlank(displayParamDTO.getAreaCode())?displayParamDTO.getAreaCode():null;
+
         CountItemByParameterListDTO countItemByParameterListDTO = new CountItemByParameterListDTO();
         countItemByParameterListDTO.setSysCode(displayParamDTO.getSysCode());
-        if(StringUtils.isNotBlank(displayParamDTO.getBuildingCodes())){
-            buildingCodeList = Arrays.asList(displayParamDTO.getBuildingCodes().split(","));
-            countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
-        }else {
-            if(StringUtils.isNotBlank(displayParamDTO.getAreaCode())){
-                areaCode = displayParamDTO.getAreaCode();
-                countItemByParameterListDTO.setAreaCode(displayParamDTO.getAreaCode());
-            }
-
-        }
+        countItemByParameterListDTO.setBuildingCodeList(buildingCodeList);
+        countItemByParameterListDTO.setAreaCode(areaCode);
 
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(displayParamDTO.getSysCode());
         tblItem.setBuildingCodeList(buildingCodeList);
-        if(StringUtils.isNotBlank(areaCode)){
-            tblItem.setAreaCodeList(Collections.singletonList(areaCode));
-        }
+        tblItem.setAreaCodeList(areaCodeList);
 
         Integer allItemCount = itemAPI.queryAllItemsCount(tblItem).getData();
-        tblItem.setAlarm(1);
+        tblItem.setAlarm(ItemConstants.ITEM_ALARM_TRUE);
         Integer alarm = itemAPI.queryAllItemsCount(tblItem).getData();
-        tblItem.setAlarm(null);
-        tblItem.setAlarm(0);
-        tblItem.setFault(1);
+        tblItem.setAlarm(ItemConstants.ITEM_ALARM_FALSE);
+        tblItem.setFault(ItemConstants.ITEM_FAULT_TRUE);
         Integer fault = itemAPI.queryAllItemsCount(tblItem).getData();
         result.setItemNum(allItemCount);
         result.setFaultNum(fault);

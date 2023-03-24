@@ -1,7 +1,6 @@
 package com.thtf.elevator.service;
 
 import com.github.pagehelper.PageInfo;
-import com.thtf.common.dto.itemserver.PageInfoVO;
 import com.thtf.elevator.dto.DisplayInfoDTO;
 import com.thtf.elevator.vo.AppAlarmInfoVO;
 import com.thtf.elevator.vo.AppItemSortDTO;

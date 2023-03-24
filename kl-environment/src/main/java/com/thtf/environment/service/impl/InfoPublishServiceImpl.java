@@ -4,6 +4,8 @@ import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
+import com.thtf.common.constant.AlarmConstants;
+import com.thtf.common.constant.ItemConstants;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.CountItemByParameterListDTO;
 import com.thtf.common.dto.itemserver.CountItemInfoParamDTO;
@@ -178,20 +180,14 @@ public class InfoPublishServiceImpl implements InfoPublishService {
      */
     @Override
     public PageInfoVO getLargeScreenAlarmInfo(String sysCode, String buildingCodes, String areaCode, String keyword, Integer pageNumber, Integer pageSize) {
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList = Arrays.asList(areaCode.split(","));
-        }else {
-            if(StringUtils.isNotBlank(buildingCodes)){
-                buildingCodeList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
+        List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes)?Arrays.asList(buildingCodes.split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(areaCode)?Arrays.asList(areaCode.split(",")):null;
+
         TblItem tblItem = new TblItem();
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
         tblItem.setSystemCode(sysCode);
-        tblItem.setFault(1);
+        tblItem.setFault(ItemConstants.ITEM_FAULT_TRUE);
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
         if(itemList ==  null || itemList.size() == 0){
             return null;
@@ -200,7 +196,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
 
         ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
         listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
-        listAlarmInfoLimitOneParamDTO.setAlarmCategory("1");
+        listAlarmInfoLimitOneParamDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
         listAlarmInfoLimitOneParamDTO.setItemCodeList(itemCodeList);
         listAlarmInfoLimitOneParamDTO.setKeyword(keyword);
         listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(keyword);
@@ -366,21 +362,10 @@ public class InfoPublishServiceImpl implements InfoPublishService {
     @Override
     public InfoPublishDisplayDTO getDisplayInfo(String sysCode, String buildingCodes, String areaCode, String itemTypeCodes) {
         InfoPublishDisplayDTO result = new InfoPublishDisplayDTO();
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-        List<String> itemTypeCodeList = null;
+        List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes)?Arrays.asList(buildingCodes.split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(areaCode)?Arrays.asList(areaCode.split(",")):null;
+        List<String> itemTypeCodeList = StringUtils.isNotBlank(itemTypeCodes)?Arrays.asList(itemTypeCodes.split(",")):null;
 
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList = Arrays.asList(areaCode.split(","));
-        }else {
-            if(StringUtils.isNotBlank(buildingCodes)){
-                buildingCodeList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
-
-        if (StringUtils.isNotBlank(itemTypeCodes)){
-            itemTypeCodeList = Arrays.asList(itemTypeCodes.split(","));
-        }
         // 设备总数 报警设备数 故障设备总数
         CountItemInfoParamDTO countItemInfoParam = new CountItemInfoParamDTO();
         countItemInfoParam.setSysCode(sysCode);

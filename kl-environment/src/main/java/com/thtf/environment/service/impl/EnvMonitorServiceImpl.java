@@ -34,6 +34,7 @@ import com.thtf.environment.vo.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shardingsphere.api.hint.HintManager;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -281,17 +282,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             return null;
         }
         // 所有设备类别编码
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
+        List<String> buildingCodeList = StringUtils.isNotBlank(paramVO.getBuildingCodes())?Arrays.asList(paramVO.getBuildingCodes().split(",")):adminAPI.listBuildingCodeUserSelf().getData();;
+        List<String> areaCodeList = StringUtils.isNotBlank(paramVO.getAreaCode())?Arrays.asList(paramVO.getAreaCode().split(",")):null;
         List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
-
-        if(StringUtils.isNotBlank(paramVO.getBuildingCodes())){
-            buildingCodeList = Arrays.asList(paramVO.getBuildingCodes().split(","));
-        }else {
-            if (StringUtils.isNotBlank(paramVO.getAreaCode())){
-                areaCodeList = Arrays.asList(paramVO.getAreaCode().split(","));
-            }
-        }
         if(StringUtils.isNotBlank(paramVO.getItemTypeCode())){
             itemTypeCodeList = Arrays.asList(paramVO.getItemTypeCode().split(","));
         }
@@ -895,17 +888,10 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         Map<String, Object> resultMap = new HashMap<>();
 
         // 报警堆
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
+        List<String> buildingCodeList = StringUtils.isNotBlank(listParameterMapDTO.getBuildingCodes())?Arrays.asList(listParameterMapDTO.getBuildingCodes().split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(listParameterMapDTO.getAreaCodes())?Arrays.asList(listParameterMapDTO.getAreaCodes().split(",")):null;
         TblItem tblItem = new TblItem();
         tblItem.setSystemCode(listParameterMapDTO.getSysCode());
-        if(StringUtils.isNotBlank(listParameterMapDTO.getBuildingCodes())){
-            buildingCodeList = Arrays.asList(listParameterMapDTO.getBuildingCodes().split(","));
-        }else {
-            if(StringUtils.isNotBlank(listParameterMapDTO.getAreaCodes())){
-                areaCodeList = Arrays.asList(listParameterMapDTO.getAreaCodes().split(","));
-            }
-        }
 
         if(StringUtils.isNotBlank(listParameterMapDTO.getItemTypeCodes())){
             tblItem.setItemTypeCodeList(Arrays.asList(listParameterMapDTO.getItemTypeCodes().split(",")));
