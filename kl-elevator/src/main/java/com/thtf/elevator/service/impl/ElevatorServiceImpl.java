@@ -21,7 +21,6 @@ import com.thtf.elevator.config.ItemParameterConfig;
 import com.thtf.elevator.dto.ParameterInfoDTO;
 import com.thtf.elevator.dto.*;
 import com.thtf.elevator.dto.convert.ItemConverter;
-import com.thtf.elevator.dto.convert.PageInfoConvert;
 import com.thtf.elevator.dto.convert.ParameterConverter;
 import com.thtf.elevator.service.ElevatorService;
 import com.thtf.elevator.vo.QueryItemParamVO;
@@ -74,7 +73,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>
      */
     @Override
-    public List<CodeAndNameDTO> getItemType(String sysCode) {
+    public List<CodeAndNameDTO> listItemTypeLeaf(String sysCode) {
         List<CodeAndNameDTO> result;
         TblItemType tblItemType = new TblItemType();
         tblItemType.setSysCode(sysCode);
@@ -145,21 +144,13 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     @Override
-    public List<DisplayInfoDTO> displayInfo(String sysCode,String buildingCodes, String areaCode) {
+    public List<DisplayInfoDTO> displayInfo(String sysCode, String buildingCodes, String areaCode) {
 
         // 获取设备参数为运行时的状态值
         String parameterValueByStateExplain = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), null, new String[]{"运","行","在"});
 
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList = Arrays.asList(areaCode.split(","));
-        }else {
-            if(StringUtils.isNotBlank(buildingCodes)){
-                buildingCodeList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
+        List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes)?Arrays.asList(buildingCodes.split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(areaCode)?Arrays.asList(areaCode.split(",")):null;
         List<DisplayInfoDTO> result = new ArrayList<>();
         // 获取电梯的所有子类,这里假设只有一级父级
         TblItemType tblItemType = new TblItemType();
@@ -192,10 +183,7 @@ public class ElevatorServiceImpl implements ElevatorService {
                 if(StringUtils.isBlank(parameterValueByStateExplain)){
                     runNumberKV.setValue(0);
                 }else {
-                    Integer runNumber = itemAPI.countParameterNumByItemCodeListAndPtypeAndPvalue(
-                            parameterType,
-                            itemList.stream().map(TblItem::getCode).collect(Collectors.toList()),
-                            parameterValueByStateExplain).getData();
+                    Integer runNumber = itemAPI.countParameterNumByItemCodeListAndPtypeAndPvalue(parameterType, itemList.stream().map(TblItem::getCode).collect(Collectors.toList()), parameterValueByStateExplain).getData();
                     runNumberKV.setValue(runNumber);
                 }
             }else {
@@ -217,7 +205,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorInfoResultDTO>
      */
     @Override
-    public List<ElevatorInfoResultDTO> itemCodeList(List<String> itemCodeList,Boolean isNeedAreaName) {
+    public List<ElevatorInfoResultDTO> listElevatorItemByCodeList(List<String> itemCodeList) {
         if(null == itemCodeList || itemCodeList.size() == 0){
             return null;
         }
@@ -231,12 +219,10 @@ public class ElevatorServiceImpl implements ElevatorService {
             elevatorInfoResultDTO.setItemCode(itemInfo.getCode());
             elevatorInfoResultDTO.setItemName(itemInfo.getName());
             elevatorInfoResultDTO.setAreaCode(itemInfo.getAreaCode());
-            Map<String, String> data = adminAPI.getBuildingMap(Collections.singletonList(itemInfo.getBuildingCode())).getData();
+            elevatorInfoResultDTO.setAreaName(itemInfo.getAreaName());
             elevatorInfoResultDTO.setBuildingCode(itemInfo.getBuildingCode());
+            Map<String, String> data = adminAPI.getBuildingMap(Collections.singletonList(itemInfo.getBuildingCode())).getData();
             elevatorInfoResultDTO.setBuildingName(data.get(itemInfo.getBuildingCode()));
-            if(isNeedAreaName){
-                elevatorInfoResultDTO.setAreaName(adminAPI.searchAreaByCode(itemInfo.getAreaCode()).getData().getName());
-            }
             // 查询参数信息
             List<TblItemParameter> parameterList = allParameters.stream().filter(e -> e.getItemCode().equals(itemCode)).collect(Collectors.toList());
             convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,parameterList);
@@ -257,7 +243,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: com.thtf.elevator.vo.PageInfoVO
      */
     @Override
-    public PageInfo<ElevatorInfoResultDTO> getAllElevatorPage(String sysCode,String buildingCodes, String areaCode,String itemTypeCode, Integer state, Integer pageNum, Integer pageSize) {
+    public PageInfo<ElevatorInfoResultDTO> listElevatorItemPage(String sysCode,String buildingCodes, String areaCode,String itemTypeCode, Integer state, Integer pageNum, Integer pageSize) {
 
         List<String> buildingCodesList = null;
         List<String> areaCodesList = null;
@@ -329,92 +315,7 @@ public class ElevatorServiceImpl implements ElevatorService {
         return result;
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 将参数映射到ElevatorInfoResultDTO属性中
-     * @Date: 2022/11/29
-     * @Param elevatorInfoResultDTO:
-     * @Param parameterList:
-     * @return: void
-     */
-    public void convertParameterPropertiesToElevatorInfoResultDTO(ElevatorInfoResultDTO elevatorInfoResultDTO, List<TblItemParameter> parameterList){
-        // 匹配参数信息
-        List<ParameterInfoDTO> parameterInnerList = new ArrayList<>();
-        for (TblItemParameter parameter : parameterList) {
-            // 下行
-            if(itemParameterConfig.getDownGoing().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setDownGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
 
-            // 上行
-            if(itemParameterConfig.getUpGoing().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setUpGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 运行时长
-            if(itemParameterConfig.getRunTime().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setRunTimeParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 报警状态
-            if(itemParameterConfig.getAlarm().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setAlarmParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 故障状态
-            if(itemParameterConfig.getFault().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setFaultParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 锁梯状态
-            if(itemParameterConfig.getLockStatus().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setLockStatusParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 当前楼层
-            if(itemParameterConfig.getCurrentFloor().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setCurrentFloorValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 运行状态
-            if(itemParameterConfig.getState().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setRunParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-
-            // 是否超载
-            if(itemParameterConfig.getOverLoad().equals(parameter.getParameterType())){
-                if(StringUtils.isNotBlank(parameter.getValue())){
-                    elevatorInfoResultDTO.setOverLoadParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
-                }
-                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
-            }
-        }
-        elevatorInfoResultDTO.setParameterList(parameterInnerList);
-    }
 
     /**
      * @Author: liwencai
@@ -424,7 +325,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @return: java.util.List<com.thtf.elevator.dto.ElevatorAlarmResultDTO>
      */
     @Override
-    public PageInfo<ElevatorAlarmResultDTO> getAllAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
+    public PageInfo<ElevatorAlarmResultDTO> listElevatorAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
         // 故障设备信息
         List<String> buildingCodesList = null;
         List<String> areaCodesList = null;
@@ -512,7 +413,113 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Return: java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmNumberInfo>
      */
     @Override
-    public List<ItemAlarmNumberInfo> getItemFaultStatistics(String sysCode, String buildingCodes,String areaCode,String itemTypeCode,String startTime,String endTime) {
-        return alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, buildingCodes,areaCode,itemTypeCode, startTime, endTime).getData();
+    public ItemFaultStatisticsDTO getItemFaultStatistics(String sysCode, String buildingCodes,String areaCode,String itemTypeCode,String startTime,String endTime) {
+
+        List<ItemAlarmNumberInfo> itemFaultStatistics = alarmAPI.getAlarmNumberByStartAndEndTime(sysCode, buildingCodes,areaCode,itemTypeCode, startTime, endTime).getData();
+
+        if(null == itemFaultStatistics || itemFaultStatistics.size() == 0){
+            return null;
+        }
+        ItemFaultStatisticsDTO result = new ItemFaultStatisticsDTO();
+        List<String> itemNameList = new ArrayList<>();
+        List<Integer> monitorAlarmNumberList = new ArrayList<>();
+        List<Integer> malfunctionAlarmNumberList = new ArrayList<>();
+        for (ItemAlarmNumberInfo alarmNumberInfo : itemFaultStatistics) {
+            itemNameList.add(alarmNumberInfo.getItemName());
+            monitorAlarmNumberList.add(alarmNumberInfo.getMonitorAlarmNumber());
+            malfunctionAlarmNumberList.add(alarmNumberInfo.getMalfunctionAlarmNumber());
+        }
+        result.setItemName(itemNameList);
+        result.setMonitorAlarmNumber(monitorAlarmNumberList);
+        result.setMalfunctionAlarmNumber(malfunctionAlarmNumberList);
+        return result;
+    }
+
+
+    /**
+     * @Author: liwencai
+     * @Description: 将参数映射到ElevatorInfoResultDTO属性中
+     * @Date: 2022/11/29
+     * @Param elevatorInfoResultDTO:
+     * @Param parameterList:
+     * @return: void
+     */
+    public void convertParameterPropertiesToElevatorInfoResultDTO(ElevatorInfoResultDTO elevatorInfoResultDTO, List<TblItemParameter> parameterList){
+        // 匹配参数信息
+        List<ParameterInfoDTO> parameterInnerList = new ArrayList<>();
+        for (TblItemParameter parameter : parameterList) {
+            // 下行
+            if(itemParameterConfig.getDownGoing().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setDownGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 上行
+            if(itemParameterConfig.getUpGoing().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setUpGoingParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 运行时长
+            if(itemParameterConfig.getRunTime().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setRunTimeParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 报警状态
+            if(itemParameterConfig.getAlarm().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setAlarmParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 故障状态
+            if(itemParameterConfig.getFault().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setFaultParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 锁梯状态
+            if(itemParameterConfig.getLockStatus().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setLockStatusParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 当前楼层
+            if(itemParameterConfig.getCurrentFloor().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setCurrentFloorValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 运行状态
+            if(itemParameterConfig.getState().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setRunParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+
+            // 是否超载
+            if(itemParameterConfig.getOverLoad().equals(parameter.getParameterType())){
+                if(StringUtils.isNotBlank(parameter.getValue())){
+                    elevatorInfoResultDTO.setOverLoadParameterValue(parameter.getValue()+Optional.ofNullable(parameter.getUnit()).orElse(""));
+                }
+                parameterInnerList.add(parameterConverter.toParameterInfo(parameter));
+            }
+        }
+        elevatorInfoResultDTO.setParameterList(parameterInnerList);
     }
 }

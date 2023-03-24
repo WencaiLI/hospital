@@ -1,13 +1,11 @@
 package com.thtf.elevator.service.impl;
 
 import com.thtf.common.feign.ItemAPI;
-import com.thtf.elevator.config.ItemParameterConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -24,10 +22,8 @@ public class CommonService {
 
     public String getParameterValueByStateExplain(String systemCode,String parameterTypeCode,String itemTypeCodes,String[] keywords){
         Map<String, String> map = itemAPI.listParameterStateExplainBySysCode(parameterTypeCode,systemCode,itemTypeCodes).getData();
-        System.out.println(map);
         if(null != map){
             String stateExplain = map.get(parameterTypeCode);
-            System.out.println("parameterTypeCode "+parameterTypeCode+"  stateExplain "+stateExplain);
             if(StringUtils.isNotBlank(stateExplain)){
                 String[] split = stateExplain.split(";");
                 for (String explain :split) {

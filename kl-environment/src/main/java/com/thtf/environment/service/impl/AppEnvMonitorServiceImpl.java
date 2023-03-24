@@ -99,9 +99,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         ListAlarmPageParamDTO listAlarmPageParamDTO = new ListAlarmPageParamDTO();
         listAlarmPageParamDTO.setAlarmCategoryList(Collections.singletonList(0)); // 报警
         listAlarmPageParamDTO.setSysCode(paramDTO.getSysCode());
-        if(StringUtils.isNotBlank(paramDTO.getBuildingCodes())){
-            listAlarmPageParamDTO.setBuildingCodes(paramDTO.getBuildingCodes());
-        }
+        listAlarmPageParamDTO.setBuildingCodes(paramDTO.getBuildingCodes());
         listAlarmPageParamDTO.setAreaCodes(paramDTO.getAreaCodes());
         if(null != paramDTO.getStartTime() && null != paramDTO.getEndTime()){
             listAlarmPageParamDTO.setStartTime(paramDTO.getStartTime());
@@ -109,7 +107,6 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
         }
         listAlarmPageParamDTO.setPageNumber(paramDTO.getPageNumber());
         listAlarmPageParamDTO.setPageSize(paramDTO.getPageSize());
-        //
         List<String> itemCodeList = new ArrayList<>();
         if(null != paramDTO.getGroupIds() && paramDTO.getGroupIds().size() > 0){
             List<TblGroup> data = itemAPI.searchGroupByIdList(paramDTO.getGroupIds()).getData();
@@ -118,11 +115,9 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
             }
         }
         listAlarmPageParamDTO.setItemCodeList(itemCodeList);
-        //
         if(null != paramDTO.getItemTypeCodeList() && paramDTO.getItemTypeCodeList().size() > 0){
             listAlarmPageParamDTO.setItemTypeCodeList(paramDTO.getItemTypeCodeList());
         }
-        // PageInfo<AppAlarmRecordDTO> data = alarmAPI.listAlarmUnhandled(listAlarmPageParamDTO).getData();
         return alarmAPI.listAlarmUnhandled(listAlarmPageParamDTO).getData();
     }
 

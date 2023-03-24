@@ -5,11 +5,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.constant.AlarmConstants;
+import com.thtf.common.constant.ItemConstants;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.itemserver.*;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblItemParameter;
+import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
 import com.thtf.environment.config.ItemParameterConfig;
@@ -46,6 +48,9 @@ public class BroadcastServiceImpl implements BroadcastService {
     private AlarmAPI alarmAPI;
 
     @Resource
+    private AdminAPI adminAPI;
+
+    @Resource
     private PageInfoConvert pageInfoConvert;
 
     @Resource
@@ -71,15 +76,8 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     public DisplayInfoDTO displayInfo(String sysCode, String buildingCodes,String areaCode) {
         DisplayInfoDTO result = new DisplayInfoDTO();
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList = Arrays.asList(areaCode.split(","));
-        }else {
-            if(StringUtils.isNotBlank(buildingCodes)){
-                buildingCodeList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
+        List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes)?Arrays.asList(buildingCodes.split(",")):adminAPI.listBuildingCodeUserSelf().getData();
+        List<String> areaCodeList = StringUtils.isNotBlank(areaCode)?Arrays.asList(areaCode.split(",")):null;
         // 设备总数 报警设备数 故障设备总数
         CountItemInfoParamDTO countItemInfoParam = new CountItemInfoParamDTO();
         countItemInfoParam.setSysCode(sysCode);
@@ -275,20 +273,13 @@ public class BroadcastServiceImpl implements BroadcastService {
     @Override
     public PageInfo<AlarmInfoOfBroadcastDTO> getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize) {
         PageInfo<AlarmInfoOfBroadcastDTO> pageInfoVO = new PageInfo<>();
-        List<String> buildingCodeList = null;
-        List<String> areaCodeList = null;
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodeList = Arrays.asList(areaCode.split(","));
-        }else {
-            if(StringUtils.isNotBlank(buildingCodes)){
-                buildingCodeList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
+        List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes)?Arrays.asList(buildingCodes.split(",")):adminAPI.listBuildingCodeUserSelf().getData();;
+        List<String> areaCodeList = StringUtils.isNotBlank(areaCode)?Arrays.asList(areaCode.split(",")):null;
         TblItem tblItem = new TblItem();
         tblItem.setBuildingCodeList(buildingCodeList);
         tblItem.setAreaCodeList(areaCodeList);
         tblItem.setSystemCode(sysCode);
-        tblItem.setFault(1);
+        tblItem.setFault(ItemConstants.ITEM_FAULT_TRUE);
         List<TblItem> itemList = itemAPI.queryAllItems(tblItem).getData();
         if(CollectionUtils.isEmpty(itemList)){
             return pageInfoVO;
