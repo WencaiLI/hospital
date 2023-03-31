@@ -1,16 +1,22 @@
 package com.thtf.environment.service.impl;
 
+import com.thtf.common.constant.AlarmConstants;
+import com.thtf.common.constant.ItemConstants;
+import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmPageParamDTO;
 import com.thtf.common.dto.itemserver.ItemGroupParamVO;
 import com.thtf.common.dto.itemserver.ParameterTemplateAndDetailDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblGroup;
+import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.common.response.JsonResult;
 import com.thtf.environment.dto.AppEnvMonitorDisplayDTO;
 import com.thtf.environment.dto.AppListAlarmParamDTO;
 import com.thtf.environment.dto.KeyValueDTO;
 import com.thtf.environment.service.AppEnvMonitorService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: liwencai
@@ -66,22 +73,17 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
     public List<KeyValueDTO> getAlarmCount(String sysCode, String buildingCodes){
         List<KeyValueDTO> result = new ArrayList<>();
         List<ParameterTemplateAndDetailDTO> parameterInfo = envMonitorServiceImpl.getParameterInfo();
-        List<String> buildingCodesList = null;
-
-        if(StringUtils.isNotBlank(buildingCodes)){
-            buildingCodesList = Arrays.asList(buildingCodes.split(","));
-        }
+        List<String> itemTypeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+        itemTypeList = CollectionUtils.isNotEmpty(itemTypeList)?itemTypeList:null;
+        List<ItemAlarmInfoDTO> data = alarmAPI.getItemTypeAlarmSituation(sysCode, null, buildingCodes, AlarmConstants.ALARM_CATEGORY_INTEGER, itemTypeList, true, null, null).getData();
         for (ParameterTemplateAndDetailDTO parameter : parameterInfo) {
             KeyValueDTO keyValueDTO = new KeyValueDTO();
             keyValueDTO.setKey(parameter.getName().split("[(]")[0].split("（")[0]);
-            // 报警数量
-            TblAlarmRecordUnhandle tblAlarmRecordUnhandle = new TblAlarmRecordUnhandle();
-            tblAlarmRecordUnhandle.setSystemCode(sysCode);
-            tblAlarmRecordUnhandle.setBuildingCodeList(buildingCodesList);
-            tblAlarmRecordUnhandle.setAlarmCategory(0);
-            tblAlarmRecordUnhandle.setItemTypeCode(parameter.getItemTypeCode());
-            Long data = alarmAPI.queryAllAlarmCount(tblAlarmRecordUnhandle).getData();
-            keyValueDTO.setValue(data);
+            data.forEach(item->{
+                if(parameter.getItemTypeCode().equals(item.getAttribute().toString())){
+                    keyValueDTO.setValue(item.getMonitorAlarmNumber()) ;
+                }
+            });
             result.add(keyValueDTO);
         }
         return result;
@@ -97,7 +99,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
     @Override
     public Object listAlarmUnhandled(AppListAlarmParamDTO paramDTO){
         ListAlarmPageParamDTO listAlarmPageParamDTO = new ListAlarmPageParamDTO();
-        listAlarmPageParamDTO.setAlarmCategoryList(Collections.singletonList(0)); // 报警
+        listAlarmPageParamDTO.setAlarmCategoryList(Collections.singletonList(AlarmConstants.ALARM_CATEGORY_INTEGER));
         listAlarmPageParamDTO.setSysCode(paramDTO.getSysCode());
         listAlarmPageParamDTO.setBuildingCodes(paramDTO.getBuildingCodes());
         listAlarmPageParamDTO.setAreaCodes(paramDTO.getAreaCodes());
