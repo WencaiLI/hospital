@@ -54,16 +54,6 @@ public class FaceRecognitionItemResultVO {
      */
     private String itemTypeName;
 
-    /**
-     * 在线状态参数编码
-     */
-    private String onlineParameterCode;
-
-    /**
-     * 在线状态参数值
-     */
-    private String onlineValue;
-
     /* ******** 摄像机相关信息 ******** */
 
     /**
@@ -82,6 +72,22 @@ public class FaceRecognitionItemResultVO {
     private String ipAddress;
 
     /**
+     * 通道号
+     */
+    private String channelNum;
+
+    /* ****** 设备参数信息 ********** */
+    /**
+     * 在线状态参数编码
+     */
+    private String onlineParameterCode;
+
+    /**
+     * 在线状态参数值
+     */
+    private String onlineValue;
+
+    /**
      * 方位
      */
     private String positionParameterCode;
@@ -90,11 +96,6 @@ public class FaceRecognitionItemResultVO {
      * 方位值
      */
     private String positionValue;
-
-    /**
-     * 通道号
-     */
-    private String channelNum;
 
     /**
      * 报警参数编码

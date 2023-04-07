@@ -14,9 +14,11 @@ import com.thtf.common.dto.adminserver.ResultPage;
 import com.thtf.common.dto.alarmserver.AppAlarmRecordDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmInfoLimitOneParamDTO;
 import com.thtf.common.dto.alarmserver.ListAlarmPageParamDTO;
+import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.dto.itemserver.ListItemByKeywordPageParamDTO;
 import com.thtf.common.dto.itemserver.ListItemByKeywordPageResultDTO;
 
+import com.thtf.common.dto.itemserver.ListItemNestedParametersPageParamDTO;
 import com.thtf.common.entity.alarmserver.TblAlarmRecordUnhandle;
 import com.thtf.common.entity.itemserver.TblItem;
 import com.thtf.common.entity.itemserver.TblVideoItem;
@@ -42,6 +44,7 @@ import com.thtf.face_recognition.service.ManufacturerApiService;
 import com.thtf.face_recognition.service.MegviiAlarmDataService;
 import com.thtf.face_recognition.vo.*;
 import okhttp3.MediaType;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -257,23 +260,48 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
 //    @Override
     public MegviiPage<FaceRecognitionAlarmResultVO> listFaceRecognitionAlarmOld(FaceRecognitionAlarmParamVO paramVO) {
         MegviiPage<FaceRecognitionAlarmResultVO> megviiPage = new MegviiPage<FaceRecognitionAlarmResultVO>();
+        megviiPage.setPageSize(paramVO.getPageNumber());
+        megviiPage.setPageSize(paramVO.getPageSize());
         List<FaceRecognitionAlarmResultVO> resultVOList = new ArrayList<>();
 
-        ListItemByKeywordPageParamDTO listItemByKeywordPageParamDTO = new ListItemByKeywordPageParamDTO();
-        // 关键词搜索
-        if(StringUtils.isNoneBlank(paramVO.getKeyword())){
-            listItemByKeywordPageParamDTO.setKeywordOfDesc(paramVO.getKeyword());
-            listItemByKeywordPageParamDTO.setKeywordOfCode(paramVO.getKeyword());
-            listItemByKeywordPageParamDTO.setKeywordOfName(paramVO.getKeyword());
+//        ListItemByKeywordPageParamDTO listItemByKeywordPageParamDTO = new ListItemByKeywordPageParamDTO();
+//        // 关键词搜索
+//        if(StringUtils.isNoneBlank(paramVO.getKeyword())){
+//            listItemByKeywordPageParamDTO.setKeywordOfDesc(paramVO.getKeyword());
+//            listItemByKeywordPageParamDTO.setKeywordOfCode(paramVO.getKeyword());
+//            listItemByKeywordPageParamDTO.setKeywordOfName(paramVO.getKeyword());
+//        }
+//
+//        listItemByKeywordPageParamDTO.setAreaCodes(paramVO.getAreaCodes());
+//        listItemByKeywordPageParamDTO.setBuildingCodes(paramVO.getBuildingCodes());
+//
+//        // 获取设备信息
+//        List<ListItemByKeywordPageResultDTO> allItems = itemAPI.listItemByKeywordPage(listItemByKeywordPageParamDTO).getData().getList();
+
+        ListItemNestedParametersPageParamDTO listItemNestedParametersPageParamDTO =  ListItemNestedParametersPageParamDTO.builder()
+                .sysCode(paramVO.getSysCode())
+                .buildingCodeList(StringUtils.isNotBlank(paramVO.getBuildingCodes()) ? Arrays.asList(paramVO.getBuildingCodes().split(",")) : null)
+                .areaCodeList(StringUtils.isNotBlank(paramVO.getAreaCodes()) ? Arrays.asList(paramVO.getAreaCodes().split(",")) : null)
+                .pageNumber(paramVO.getPageNumber())
+                .pageSize(paramVO.getPageSize())
+                .build();
+
+        if(StringUtils.isNotBlank(paramVO.getKeyword())){
+            listItemNestedParametersPageParamDTO.setCodeKey(paramVO.getKeyword());
+            listItemNestedParametersPageParamDTO.setAreaKey(paramVO.getKeyword());
+            listItemNestedParametersPageParamDTO.setNameKey(paramVO.getKeyword());
         }
 
-        listItemByKeywordPageParamDTO.setAreaCodes(paramVO.getAreaCodes());
-        listItemByKeywordPageParamDTO.setBuildingCodes(paramVO.getBuildingCodes());
+        PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(listItemNestedParametersPageParamDTO).getData();
 
-        // 获取设备信息
-        List<ListItemByKeywordPageResultDTO> allItems = itemAPI.listItemByKeywordPage(listItemByKeywordPageParamDTO).getData().getList();
+        if(CollectionUtils.isEmpty(pageInfo.getList())){
+            megviiPage.setTotal(pageInfo.getTotal());
+            return megviiPage;
+        }
+
+        List<ItemNestedParameterVO> allItems = pageInfo.getList();
         // 所有设备编码
-        List<String> allItemCodeList = allItems.stream().map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
+        List<String> allItemCodeList = allItems.stream().map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
 
         MegviiListEventRecordParamDTO paramDTO = new MegviiListEventRecordParamDTO();
         paramDTO.setPageNum(paramVO.getPageNumber());
@@ -577,10 +605,10 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
      * 将MegviiListEvent转换为EventRecordResultDTO
      */
     public FaceRecognitionAlarmResultVO convertToMegviiListEventRecordResultDTO (MegviiListEventRecordResultDTO param,
-                                                                                 List<ListItemByKeywordPageResultDTO> allItems){
+                                                                                 List<ItemNestedParameterVO> allItems){
         FaceRecognitionAlarmResultVO result = null;
 
-        for (ListItemByKeywordPageResultDTO item : allItems) {
+        for (ItemNestedParameterVO item : allItems) {
             if(item.getName().equals(param.getDeviceName())){
                 result = new FaceRecognitionAlarmResultVO();
                 result.setItemId(item.getId());
@@ -601,7 +629,6 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
                 result.setAlarmType(MegviiEventLevelEnum.getMegviiEventLevelDescByTypeId(param.getEventLevelId()));
                 long duration = LocalDateTimeUtil.between(alarmDateTime, LocalDateTime.now(), ChronoUnit.MILLIS);
                 result.setStayTime(DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND));
-                //result.setStayTime(getTimeGap(alarmDateTime,LocalDateTime.now()));
             }
         }
         return result;
@@ -920,34 +947,6 @@ public class MegviiApiServiceImpl implements ManufacturerApiService {
         return map;
     }
 
-    /**
-     * @Author: liwencai
-     * @Description: 获取时间差（*天*小时*分*秒）
-     * @Date: 2022/10/27
-     * @Param: startTime: 开始时间
-     * @Param: endTime: 结束使劲按
-     * @Return: java.lang.String
-     */
-    public String getTimeGap(LocalDateTime startTime, LocalDateTime endTime){
-        Date nowDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
-        Date alarmTimeStartTime = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
-        long nd = 1000 * 24 * 60 * 60;
-        long nh = 1000 * 60 * 60;
-        long nm = 1000 * 60;
-        long ns = 1000;
-        // 获得两个时间的毫秒时间差异
-        long diff = nowDate.getTime() - alarmTimeStartTime.getTime();
-        // 计算差多少天
-        long day = diff / nd;
-        // 计算差多少小时
-        long hour = diff % nd / nh;
-        // 计算差多少分钟
-        long min = diff % nd % nh / nm;
-        // 计算差多少秒
-        long sec = diff % nd % nh % nm /ns;
-        // 输出结果
-        return (day+"天"+hour + "小时" + min + "分" +sec+"秒");
-    }
     /* ***************************** 视频控制相关接口 *********************************** */
 
 

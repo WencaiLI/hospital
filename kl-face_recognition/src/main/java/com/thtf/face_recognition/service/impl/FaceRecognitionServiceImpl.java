@@ -10,6 +10,7 @@ import com.thtf.common.entity.itemserver.TblVideoItem;
 import com.thtf.common.feign.AdminAPI;
 import com.thtf.common.feign.AlarmAPI;
 import com.thtf.common.feign.ItemAPI;
+import com.thtf.face_recognition.common.config.ItemParameterConfig;
 import com.thtf.face_recognition.common.constant.ParameterConstant;
 import com.thtf.face_recognition.common.util.megvii.StringUtil;
 import com.thtf.face_recognition.dto.DisplayParamDTO;
@@ -20,6 +21,7 @@ import com.thtf.face_recognition.service.FaceRecognitionService;
 import com.thtf.face_recognition.vo.*;
 
 import com.thtf.face_recognition.vo.PageInfoVO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +43,13 @@ import java.util.stream.Collectors;
 public class FaceRecognitionServiceImpl implements FaceRecognitionService {
 
     @Autowired
-    private RedisOperationService redisOperationService;
+    private ItemParameterConfig itemParameterConfig;
 
     @Resource
     private ItemAPI itemAPI;
 
     @Resource
     private AdminAPI adminAPI;
-
-    @Resource
-    private AlarmAPI alarmAPI;
 
     @Resource
     private PageInfoConvert pageInfoConvert;
@@ -118,69 +117,63 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
      */
     @Override
     public PageInfoVO<FaceRecognitionItemResultVO> listFaceRecognitionItem(FaceRecognitionItemParamVO paramVO) {
-        List<FaceRecognitionItemResultVO> resultList = new ArrayList<>();
-        ListItemByKeywordPageParamDTO feignParam = new ListItemByKeywordPageParamDTO();
-        BeanUtils.copyProperties(paramVO,feignParam);
+        ListItemNestedParametersPageParamDTO listItemNestedParametersPageParamDTO =  ListItemNestedParametersPageParamDTO.builder()
+                .sysCode(paramVO.getSysCode())
+                .buildingCodeList(StringUtils.isNotBlank(paramVO.getBuildingCodes()) ? Arrays.asList(paramVO.getBuildingCodes().split(",")) : null)
+                .areaCodeList(StringUtils.isNotBlank(paramVO.getAreaCodes()) ? Arrays.asList(paramVO.getAreaCodes().split(",")) : null)
+                .pageNumber(paramVO.getPageNumber())
+                .pageSize(paramVO.getPageSize())
+                .build();
+
         if(StringUtils.isNotBlank(paramVO.getKeyword())){
-            feignParam.setKeywordOfName(paramVO.getKeyword());
-            feignParam.setKeywordOfCode(paramVO.getKeyword());
-            feignParam.setKeywordOfDesc(paramVO.getKeyword());
+            listItemNestedParametersPageParamDTO.setCodeKey(paramVO.getKeyword());
+            listItemNestedParametersPageParamDTO.setAreaKey(paramVO.getKeyword());
+            listItemNestedParametersPageParamDTO.setNameKey(paramVO.getKeyword());
         }
-        PageInfo<ListItemByKeywordPageResultDTO> pageInfo = itemAPI.listItemByKeywordPage(feignParam).getData();
-        if(pageInfo.getList().size() == 0){
-            return null;
-        }
-        // 设备编码集
-        List<String> itemCodeList = pageInfo.getList().stream().map(ListItemByKeywordPageResultDTO::getCode).collect(Collectors.toList());
+
+        PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(listItemNestedParametersPageParamDTO).getData();
         PageInfoVO<FaceRecognitionItemResultVO> pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
-        // 集中查询摄像机信息
+        if(CollectionUtils.isEmpty(pageInfo.getList())){
+            return pageInfoVO;
+        }
+
+        List<String> itemCodeList = pageInfo.getList().stream().map(ItemNestedParameterVO::getCode).distinct().collect(Collectors.toList());
         ListVideoItemParamDTO listVideoItemParamDTO = new ListVideoItemParamDTO();
         listVideoItemParamDTO.setItemCodeList(itemCodeList);
         List<ListVideoItemResultDTO> videoItems = itemAPI.listVideoItemByRel(listVideoItemParamDTO).getData();
-        // 集中查询设备参数
-        List<String> parameterCode = new ArrayList<>();
-        parameterCode.add(ParameterConstant.FACE_RECOGNITION_Position);
-        parameterCode.add(ParameterConstant.FACE_RECOGNITION_ONLINE);
-        parameterCode.add(ParameterConstant.FACE_RECOGNITION_ALARM);
-        parameterCode.add(ParameterConstant.FACE_RECOGNITION_FAULT);
-        ListItemNestedParametersParamDTO param = new ListItemNestedParametersParamDTO();
-        param.setItemCodeList(itemCodeList);
-        param.setParameterTypeCodeList(parameterCode);
-        List<ListItemNestedParametersResultDTO> itemNestedParametersResultList = itemAPI.listItemNestedParameters(param).getData();
-        // 结果集
-        pageInfo.getList().forEach(e->{
-            itemNestedParametersResultList.forEach(item->{
-                if(item.getItemCode().equals(e.getCode())){
-                    FaceRecognitionItemResultVO result = new FaceRecognitionItemResultVO();
-                    result.setItemCode(e.getCode());
-                    result.setItemName(e.getName());
-                    result.setItemTypeName(e.getItemTypeName());
-                    result.setDescription(e.getDescription());
-                    result.setBuildingCode(e.getBuildingCode());
-                    result.setAreaCode(e.getAreaCode());
-                    result.setBuildingAreaName(e.getAreaName());
-                    // 模型视角信息
-                    if(StringUtils.isNotBlank(e.getViewLongitude())){
-                        result.setEye(Arrays.stream(e.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
-                    }
-                    if(StringUtils.isNotBlank(e.getViewLatitude())){
-                        result.setCenter(Arrays.stream(e.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
-                    }
-                    this.convertToParameterInfo(result,item.getParameterList());
-                    videoItems.forEach(video->{
-                        if(e.getCode().equals(video.getItemCode())){
-                            result.setVideoUsername(video.getUserName());
-                            result.setVideoPassword(video.getPassword());
-                            result.setIpAddress(video.getIp());
-                            result.setChannelNum(video.getItemChannelNum());
-                        }
-                    });
-                    // 匹配报警信息
-                    result.setAlarmCategory(this.getAlarmCategory(item.getAlarm(),item.getFault()));
-                    resultList.add(result);
-                }
-            });
 
+        List<FaceRecognitionItemResultVO> resultList = new ArrayList<>();
+        pageInfo.getList().forEach(itemNestedParameterVO -> {
+            FaceRecognitionItemResultVO faceRecognitionItemResultVO = new FaceRecognitionItemResultVO();
+            faceRecognitionItemResultVO.setItemCode(itemNestedParameterVO.getCode());
+            faceRecognitionItemResultVO.setItemName(itemNestedParameterVO.getName());
+            faceRecognitionItemResultVO.setItemTypeName(itemNestedParameterVO.getTypeName());
+            faceRecognitionItemResultVO.setDescription(itemNestedParameterVO.getDescription());
+            faceRecognitionItemResultVO.setBuildingCode(itemNestedParameterVO.getBuildingCode());
+            faceRecognitionItemResultVO.setAreaCode(itemNestedParameterVO.getAreaCode());
+            faceRecognitionItemResultVO.setBuildingAreaName(itemNestedParameterVO.getAreaName());
+            // 模型视角信息
+            if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLongitude())){
+                faceRecognitionItemResultVO.setEye(Arrays.stream(itemNestedParameterVO.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            if(StringUtils.isNotBlank(itemNestedParameterVO.getViewLatitude())){
+                faceRecognitionItemResultVO.setCenter(Arrays.stream(itemNestedParameterVO.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            this.convertToParameterInfo(faceRecognitionItemResultVO,itemNestedParameterVO.getParameterList());
+            if(CollectionUtils.isNotEmpty(videoItems)){
+                videoItems.forEach(video->{
+                    if(itemNestedParameterVO.getCode().equals(video.getItemCode())){
+                        faceRecognitionItemResultVO.setVideoUsername(video.getUserName());
+                        faceRecognitionItemResultVO.setVideoPassword(video.getPassword());
+                        faceRecognitionItemResultVO.setIpAddress(video.getIp());
+                        faceRecognitionItemResultVO.setChannelNum(video.getItemChannelNum());
+                    }
+                });
+            }
+
+            // 匹配报警信息
+            faceRecognitionItemResultVO.setAlarmCategory(this.getAlarmCategory(itemNestedParameterVO.getAlarm(),itemNestedParameterVO.getFault()));
+            resultList.add(faceRecognitionItemResultVO);
         });
         pageInfoVO.setList(resultList);
         return pageInfoVO;
@@ -301,26 +294,26 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         List<TblItemParameter> list = new ArrayList<>();
         parameterList.forEach(e->{
             // 在线
-            if(ParameterConstant.FACE_RECOGNITION_ONLINE.equals(e.getParameterType())){
+            if(itemParameterConfig.getFaceRecognitionOnline().equals(e.getParameterType())){
                 listFaceRecognitionItem.setOnlineParameterCode(e.getCode());
                 listFaceRecognitionItem.setOnlineValue(e.getValue());
                 list.add(e);
 
             }
             // 方位
-            if(ParameterConstant.FACE_RECOGNITION_Position.equals(e.getParameterType())){
+            if(itemParameterConfig.getFaceRecognitionPosition().equals(e.getParameterType())){
                 listFaceRecognitionItem.setPositionParameterCode(e.getCode());
                 listFaceRecognitionItem.setPositionValue(e.getValue());
                 list.add(e);
             }
             // 报警
-            if(ParameterConstant.FACE_RECOGNITION_ALARM.equals(e.getParameterType())){
+            if(itemParameterConfig.getAlarm().equals(e.getParameterType())){
                 listFaceRecognitionItem.setAlarmParameterCode(e.getCode());
                 listFaceRecognitionItem.setAlarmParameterValue(e.getValue());
                 list.add(e);
             }
             // 故障
-            if(ParameterConstant.FACE_RECOGNITION_FAULT.equals(e.getParameterType())){
+            if(itemParameterConfig.getFault().equals(e.getParameterType())){
                 listFaceRecognitionItem.setFaultParameterCode(e.getCode());
                 listFaceRecognitionItem.setFaultParameterValue(e.getValue());
                 list.add(e);
