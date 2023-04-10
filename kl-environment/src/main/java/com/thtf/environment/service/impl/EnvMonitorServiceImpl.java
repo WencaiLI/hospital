@@ -349,18 +349,18 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
             // 匹配参数信息
             this.convertToParameter(envMonitorItemResultVO,item.getParameterList(),parameterInfo,itemTypeCodeList);
 
-            // 匹配报警信息  0 正常 1 报警 2 故障 此处的报警信息的设备取决于前端取哪个字段
             if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
-                envMonitorItemResultVO.setAlarmCategory(1);
-                String parameterValue = commonService.getParameterValueByStateExplain(itemParameterConfig.getAlarm(), item.getParameterList(), new String[]{"报警", "警"});
-                envMonitorItemResultVO.setAlarmParameterValue(parameterValue);
+                envMonitorItemResultVO.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER);
+                envMonitorItemResultVO.setFaultParameterCode(ItemConstants.ITEM_FAULT_FALSE.toString());
+                envMonitorItemResultVO.setAlarmParameterValue(ItemConstants.ITEM_ALARM_TRUE.toString());
             }else if (ItemConstants.ITEM_ALARM_FALSE.equals(item.getAlarm()) && ItemConstants.ITEM_FAULT_TRUE.equals(item.getFault())){
-                envMonitorItemResultVO.setAlarmCategory(2);
-                String parameterValue = commonService.getParameterValueByStateExplain(itemParameterConfig.getFault(), item.getParameterList(), new String[]{"故障", "障"});
-                envMonitorItemResultVO.setFaultParameterCode(parameterValue);
+                envMonitorItemResultVO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER);
+                envMonitorItemResultVO.setFaultParameterCode(ItemConstants.ITEM_FAULT_TRUE.toString());
+                envMonitorItemResultVO.setAlarmParameterValue(ItemConstants.ITEM_ALARM_FALSE.toString());
             }else {
-                envMonitorItemResultVO.setAlarmCategory(0);
-                envMonitorItemResultVO.setAlarmParameterValue(null);
+                envMonitorItemResultVO.setAlarmCategory(null);
+                envMonitorItemResultVO.setFaultParameterCode(ItemConstants.ITEM_FAULT_FALSE.toString());
+                envMonitorItemResultVO.setAlarmParameterValue(ItemConstants.ITEM_ALARM_FALSE.toString());
             }
             resultVOList.add(envMonitorItemResultVO);
         }
