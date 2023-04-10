@@ -327,15 +327,9 @@ public class ElevatorServiceImpl implements ElevatorService {
     @Override
     public PageInfo<ElevatorAlarmResultDTO> listElevatorAlarmPage(String sysCode,String buildingCodes, String areaCode, String itemTypeCode,Integer alarmCategory,Integer pageNumber,Integer pageSize) {
         // 故障设备信息
-        List<String> buildingCodesList = null;
-        List<String> areaCodesList = null;
-        if(StringUtils.isNotBlank(areaCode)){
-            areaCodesList = Arrays.asList(areaCode.split(","));
-        }else {
-            if(StringUtils.isNotBlank(buildingCodes)){
-                buildingCodesList = Arrays.asList(buildingCodes.split(","));
-            }
-        }
+        List<String> buildingCodesList = StringUtils.isNotBlank(buildingCodes) ? Arrays.asList(buildingCodes.split(",")) : null;
+        List<String> areaCodesList = StringUtils.isNotBlank(areaCode) ? Arrays.asList(areaCode.split(",")) : null;
+
         ListItemNestedParametersPageParamDTO paramDTO = new ListItemNestedParametersPageParamDTO();
         if(null != alarmCategory){
             if (AlarmConstants.ALARM_CATEGORY_INTEGER.equals(alarmCategory)){
@@ -355,13 +349,14 @@ public class ElevatorServiceImpl implements ElevatorService {
         paramDTO.setPageNumber(pageNumber);
         paramDTO.setPageSize(pageSize);
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
-        // PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         PageInfo<ElevatorAlarmResultDTO> pageInfoVO = new PageInfo<>();
         BeanUtils.copyProperties(pageInfo,pageInfoVO);
         List<ItemNestedParameterVO> itemList = pageInfo.getList();
         if(CollectionUtils.isEmpty(pageInfo.getList())){
             return null;
         }
+        //
+        Map<String, String> buildingMap = adminAPI.getBuildingMap(buildingCodesList).getData();
         // 报警或故障的设备编码
         List<String> alarmOrFaultItemCodeList = itemList.stream().filter(e->(e.getAlarm().equals(ItemConstants.ITEM_ALARM_TRUE) || e.getFault().equals(ItemConstants.ITEM_FAULT_TRUE))).map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
         List<TblAlarmRecordUnhandle> recordUnhandles = new ArrayList<>();
@@ -381,6 +376,7 @@ public class ElevatorServiceImpl implements ElevatorService {
             elevatorInfoResult.setAreaName(item.getAreaName());
             elevatorInfoResult.setAreaCode(item.getAreaCode());
             elevatorInfoResult.setBuildingCode(item.getBuildingCode());
+            elevatorInfoResult.setBuildingName(buildingMap.get(item.getBuildingCode()));
             if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
                 elevatorInfoResult.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER.toString());
             }
