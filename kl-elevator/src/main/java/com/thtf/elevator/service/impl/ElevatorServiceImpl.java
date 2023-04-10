@@ -355,8 +355,8 @@ public class ElevatorServiceImpl implements ElevatorService {
         if(CollectionUtils.isEmpty(pageInfo.getList())){
             return null;
         }
-        //
-        Map<String, String> buildingMap = adminAPI.getBuildingMap(buildingCodesList).getData();
+        List<String> buildingCodeListForSelect = pageInfo.getList().stream().map(ItemNestedParameterVO::getBuildingCode).distinct().collect(Collectors.toList());
+        Map<String, String> buildingMap = adminAPI.getBuildingMap(buildingCodeListForSelect).getData();
         // 报警或故障的设备编码
         List<String> alarmOrFaultItemCodeList = itemList.stream().filter(e->(e.getAlarm().equals(ItemConstants.ITEM_ALARM_TRUE) || e.getFault().equals(ItemConstants.ITEM_FAULT_TRUE))).map(ItemNestedParameterVO::getCode).collect(Collectors.toList());
         List<TblAlarmRecordUnhandle> recordUnhandles = new ArrayList<>();
