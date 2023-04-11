@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: liwencai
@@ -112,6 +113,19 @@ public class EnvMonitorController {
     @PostMapping("/item_type")
     public JsonResult<List<CodeNameVO>> getItemTypeList(@RequestParam("sysCode") String sysCode){
         return JsonResult.querySuccess(envMonitorService.getItemTypeList(sysCode));
+    }
+
+    /**
+     * 获取监测参数单位
+     * @author liwencai
+     * @param sysCode 子系统编码
+     * @param itemTypeCodeList 设备类别编码集
+     * @return {@link JsonResult<Map<String,String>>}
+     */
+    @GetMapping("item_type_parameter_unit")
+    public JsonResult<Map<String, String>> getParameterUnit(@RequestParam("sysCode") String sysCode,
+                                                               @RequestParam(value = "itemTypeCodes",required = false) List<String> itemTypeCodeList){
+        return JsonResult.querySuccess(envMonitorService.getParameterUnit(sysCode, itemTypeCodeList));
     }
 
     /**

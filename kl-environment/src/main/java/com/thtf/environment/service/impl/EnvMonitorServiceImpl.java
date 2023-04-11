@@ -185,6 +185,23 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     }
 
     /**
+     * 获取监测参数单位
+     * @author liwencai
+     * @param sysCode 子系统编码
+     * @param itemTypeCodeList 设备类别编码集
+     * @return {@link JsonResult<Map<String,String>>}
+     */
+    @Override
+    public Map<String, String> getParameterUnit(String sysCode, List<String> itemTypeCodeList) {
+        List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
+        Map<String,String> result = new HashMap<>();
+        parameterInfo.forEach(e->{
+            result.put(e.getItemTypeCode(),e.getUnit());
+        });
+        return result;
+    }
+
+    /**
      * @Author: liwencai
      * @Description: 未处理报警数据统计
      * @Date: 2022/10/25
