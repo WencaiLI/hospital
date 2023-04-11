@@ -15,6 +15,7 @@ import com.thtf.environment.entity.TblHistoryMoment;
 import com.thtf.environment.vo.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: liwencai
@@ -161,4 +162,13 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO>>
      */
     JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(ItemAlarmInfoVO param);
+
+    /**
+     * 获取监测参数单位
+     * @author liwencai
+     * @param sysCode 子系统编码
+     * @param itemTypeCodeList 设备类别编码集
+     * @return {@link JsonResult<Map<String,String>>}
+     */
+    Map<String, String> getParameterUnit(String sysCode, List<String> itemTypeCodeList);
 }
