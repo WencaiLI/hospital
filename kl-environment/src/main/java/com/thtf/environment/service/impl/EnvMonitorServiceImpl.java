@@ -192,11 +192,11 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @return {@link JsonResult<Map<String,String>>}
      */
     @Override
-    public Map<String, String> getParameterUnit(String sysCode, List<String> itemTypeCodeList) {
+    public List<CodeUnitVO> getParameterUnit(String sysCode, List<String> itemTypeCodeList) {
+        List<CodeUnitVO> result = new ArrayList<>();
         List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-        Map<String,String> result = new HashMap<>();
         parameterInfo.forEach(e->{
-            result.put(e.getItemTypeCode(),e.getUnit());
+            result.add(CodeUnitVO.builder().code(e.getItemTypeCode()).unit(e.getUnit()).build());
         });
         return result;
     }

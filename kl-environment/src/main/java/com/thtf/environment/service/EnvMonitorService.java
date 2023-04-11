@@ -170,5 +170,5 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @param itemTypeCodeList 设备类别编码集
      * @return {@link JsonResult<Map<String,String>>}
      */
-    Map<String, String> getParameterUnit(String sysCode, List<String> itemTypeCodeList);
+    List<CodeUnitVO> getParameterUnit(String sysCode, List<String> itemTypeCodeList);
 }

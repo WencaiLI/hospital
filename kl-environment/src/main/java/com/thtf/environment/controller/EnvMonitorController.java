@@ -123,7 +123,7 @@ public class EnvMonitorController {
      * @return {@link JsonResult<Map<String,String>>}
      */
     @GetMapping("item_type_parameter_unit")
-    public JsonResult<Map<String, String>> getParameterUnit(@RequestParam("sysCode") String sysCode,
+    public JsonResult<List<CodeUnitVO>> getParameterUnit(@RequestParam("sysCode") String sysCode,
                                                                @RequestParam(value = "itemTypeCodes",required = false) List<String> itemTypeCodeList){
         return JsonResult.querySuccess(envMonitorService.getParameterUnit(sysCode, itemTypeCodeList));
     }
