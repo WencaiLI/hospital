@@ -560,8 +560,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         int year = DateUtil.year(newDate);
         int month = DateUtil.month(newDate);
         month +=1;
-        // int lengthOfMonth = DateUtil.lengthOfMonth(year,false);
-        int lengthOfMonth = DateUtil.lengthOfMonth(month,false);
+        int lengthOfMonth = DateUtil.lengthOfMonth(month,DateUtil.isLeapYear(year));
         String timePrefix = year+"-"+String.format("%02d", month)+"-";
         // 为null补0
         hourlyHistoryMoment.forEach(e->{
