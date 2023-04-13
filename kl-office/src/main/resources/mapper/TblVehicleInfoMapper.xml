@@ -82,7 +82,7 @@
     <select id="getRankings" parameterType="java.util.Map" resultType="com.thtf.office.vo.VehicleRankingsResultVO">
         select @rowno:=@rowno+1 as top,rate.${field} as attribute,rate.number as number
         from (
-        select @rowno:=0,scheduling.${field} ,count(*) as number,end_time
+        select @rowno:=0,scheduling.${field} ,count(*) as number
         from tbl_vehicle_scheduling as scheduling,tbl_vehicle_info as info
         where scheduling.car_number = info.car_number
           and scheduling.delete_time is null
