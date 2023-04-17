@@ -174,11 +174,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
     @Override
     public JsonResult<List<ItemAlarmInfoDTO>> getItemsAlarmInfo(ItemAlarmInfoVO param) {
         if(CollectionUtils.isEmpty(param.getItemTypeCodeList())){
-            List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-            if(CollectionUtils.isEmpty(parameterInfo)){
-                return null;
-            }
-            List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
+            List<CodeNameVO> itemTypeList = getItemTypeList(param.getSysCode());
+            List<String> itemTypeCodeList = itemTypeList.stream().map(CodeNameVO::getCode).collect(Collectors.toList());
+            System.out.println("itemTypeCodeList"+itemTypeCodeList);
             param.setItemTypeCodeList(itemTypeCodeList);
         }
         return itemAPI.listTypeCodeItemAlarmInfo(param);
