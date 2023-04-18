@@ -143,7 +143,7 @@ public class ElevatorServiceImpl implements ElevatorService {
      * @Author: liwencai
      * @Description: 前端数据展示
      * @Date: 2022/9/5
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @Param itemType:
      * @return: java.util.List<com.thtf.elevator.dto.DisplayInfoDTO>
      */

@@ -112,9 +112,9 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Author: liwencai
      * @Description:
      * @Date: 2022/11/23
-     * @Param sysCode:
-     * @Param areaCode:
-     * @Param buildingCodes:
+     * @Param sysCode: 子系统编码
+     * @Param areaCode: 区域编码
+     * @Param buildingCodes: 建筑编码集
      * @return: java.util.List<com.thtf.environment.vo.GroupAlarmInfoVO>
      */
     List<GroupAlarmInfoVO> getGroupAlarmDisplayInfo(String sysCode, String areaCode, String buildingCodes);
@@ -123,7 +123,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Author: liwencai
      * @Description:
      * @Date: 2022/11/23
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @Param itemTypeCode:
      * @return: java.util.List<com.thtf.environment.vo.ItemCodeAndNameAndTypeVO>
      */
@@ -145,7 +145,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Description: 24小时维度统计报警数量
      * @Date: 2023/2/1
      * @Param sysCode: 子系统编码
-     * @Param buildingCodes: 建筑区域编码集合
+     * @Param buildingCodes: 建筑编码集
      * @Param areaCode: 区域编码
      * @Param isHandled: 是否包含已处理报警
      * @Param startTime: 开始时间

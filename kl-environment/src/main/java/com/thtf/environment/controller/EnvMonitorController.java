@@ -52,7 +52,7 @@ public class EnvMonitorController {
      * @Author: liwencai
      * @Description: 获取同类别的设备信息
      * @Date: 2022/11/23
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @Param itemTypeCode:
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.vo.ItemCodeAndNameAndTypeVO>>
      */

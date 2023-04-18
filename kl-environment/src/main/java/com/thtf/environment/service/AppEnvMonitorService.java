@@ -16,9 +16,9 @@ public interface AppEnvMonitorService {
      * @Author: liwencai 
      * @Description:
      * @Date: 2022/12/15
-     * @Param sysCode: 
-     * @Param areaCode: 
-     * @Param buildingCodes: 
+     * @Param sysCode: 子系统编码
+     * @Param areaCode: 区域编码
+     * @Param buildingCodes: 建筑编码集
      * @Return: com.thtf.environment.dto.AppEnvMonitorDisplayDTO 
      */
     AppEnvMonitorDisplayDTO getDisplayInfo(String sysCode, String buildingCodes);
@@ -27,8 +27,8 @@ public interface AppEnvMonitorService {
      * @Author: liwencai 
      * @Description:
      * @Date: 2022/12/15
-     * @Param sysCode: 
-     * @Param buildingCodes: 
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
      * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO> 
      */
     List<KeyValueDTO> getAlarmCount(String sysCode, String buildingCodes);
@@ -47,8 +47,8 @@ public interface AppEnvMonitorService {
      * @Author: liwencai 
      * @Description:
      * @Date: 2022/12/15
-     * @Param sysCode: 
-     * @Param buildingCodes: 
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
      * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO> 
      */
     List<KeyValueDTO> listGroupInfo(String sysCode, String buildingCodes);
@@ -57,7 +57,7 @@ public interface AppEnvMonitorService {
      * @Author: liwencai 
      * @Description:
      * @Date: 2022/12/15
-     * @Param sysCode: 
+     * @Param sysCode: 子系统编码
      * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO> 
      */
     List<KeyValueDTO> listTypeInfo(String sysCode);

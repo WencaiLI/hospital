@@ -3,6 +3,8 @@ package com.thtf.environment.vo;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 
 /**
  * @Author: liwencai
@@ -13,8 +15,8 @@ import lombok.Data;
 @Builder
 public class ListLargeScreenInfoParamVO {
     private String sysCode;
-    private String buildingCodes;
-    private String areaCodes;
+    private List<String> buildingCodeList;
+    private List<String> areaCodeList;
     private String onlineValue;
     private String keyword;
     private Integer pageNumber;

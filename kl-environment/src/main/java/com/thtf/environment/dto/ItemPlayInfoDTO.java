@@ -38,6 +38,7 @@ public class ItemPlayInfoDTO {
     private String repeatProjection; // 重复计划（持续）（最好使用枚举类，枚举状态）
 
     private String volumeParameterCode; // 音量参数编码
+
     private String luminanceParameterCode; // 亮度参数编码
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")

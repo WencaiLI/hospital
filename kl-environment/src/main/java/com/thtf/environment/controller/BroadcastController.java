@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -22,10 +23,10 @@ import java.util.List;
 @Slf4j
 public class BroadcastController {
 
-    @Autowired
+    @Resource
     private BroadcastService broadcastService;
 
-    @Autowired
+    @Resource
     private InfoPublishService infoPublishService;
 
     /**
@@ -45,22 +46,10 @@ public class BroadcastController {
 
     /**
      * @Author: liwencai
-     * @Description: 控制信息
-     * @Date: 2022/10/7
-     * @Param sysCode: 子系统编码
-     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.KeyValueDTO>>
-     */
-    @PostMapping("/controlInfo")
-    JsonResult<List<KeyValueDTO>> controlInfo(@RequestParam(value ="sysCode")String sysCode){
-        return JsonResult.querySuccess(broadcastService.controlInfo(sysCode));
-    }
-
-    /**
-     * @Author: liwencai
      * @Description:
      * @Date: 2022/12/1
-     * @Param sysCode:
-     * @Param itemCodes:
+     * @Param sysCode: 子系统编码
+     * @Param itemCodes: 设备编码集
      * @return: com.thtf.common.response.JsonResult
      */
     @GetMapping("/monitor_point_info")
@@ -144,8 +133,8 @@ public class BroadcastController {
      * @Author: liwencai
      * @Description: 切换远程开关的状态
      * @Date: 2022/11/2
-     * @Param: sysCode:
-     * @Param: itemCodes:
+     * @Param: sysCode: 子系统编码
+     * @Param: itemCodes: 设备编码集
      * @Return: com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @PostMapping("/remote_switch")

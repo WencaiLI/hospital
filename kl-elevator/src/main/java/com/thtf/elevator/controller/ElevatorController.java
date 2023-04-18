@@ -93,9 +93,9 @@ public class ElevatorController {
      * @Author: liwencai
      * @Description: 查看电梯故障报警信息
      * @Date: 2022/9/5
-     * @Param sysCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param sysCode: 子系统编码
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.elevator.dto.ElevatorAlarmResultDTO>>
      */
     @PostMapping("/getAllAlarmPage")
@@ -113,7 +113,7 @@ public class ElevatorController {
      * @Author: liwencai
      * @Description: 报警情况统计
      * @Date: 2022/9/5
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.elevator.dto.KeyValueDTO>>
      */
     @PostMapping("/getItemFaultStatistics")
