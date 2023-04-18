@@ -23,23 +23,14 @@ public interface BroadcastService {
     DisplayInfoDTO displayInfo(String sysCode, String buildingCodes, String areaCode);
 
     /**
-     * @Author: liwencai 
-     * @Description: 获取控制信息
-     * @Date: 2022/10/7
-     * @Param sysCode: 
-     * @return: java.util.List<com.thtf.environment.dto.KeyValueDTO> 
-     */
-    List<KeyValueDTO> controlInfo(String sysCode);
-
-    /**
      * @Author: liwencai
      * @Description: 获取设备信息
      * @Date: 2022/10/7
-     * @Param keyword:
-     * @Param sysCode:
-     * @Param areaCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param keyword: 关键词
+     * @Param sysCode: 子系统编码
+     * @Param areaCode: 区域编码
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: java.util.List<com.thtf.environment.dto.ItemInfoOfBroadcastDTO>
      */
     PageInfo<ItemInfoOfBroadcastDTO> getItemInfo(String sysCode, String buildingCodes, String areaCode, String runVale, String keyword, Integer pageNumber, Integer pageSize);
@@ -48,10 +39,10 @@ public interface BroadcastService {
      * @Author: liwencai 
      * @Description:
      * @Date: 2022/10/7
-     * @Param keyword: 
-     * @Param sysCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param keyword: 关键词
+     * @Param sysCode: 子系统编码
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @return: com.thtf.environment.dto.PageInfoVO 
      */
     PageInfo<AlarmInfoOfBroadcastDTO> getAlarmInfo(String keyword, String sysCode, String buildingCodes, String areaCode, Integer pageNumber, Integer pageSize);
@@ -78,8 +69,8 @@ public interface BroadcastService {
      * @Author: liwencai
      * @Description:
      * @Date: 2022/12/1
-     * @Param sysCode:
-     * @Param itemCodes:
+     * @Param sysCode: 子系统编码
+     * @Param itemCodes: 设备编码集
      * @return: com.thtf.environment.dto.ItemInfoOfLargeScreenDTO
      */
     ItemInfoOfBroadcastDTO getMonitorPoint(String sysCode, String itemCodes);

@@ -125,7 +125,7 @@ public class AppElevatorController {
      * @Author: liwencai
      * @Description: 获取电梯类别
      * @Date: 2023/3/2
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.common.dto.itemserver.CodeAndNameDTO>>
      */
     @GetMapping("/getElevatorType")

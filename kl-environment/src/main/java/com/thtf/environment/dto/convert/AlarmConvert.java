@@ -16,13 +16,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AlarmConvert {
 
-
-
     @Mappings({
             @Mapping(target = "alarmId",source = "id"),
-            @Mapping(target = "areaCode",source = "buildingAreaCode")
-//            @Mapping(source = "alarmId",target = "id"),
-//            @Mapping(source = "areaCode",target = "buildingAreaCode")
+            @Mapping(target = "areaCode",source = "buildingAreaCode"),
+            @Mapping(target = "areaName",source = "buildingAreaName")
     })
     AlarmInfoOfLargeScreenDTO toAlarmInfoOfLargeScreenDTO(TblAlarmRecordUnhandle alarmRecordUnhandle);
 

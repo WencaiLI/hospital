@@ -1,5 +1,10 @@
 package com.thtf.environment.service.impl;
 
+import cn.hutool.core.date.BetweenFormatter;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import com.thtf.common.constant.AlarmConstants;
+import com.thtf.common.constant.ItemConstants;
 import com.thtf.common.entity.itemserver.TblItemParameter;
 import com.thtf.common.feign.ItemAPI;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -67,5 +74,56 @@ public class CommonService {
         return null;
     }
 
+    /**
+     * 获取报警留置时长
+     * @author liwencai
+     * @param alarmTime 报警时间
+     * @return {@link String}
+     */
+    String getAlarmStayTime(LocalDateTime alarmTime){
+        if(null == alarmTime){
+            return null;
+        }
+        long duration = LocalDateTimeUtil.between(alarmTime, LocalDateTime.now(), ChronoUnit.MILLIS);
+        return DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND);
+    }
+
+    /**
+     *  获取报警留置时长
+     * @author liwencai
+     * @param alarmTime 报警时间
+     * @param now 当前时间
+     * @return {@link String}
+     */
+    String getAlarmStartTime(LocalDateTime alarmTime ,LocalDateTime now){
+        if(null == alarmTime || null == now){
+            return null;
+        }
+        long duration = LocalDateTimeUtil.between(alarmTime, now, ChronoUnit.MILLIS);
+        return DateUtil.formatBetween(duration, BetweenFormatter.Level.SECOND);
+    }
+
+    Integer getAlarmCategory(Integer itemAlarmVale,Integer itemFaultValue) {
+        if(null == itemAlarmVale || null == itemFaultValue){
+            return null;
+        }
+        if(itemAlarmVale.equals(ItemConstants.ITEM_ALARM_TRUE)){
+            return AlarmConstants.ALARM_CATEGORY_INTEGER;
+        }else if (ItemConstants.ITEM_ALARM_FALSE.equals(itemAlarmVale) && ItemConstants.ITEM_FAULT_TRUE.equals(itemFaultValue)){
+            return AlarmConstants.FAULT_CATEGORY_INTEGER;
+        }else {
+            return null;
+        }
+    }
+
+    String getAlarmCategoryString(Integer itemAlarmVale,Integer itemFaultValue){
+        Integer integerValue = this.getAlarmCategory(itemAlarmVale, itemFaultValue);
+        if(null == integerValue){
+            return null;
+        }else {
+            return String.valueOf(integerValue);
+        }
+
+    }
 }
 

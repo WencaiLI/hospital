@@ -92,8 +92,8 @@ public class FaceRecognitionController {
      * @Description: 单设备事件
      * @Date: 2022/12/14
      * @Param itemCode:
-     * @Param pageNumber:
-     * @Param pageSize:
+     * @Param pageNumber: 页号
+     * @Param pageSize: 页大小
      * @Return: com.thtf.common.response.JsonResult<com.thtf.face_recognition.dto.MegviiPage<com.thtf.face_recognition.dto.MegviiItemEventDTO>>
      */
     @GetMapping("/item_event")

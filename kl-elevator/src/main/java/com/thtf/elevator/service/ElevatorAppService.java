@@ -19,9 +19,9 @@ public interface ElevatorAppService {
      * @Author: liwencai
      * @Description: 获取展示信息
      * @Date: 2023/3/15
-     * @Param sysCode:
-     * @Param buildingCodes:
-     * @Param areaCode:
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Param areaCode: 区域编码
      * @Return: java.util.List<com.thtf.elevator.dto.DisplayInfoDTO>
      */
     List<DisplayInfoDTO> displayInfo(String sysCode, String buildingCodes, String areaCode);
@@ -30,9 +30,9 @@ public interface ElevatorAppService {
      * @Author: liwencai
      * @Description: 获取报警信息
      * @Date: 2023/3/15
-     * @Param sysCode:
-     * @Param buildingCodes:
-     * @Param areaCode:
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Param areaCode: 区域编码
      * @Return: com.thtf.elevator.vo.AppAlarmInfoVO
      */
     AppAlarmInfoVO getAlarmInfo(String sysCode, String buildingCodes, String areaCode);

@@ -800,7 +800,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      * @Author: liwencai
      * @Description:
      * @Date: 2022/11/26
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @Param itemTypeCode:
      * @return: java.util.List<com.thtf.environment.vo.ItemCodeAndNameAndTypeVO>
      */

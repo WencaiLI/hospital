@@ -47,8 +47,8 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
      * @Author: liwencai
      * @Description: 前端信息
      * @Date: 2023/3/15
-     * @Param sysCode:
-     * @Param buildingCodes:
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
      * @Return: com.thtf.environment.dto.AppEnvMonitorDisplayDTO
      */
     @Override
@@ -127,8 +127,8 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
      * @Author: liwencai
      * @Description: 获取组信息
      * @Date: 2023/3/15
-     * @Param sysCode:
-     * @Param buildingCodes:
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
      * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO>
      */
     @Override
@@ -150,7 +150,7 @@ public class AppEnvMonitorServiceImpl implements AppEnvMonitorService {
      * @Author: liwencai
      * @Description: 获取类别信息
      * @Date: 2023/3/15
-     * @Param sysCode:
+     * @Param sysCode: 子系统编码
      * @Return: java.util.List<com.thtf.environment.dto.KeyValueDTO>
      */
     @Override

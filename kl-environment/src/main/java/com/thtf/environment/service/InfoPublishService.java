@@ -45,8 +45,8 @@ public interface InfoPublishService {
      * @Author: liwencai
      * @Description: 远程控制
      * @Date: 2022/11/3
-     * @Param: sysCode: 
-     * @Param: itemCodes: 
+     * @Param: sysCode: 子系统编码
+     * @Param: itemCodes: 设备编码集
      * @Return: java.lang.Boolean
      */
     Boolean remoteSwitch(String sysCode, String itemCodes);
@@ -76,8 +76,8 @@ public interface InfoPublishService {
      * @Author: liwencai
      * @Description:
      * @Date: 2022/11/30
-     * @Param sysCode:
-     * @Param itemCodes:
+     * @Param sysCode: 子系统编码
+     * @Param itemCodes: 设备编码集
      * @return: com.thtf.environment.dto.InfoPublishPointDTO
      */
     ItemInfoOfLargeScreenDTO getMonitorPoint(String sysCode, String itemCode);
@@ -86,9 +86,9 @@ public interface InfoPublishService {
      * @Author: liwencai
      * @Description: 前端展示数据
      * @Date: 2023/1/30
-     * @Param sysCode:
-     * @Param buildingCodes:
-     * @Param areaCode:
+     * @Param sysCode: 子系统编码
+     * @Param buildingCodes: 建筑编码集
+     * @Param areaCode: 区域编码
      * @Param itemTypeCodes:
      * @Return: com.thtf.environment.dto.InfoPublishDisplayDTO
      */
