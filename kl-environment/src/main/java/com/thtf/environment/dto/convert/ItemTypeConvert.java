@@ -1,7 +1,7 @@
 package com.thtf.environment.dto.convert;
 
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.entity.itemserver.TblItemType;
-import com.thtf.environment.vo.CodeNameVO;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -21,5 +21,5 @@ public interface ItemTypeConvert {
      * @Param itemTypeList: 设备类别集
      * @return: java.util.List<com.thtf.environment.vo.CodeNameVO>
      */
-    List<CodeNameVO> toCodeNameVO (List<TblItemType> itemTypeList);
+    List<CodeAndNameDTO> toCodeNameVO(List<TblItemType> itemTypeList);
 }
