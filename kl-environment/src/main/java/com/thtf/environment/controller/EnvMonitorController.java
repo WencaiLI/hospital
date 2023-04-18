@@ -3,6 +3,7 @@ package com.thtf.environment.controller;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoVO;
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
@@ -111,7 +112,7 @@ public class EnvMonitorController {
      * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.vo.CodeNameVO>>
      */
     @PostMapping("/item_type")
-    public JsonResult<List<CodeNameVO>> getItemTypeList(@RequestParam("sysCode") String sysCode){
+    public JsonResult<List<CodeAndNameDTO>> getItemTypeList(@RequestParam("sysCode") String sysCode){
         return JsonResult.querySuccess(envMonitorService.getItemTypeList(sysCode));
     }
 

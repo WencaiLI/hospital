@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoDTO;
 import com.thtf.common.dto.alarmserver.ItemAlarmInfoVO;
+import com.thtf.common.dto.itemserver.CodeAndNameDTO;
 import com.thtf.common.dto.itemserver.GroupAlarmInfoVO;
 import com.thtf.common.dto.itemserver.ItemTotalAndOnlineAndAlarmNumDTO;
 import com.thtf.common.dto.itemserver.ListParameterMapDTO;
@@ -52,7 +53,7 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @Param: sysCode: 子系统编码
      * @Return: java.util.List<com.thtf.environment.vo.CodeNameVO>
      */
-    List<CodeNameVO> getItemTypeList(String sysCode);
+    List<CodeAndNameDTO> getItemTypeList(String sysCode);
 
     /**
      * @Author: liwencai
