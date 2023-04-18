@@ -31,17 +31,4 @@ public class ItemParameterConfig {
      */
     @Value("${FAULT}")
     private String fault;
-
-    /**
-     * 信息发布在线
-     */
-    @Value("${infoPublish-system.online}")
-    private String infoPublishOnline;
-
-    /**
-     * 在线状态
-     */
-    @Value("${broadcast-system.online}")
-    private String broadcastOnline;
-
 }
