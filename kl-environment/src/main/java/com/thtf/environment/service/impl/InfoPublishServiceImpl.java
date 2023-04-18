@@ -98,10 +98,10 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         // 运行状态筛选
         if (null != paramVO.getOnlineValue() && "1".equals(paramVO.getOnlineValue())) {
 
-            String parameterValue = commonService.getParameterValueByStateExplain(paramVO.getSysCode(), itemParameterConfig.getInfoPublishOnline(), null, new String[]{"在线", "运行", "行", "上"});
+            String parameterValue = commonService.getParameterValueByStateExplain(paramVO.getSysCode(), itemParameterConfig.getState(), null, new String[]{"在线", "运行", "行", "上"});
             List<ParameterTypeCodeAndValueDTO> parameterList = new ArrayList<>();
             ParameterTypeCodeAndValueDTO paramTypeCodeAndValueDTO = new ParameterTypeCodeAndValueDTO();
-            paramTypeCodeAndValueDTO.setParameterTypeCode(itemParameterConfig.getInfoPublishOnline());
+            paramTypeCodeAndValueDTO.setParameterTypeCode(itemParameterConfig.getState());
             paramTypeCodeAndValueDTO.setParameterValue(parameterValue);
             parameterList.add(paramTypeCodeAndValueDTO);
             listItemNestedParametersPageParam.setParameterList(parameterList);
@@ -351,8 +351,8 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         countItemByParameterListDTO.setItemTypeCodeList(itemTypeCodeList);
 
         // 查看在线数量
-        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getInfoPublishOnline());
-        String parameterValue = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getInfoPublishOnline(), itemTypeCodes, new String[]{"在线", "上"});
+        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getState());
+        String parameterValue = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), itemTypeCodes, new String[]{"在线", "上"});
         countItemByParameterListDTO.setParameterValue(parameterValue);
         Integer onlineCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
         result.setOnlineCount(onlineCount);
@@ -360,7 +360,7 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         // 查看开启数量
         countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getState());
         countItemByParameterListDTO.setParameterValue(null);
-        String parameterValueState = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getInfoPublishOnline(), itemTypeCodes, new String[]{"运行", "运", "行"});
+        String parameterValueState = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), itemTypeCodes, new String[]{"运行", "运", "行"});
         countItemByParameterListDTO.setParameterValue(parameterValueState);
         Integer onCount = itemAPI.countItemByParameterList(countItemByParameterListDTO).getData();
         result.setOnCount(onCount);

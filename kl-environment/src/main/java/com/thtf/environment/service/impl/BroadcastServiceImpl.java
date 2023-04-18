@@ -92,13 +92,13 @@ public class BroadcastServiceImpl implements BroadcastService {
             countItemByParameterListDTO.setAreaCode(areaCode);
         }
         countItemByParameterListDTO.setSysCode(sysCode);
-        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getBroadcastOnline());
-        String parameterValueOnline = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getBroadcastOnline(), null, new String[]{"在线","在","上"});
+        countItemByParameterListDTO.setParameterTypeCode(itemParameterConfig.getState());
+        String parameterValueOnline = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), null, new String[]{"在线","在","上"});
         countItemByParameterListDTO.setParameterValue(parameterValueOnline);
         result.setRunningItemNum(itemAPI.countItemByParameterList(countItemByParameterListDTO).getData());
         // 群控分组信息
         // todo liwencai 此处目前使用群控分组方式,等确定方式后确定实现方式
-        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode,buildingCodes,areaCode, itemParameterConfig.getBroadcastOnline(), parameterValueOnline).getData();
+        ItemGroupOtherCountDTO data = itemAPI.countGroupByParameter(sysCode,buildingCodes,areaCode, itemParameterConfig.getState(), parameterValueOnline).getData();
         if(null == data){
             result.setAreaNum(0);
             result.setRunningAreaNum(0);
@@ -139,10 +139,10 @@ public class BroadcastServiceImpl implements BroadcastService {
         }
         // 运行状态筛选
         if (null != runVale && runVale.equals("1")) {
-            String parameterValue = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getBroadcastOnline(), null, new String[]{"在线", "运行", "行", "上"});
+            String parameterValue = commonService.getParameterValueByStateExplain(sysCode, itemParameterConfig.getState(), null, new String[]{"在线", "运行", "行", "上"});
             List<ParameterTypeCodeAndValueDTO> parameterList = new ArrayList<>();
             ParameterTypeCodeAndValueDTO paramTypeCodeAndValueDTO = new ParameterTypeCodeAndValueDTO();
-            paramTypeCodeAndValueDTO.setParameterTypeCode(itemParameterConfig.getBroadcastOnline());
+            paramTypeCodeAndValueDTO.setParameterTypeCode(itemParameterConfig.getState());
             paramTypeCodeAndValueDTO.setParameterValue(parameterValue);
             parameterList.add(paramTypeCodeAndValueDTO);
             listItemNestedParametersPageParam.setParameterList(parameterList);
