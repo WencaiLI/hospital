@@ -156,33 +156,47 @@ public class InfoPublishServiceImpl implements InfoPublishService {
         List<String> buildingCodeList = StringUtils.isNotBlank(buildingCodes) ? Arrays.asList(buildingCodes.split(",")) : adminAPI.listBuildingCodeUserSelf().getData();
         List<String> areaCodeList = StringUtils.isNotBlank(areaCode) ? Arrays.asList(areaCode.split(",")) : null;
 
-        ListAlarmInfoLimitOneParamDTO listAlarmInfoLimitOneParamDTO = new ListAlarmInfoLimitOneParamDTO();
-        listAlarmInfoLimitOneParamDTO.setSystemCode(sysCode);
-        listAlarmInfoLimitOneParamDTO.setAlarmCategory(AlarmConstants.FAULT_CATEGORY_INTEGER.toString());
-        listAlarmInfoLimitOneParamDTO.setBuildingCodeList(buildingCodeList);
-        listAlarmInfoLimitOneParamDTO.setAreaCodeList(areaCodeList);
-        listAlarmInfoLimitOneParamDTO.setKeyword(keyword);
-        listAlarmInfoLimitOneParamDTO.setKeywordOfItemName(keyword);
-        listAlarmInfoLimitOneParamDTO.setKeywordOfItemCode(keyword);
-        listAlarmInfoLimitOneParamDTO.setKeywordOfAlarmDesc(keyword);
-        listAlarmInfoLimitOneParamDTO.setPageNumber(pageNumber);
-        listAlarmInfoLimitOneParamDTO.setPageSize(pageSize);
-        PageInfo<TblAlarmRecordUnhandle> pageInfo = alarmAPI.listAlarmInfoLimitOnePage(listAlarmInfoLimitOneParamDTO).getData();
+        TblItem tblItem = new TblItem();
+        tblItem.setSystemCode(sysCode);
+        tblItem.setBuildingCodeList(buildingCodeList);
+        tblItem.setAreaCodeList(areaCodeList);
+        tblItem.setPageNumber(pageNumber);
+        tblItem.setPageSize(pageSize);
+        tblItem.setFault(ItemConstants.ITEM_FAULT_TRUE);
+        tblItem.setAlarm(ItemConstants.ITEM_ALARM_FALSE);
+        if(StringUtils.isNotBlank(keyword)){
+            tblItem.setKeyName(keyword);
+            tblItem.setKeyCode(keyword);
+            tblItem.setKeyAreaName(keyword);
+        }
+        PageInfo<TblItem> pageInfo = itemAPI.queryAllItemsPage(tblItem).getData();
+
+
+
         PageInfoVO pageInfoVO = pageInfoConvert.toPageInfoVO(pageInfo);
         if(CollectionUtils.isEmpty(pageInfoVO.getList())){
             return pageInfoVO;
         }
+        List<String> itemCodeList = pageInfo.getList().stream().map(TblItem::getCode).collect(Collectors.toList());
+;
+        List<TblAlarmRecordUnhandle> alarmList = alarmAPI.getAlarmInfoByItemCodeListAndCategoryLimitOne(itemCodeList, AlarmConstants.FAULT_CATEGORY_INTEGER).getData();
 
         List<AlarmInfoOfLargeScreenDTO> resultList = new ArrayList<>(pageInfoVO.getList().size());
-        pageInfo.getList().forEach(alarmRecordUnhandle->{
-            AlarmInfoOfLargeScreenDTO innerResult = alarmConvert.toAlarmInfoOfLargeScreenDTO(alarmRecordUnhandle);
+        pageInfo.getList().forEach(item->{
+            AlarmInfoOfLargeScreenDTO innerResult;
+            List<TblAlarmRecordUnhandle> collect = alarmList.stream().filter(e -> e.getItemCode().equals(item.getCode())).limit(1).collect(Collectors.toList());
+            if(collect.size() == 1){
+                innerResult = alarmConvert.toAlarmInfoOfLargeScreenDTO(collect.get(0));
+            }else{
+                innerResult = new AlarmInfoOfLargeScreenDTO();
+            }
             innerResult.setStayTime(commonService.getAlarmStayTime(innerResult.getAlarmTime()));
             // todo 对接高博医院自身的信息发布系统后再写 largeScreen.setPublishContent();
-            if (null != alarmRecordUnhandle.getViewLongitude()) {
-                innerResult.setEye(Arrays.stream(alarmRecordUnhandle.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            if (null != item.getViewLongitude()) {
+                innerResult.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
-            if (null != alarmRecordUnhandle.getViewLatitude()) {
-                innerResult.setCenter(Arrays.stream(alarmRecordUnhandle.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            if (null != item.getViewLatitude()) {
+                innerResult.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
             }
             resultList.add(innerResult);
 
