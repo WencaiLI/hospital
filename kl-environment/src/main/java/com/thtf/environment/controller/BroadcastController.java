@@ -2,12 +2,14 @@ package com.thtf.environment.controller;
 
 import com.github.pagehelper.PageInfo;
 import com.thtf.common.response.JsonResult;
-import com.thtf.environment.dto.*;
+import com.thtf.environment.dto.AlarmInfoOfBroadcastDTO;
+import com.thtf.environment.dto.BroadcastContentInsertDTO;
+import com.thtf.environment.dto.DisplayInfoDTO;
+import com.thtf.environment.dto.ItemInfoOfBroadcastDTO;
 import com.thtf.environment.service.BroadcastService;
 import com.thtf.environment.service.InfoPublishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -35,13 +37,13 @@ public class BroadcastController {
      * @Date: 2022/10/7
      * @Param sysCode: 子系统编码
      * @Param itemType: 设备类别
-     * @return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.broadcast.dto.DisplayInfoDTO>>
+     * @return: com.thtf.common.response.JsonResult<java.util.List < com.thtf.broadcast.dto.DisplayInfoDTO>>
      */
     @PostMapping("/displayInfo")
-    JsonResult<DisplayInfoDTO> displayInfo(@RequestParam(value = "sysCode")String sysCode,
-                                           @RequestParam(value = "buildingCodes",required = false)String buildingCodes,
-                                           @RequestParam(value = "areaCode",required = false) String areaCode){
-        return JsonResult.querySuccess(broadcastService.displayInfo(sysCode,buildingCodes,areaCode));
+    JsonResult<DisplayInfoDTO> displayInfo(@RequestParam(value = "sysCode") String sysCode,
+                                           @RequestParam(value = "buildingCodes", required = false) String buildingCodes,
+                                           @RequestParam(value = "areaCode", required = false) String areaCode) {
+        return JsonResult.querySuccess(broadcastService.displayInfo(sysCode, buildingCodes, areaCode));
     }
 
     /**
@@ -54,8 +56,8 @@ public class BroadcastController {
      */
     @GetMapping("/monitor_point_info")
     public JsonResult<ItemInfoOfBroadcastDTO> getMonitorPoint(@RequestParam("sysCode") String sysCode,
-                                                                @RequestParam("itemCode") String itemCodes){
-        return JsonResult.querySuccess(broadcastService.getMonitorPoint(sysCode,itemCodes));
+                                                              @RequestParam("itemCode") String itemCodes) {
+        return JsonResult.querySuccess(broadcastService.getMonitorPoint(sysCode, itemCodes));
 
     }
 
@@ -67,17 +69,17 @@ public class BroadcastController {
      * @Param sysCode: 子系统编码
      * @Param pageNumber: 页号
      * @Param pageSize: 页大小
-     * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo<com.thtf.environment.dto.ItemInfoOfBroadcastDTO>>
+     * @return: com.thtf.common.response.JsonResult<com.github.pagehelper.PageInfo < com.thtf.environment.dto.ItemInfoOfBroadcastDTO>>
      */
     @PostMapping("/getItemInfo")
     JsonResult<PageInfo<ItemInfoOfBroadcastDTO>> getItemInfo(@RequestParam("sysCode") String sysCode,
-                                                             @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                                             @RequestParam(value = "areaCode",required = false) String areaCode,
-                                                             @RequestParam(value = "onlineValue",required = false) String onlineValue,
-                                                             @RequestParam(value = "keyword",required = false) String keyword,
-                                                             @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                                             @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.querySuccess(broadcastService.getItemInfo(sysCode,buildingCodes,areaCode,onlineValue,keyword,pageNumber,pageSize));
+                                                             @RequestParam(value = "buildingCodes", required = false) String buildingCodes,
+                                                             @RequestParam(value = "areaCode", required = false) String areaCode,
+                                                             @RequestParam(value = "onlineValue", required = false) String onlineValue,
+                                                             @RequestParam(value = "keyword", required = false) String keyword,
+                                                             @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+                                                             @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        return JsonResult.querySuccess(broadcastService.getItemInfo(sysCode, buildingCodes, areaCode, onlineValue, keyword, pageNumber, pageSize));
     }
 
     /**
@@ -92,12 +94,12 @@ public class BroadcastController {
      */
     @PostMapping("/getAlarmInfo")
     JsonResult<PageInfo<AlarmInfoOfBroadcastDTO>> getAlarmInfo(@RequestParam(value = "sysCode") String sysCode,
-                                        @RequestParam(value = "areaCode",required = false) String areaCode,
-                                        @RequestParam(value = "buildingCodes",required = false) String buildingCodes,
-                                        @RequestParam(value = "keyword",required = false) String keyword,
-                                        @RequestParam(value = "pageNumber",required = false) Integer pageNumber,
-                                        @RequestParam(value = "pageSize",required = false) Integer pageSize){
-        return JsonResult.querySuccess(broadcastService.getAlarmInfo(keyword,sysCode,buildingCodes,areaCode,pageNumber,pageSize));
+                                                               @RequestParam(value = "areaCode", required = false) String areaCode,
+                                                               @RequestParam(value = "buildingCodes", required = false) String buildingCodes,
+                                                               @RequestParam(value = "keyword", required = false) String keyword,
+                                                               @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+                                                               @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        return JsonResult.querySuccess(broadcastService.getAlarmInfo(keyword, sysCode, buildingCodes, areaCode, pageNumber, pageSize));
     }
 
     /**
@@ -105,26 +107,26 @@ public class BroadcastController {
      * @Description: 终端监听 获取终端内容
      * @Date: 2022/11/3
      * @Param: itemCode:
-     * @Return: com.thtf.common.response.JsonResult<java.util.List<com.thtf.environment.dto.BroadcastPublishContentDTO>>
+     * @Return: com.thtf.common.response.JsonResult<java.util.List < com.thtf.environment.dto.BroadcastPublishContentDTO>>
      */
     @GetMapping("/getPublishContent")
-    JsonResult<List<BroadcastContentInsertDTO>>  getPublishContent(@RequestParam("itemCode") String itemCode){
+    JsonResult<List<BroadcastContentInsertDTO>> getPublishContent(@RequestParam("itemCode") String itemCode) {
         return JsonResult.querySuccess(broadcastService.getPublishContent(itemCode));
     }
 
     /**
      * @Author: liwencai
-     * @Description: 
+     * @Description:
      * @Date: 2022/11/3
-     * @Param: param: 
+     * @Param: param:
      * @Return: com.thtf.common.response.JsonResult<java.lang.Boolean>
      */
     @PostMapping("/publishContent")
-    JsonResult<Boolean>  publishContent(@RequestBody BroadcastContentInsertDTO param){
+    JsonResult<Boolean> publishContent(@RequestBody BroadcastContentInsertDTO param) {
         Boolean flag = broadcastService.publishContent(param);
-        if(flag){
+        if (flag) {
             return JsonResult.success();
-        }else {
+        } else {
             return JsonResult.error("发布失败");
         }
     }
@@ -139,15 +141,15 @@ public class BroadcastController {
      */
     @PostMapping("/remote_switch")
     public JsonResult<Boolean> remoteSwitch(@RequestParam("sysCode") String sysCode,
-                                            @RequestParam("itemCodes") String itemCodes){
-        if(StringUtils.isNotBlank(itemCodes)){
+                                            @RequestParam("itemCodes") String itemCodes) {
+        if (StringUtils.isNotBlank(itemCodes)) {
             Boolean aBoolean = infoPublishService.remoteSwitch(sysCode, itemCodes);
-            if(aBoolean){
+            if (aBoolean) {
                 return JsonResult.success();
-            }else {
+            } else {
                 return JsonResult.error("修改失败");
             }
-        }else {
+        } else {
             return JsonResult.error("请传入设备编码");
         }
     }

@@ -334,6 +334,7 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         PageInfo<ItemNestedParameterVO> pageInfo = itemAPI.listItemNestedParametersPage(paramDTO).getData();
 
         PageInfo<EnvMonitorItemResultVO> pageInfoVO = new PageInfo<>();
+        BeanUtils.copyProperties(pageInfo,pageInfoVO);
         List<EnvMonitorItemResultVO> resultVOList = new ArrayList<>();
         Map<String, String> buildingInfoMap;
 
