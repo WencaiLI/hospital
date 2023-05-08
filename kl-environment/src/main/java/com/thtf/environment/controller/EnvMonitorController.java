@@ -279,17 +279,4 @@ public class EnvMonitorController {
         return envMonitorService.getItemsAlarmInfo(param);
     }
 
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取设备信息
-     * @Date: 2023/5/8
-     * @Param: itemCode: 设备编码
-     * @Return: com.thtf.common.response.JsonResult<com.thtf.environment.vo.ItemVO>
-     */
-    @GetMapping("/item_info")
-    public JsonResult<ItemVO> getItemInfo(@RequestParam("itemCode") String itemCode){
-        return JsonResult.querySuccess(envMonitorService.getItemInfo(itemCode));
-    }
-
 }

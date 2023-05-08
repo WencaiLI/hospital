@@ -205,31 +205,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
     /**
      * @Author: liwencai
-     * @Description: 获取设备信息
-     * @Date: 2023/5/8
-     * @Param: itemCode: 设备编码
-     * @Return: com.thtf.environment.vo.ItemVO
-     */
-    @Override
-    public ItemVO getItemInfo(String itemCode) {
-        List<ParameterTemplateAndDetailDTO> parameterInfo = getParameterInfo();
-        if (CollectionUtils.isEmpty(parameterInfo)) {
-            return null;
-        }
-        ItemVO result = new ItemVO();
-        TblItemDTO data = itemAPI.getItemDTOByItemCodeWithRelation(itemCode).getData();
-        if(null != data && null != data.getTypeCode()){
-            BeanUtils.copyProperties(data,result);
-            List<ParameterTemplateAndDetailDTO> collect = parameterInfo.stream().filter(e -> null != e.getItemTypeCode() && e.getItemTypeCode().equals(data.getTypeCode())).collect(Collectors.toList());
-            if(CollectionUtils.isNotEmpty(collect)){
-                result.setUnit(collect.get(0).getUnit());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * @Author: liwencai
      * @Description: 未处理报警数据统计
      * @Date: 2022/10/25
      * @Param: startTime: 开始时间
@@ -861,6 +836,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EnvItemMonitorDTO getMonitorPointInfo(String itemCode) {
+
+
+
         TblItem data1 = itemAPI.searchItemByItemCode(itemCode).getData();
         if (null == data1) {
             return null;
@@ -912,6 +890,20 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
             });
             result.setParameterList(resultParameterList);
+            // 获取监测参数单位
+            List<ItemTypeAndParameterTypeCodeDTO> itemTypeAndParameterTypeCodeList = parameterConfigNacos.getItemTypeAndParameterTypeCodeList();
+            if(CollectionUtils.isNotEmpty(itemTypeAndParameterTypeCodeList)){
+                itemTypeAndParameterTypeCodeList.forEach(e->{
+                    if(e.getItemTypeCode().equals(result.getItemTypeCode())){
+                        result.getParameterList().forEach(parameter->{
+                            if(parameter.getParameterType().equals(e.getParameterTypeCode())){
+                                result.setUnit(parameter.getUnit());
+                            }
+                        });
+                    }
+                });
+            }
+
         }
         return result;
     }

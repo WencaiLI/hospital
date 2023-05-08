@@ -1,8 +1,6 @@
 package com.thtf.environment.dto;
 
-import com.thtf.common.dto.itemserver.ItemNestedParameterVO;
 import com.thtf.common.entity.itemserver.TblItemParameter;
-import com.thtf.environment.vo.ItemParameterInfoVO;
 import lombok.Data;
 
 import java.util.List;
@@ -31,6 +29,11 @@ public class EnvItemMonitorDTO {
     private String alarmParameterValue;
     private String parameterCode;
     private String parameterValue;
+
+    /**
+     * 监测参数单位
+     */
+    private String unit;
     private List<Integer> eye;
     private List<Integer> center;
     private  List<TblItemParameter> parameterList;
