@@ -172,13 +172,4 @@ public interface EnvMonitorService extends IService<TblHistoryMoment> {
      * @return {@link JsonResult<Map<String,String>>}
      */
     List<CodeUnitVO> getParameterUnit(String sysCode, List<String> itemTypeCodeList);
-
-    /**
-     * @Author: liwencai
-     * @Description: 获取设备信息
-     * @Date: 2023/5/8
-     * @Param: itemCode: 设备编码
-     * @Return: com.thtf.environment.vo.ItemVO
-     */
-    ItemVO getItemInfo(String itemCode);
 }
