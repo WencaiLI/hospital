@@ -299,7 +299,6 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
         }
         // 所有设备类别编码
         List<String> buildingCodeList = StringUtils.isNotBlank(paramVO.getBuildingCodes()) ? Arrays.asList(paramVO.getBuildingCodes().split(",")) : adminAPI.listBuildingCodeUserSelf().getData();
-        ;
         List<String> areaCodeList = StringUtils.isNotBlank(paramVO.getAreaCode()) ? Arrays.asList(paramVO.getAreaCode().split(",")) : null;
         List<String> itemTypeCodeList = parameterInfo.stream().map(ParameterTemplateAndDetailDTO::getItemTypeCode).collect(Collectors.toList());
         if (StringUtils.isNotBlank(paramVO.getItemTypeCode())) {
