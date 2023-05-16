@@ -222,26 +222,11 @@ public class EasyExcelStyleUtils {
         }
 
     }
-//    @Slf4j
-//    public static class CustomSheetWriteHandler2 implements RowWriteHandler {
+
     @Slf4j
     public static class CustomSheetWriteHandler2 implements SheetWriteHandler {
-
         @Override
         public void afterSheetCreate(SheetWriteHandlerContext context) {
-
-//        @Override
-//        public void beforeRowCreate(RowWriteHandlerContext context) {
-
-        //        }
-//
-//        @Override
-//        public void afterSheetDispose(RowWriteHandlerContext context) {
-//
-//        }
-//
-//        @Override
-//        public void after(SheetWriteHandlerContext context) {
             Workbook workbook = context.getWriteWorkbookHolder().getWorkbook();
             Sheet sheet = workbook.getSheetAt(0);
             Row row1 = sheet.createRow(0);
@@ -261,7 +246,7 @@ public class EasyExcelStyleUtils {
 
             Cell cell1 = row2.createCell(0);
 
-            cell1.setCellValue("高博医院公车信息登记表");
+            cell1.setCellValue("公车信息登记表");
 
             CellStyle cellStyle = workbook.createCellStyle();
 

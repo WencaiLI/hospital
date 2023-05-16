@@ -835,6 +835,9 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
      */
     @Override
     public EnvItemMonitorDTO getMonitorPointInfo(String itemCode) {
+
+
+
         TblItem data1 = itemAPI.searchItemByItemCode(itemCode).getData();
         if (null == data1) {
             return null;
@@ -886,6 +889,20 @@ public class EnvMonitorServiceImpl extends ServiceImpl<TblHistoryMomentMapper, T
 
             });
             result.setParameterList(resultParameterList);
+            // 获取监测参数单位
+            List<ItemTypeAndParameterTypeCodeDTO> itemTypeAndParameterTypeCodeList = parameterConfigNacos.getItemTypeAndParameterTypeCodeList();
+            if(CollectionUtils.isNotEmpty(itemTypeAndParameterTypeCodeList)){
+                itemTypeAndParameterTypeCodeList.forEach(e->{
+                    if(e.getItemTypeCode().equals(result.getItemTypeCode())){
+                        result.getParameterList().forEach(parameter->{
+                            if(parameter.getParameterType().equals(e.getParameterTypeCode())){
+                                result.setUnit(parameter.getUnit());
+                            }
+                        });
+                    }
+                });
+            }
+
         }
         return result;
     }
