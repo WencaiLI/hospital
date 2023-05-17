@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@MapperScan("com.thtf.face_recognition.mapper")
+@MapperScan("com.thtf.face_recognition.adapter.driven.persistence")
 @EnableTransactionManagement
 @EnableFeignClients("com.thtf.common")
 @ComponentScan(basePackages = {"com.thtf.face_recognition","com.thtf.common"})
