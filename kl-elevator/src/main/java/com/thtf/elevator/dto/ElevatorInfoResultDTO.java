@@ -47,4 +47,8 @@ public class ElevatorInfoResultDTO {
      * 报警状态
      */
     private String alarmCategory;
+
+    private List<Integer> eye; // 滞留时长
+
+    private List<Integer> center; // 滞留时长
 }
