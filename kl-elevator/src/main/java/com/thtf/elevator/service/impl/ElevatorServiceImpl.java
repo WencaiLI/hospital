@@ -308,6 +308,12 @@ public class ElevatorServiceImpl implements ElevatorService {
         for (ElevatorInfoResultDTO elevatorInfoResultDTO : resultDTOList) {
             for (ItemNestedParameterVO item : pageInfo.getList()) {
                 if (item.getCode().equals(elevatorInfoResultDTO.getItemCode())){
+                    if(StringUtils.isNotBlank(item.getViewLongitude())){
+                        elevatorInfoResultDTO.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
+                    if(StringUtils.isNotBlank(item.getViewLatitude())){
+                        elevatorInfoResultDTO.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+                    }
                     // convertParameterPropertiesToElevatorInfoResultDTO(elevatorInfoResultDTO,item.getParameterList());
                     if (CollectionUtils.isNotEmpty(item.getParameterList())) {
                         elevatorInfoResultDTO.setParameterList(item.getParameterList().stream().map(x->parameterConverter.toParameterInfo(x)).collect(Collectors.toList()));
