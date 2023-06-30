@@ -1,5 +1,6 @@
 package com.thtf.office.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.thtf.common.feign.AdminAPI;
@@ -13,6 +14,7 @@ import com.thtf.office.entity.TblVehicleInfo;
 import com.thtf.office.mapper.TblVehicleCategoryMapper;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.service.TblVehicleCategoryService;
+import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleCategoryChangeBindVO;
 import com.thtf.office.vo.VehicleCategoryParamVO;
 import com.thtf.office.vo.VehicleCategoryResultVO;
@@ -54,6 +56,9 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
 
     @Resource
     private TblVehicleInfoMapper vehicleInfoMapper;
+
+    @Resource
+    private VehicleStatisticsService vehicleStatisticsService;
 
     /**
      * @Author: liwencai
@@ -183,39 +188,21 @@ public class TblVehicleCategoryServiceImpl extends ServiceImpl<TblVehicleCategor
             SelectAllInfoResultDTO selectAllInfoResultDTO = new SelectAllInfoResultDTO();
             selectAllInfoResultDTO.setCategoryName(o.getName());
             // 类别对应的查询数量
-            QueryWrapper<TblVehicleInfo> queryWrapperInfo = new QueryWrapper<>();
-            queryWrapperInfo.lambda().isNull(TblVehicleInfo::getDeleteTime).eq(TblVehicleInfo::getVehicleCategoryId,o.getId());
-            // 排除已淘汰车辆
-            queryWrapperInfo.lambda().ne(TblVehicleInfo::getStatus, VehicleStatusEnum.ELIMINATED.getStatus());
-            Integer totalNumber = vehicleInfoMapper.selectCount(queryWrapperInfo);
-            if(totalNumber == null){
+            Integer totalNumber = vehicleInfoMapper.selectCount(new LambdaQueryWrapper<TblVehicleInfo>()
+                    .isNull(TblVehicleInfo::getDeleteTime)
+                    .eq(TblVehicleInfo::getVehicleCategoryId,o.getId())
+                    // 排除已淘汰车辆
+                    .ne(TblVehicleInfo::getStatus, VehicleStatusEnum.ELIMINATED.getStatus())
+            );
+            if (totalNumber == null) {
                 selectAllInfoResultDTO.setTotalNumber(0);
-            }else {
+            } else {
                 selectAllInfoResultDTO.setTotalNumber(totalNumber);
             }
             // 查询各个车所处的状态
             Map<String,Object> map = new HashMap<>();
             map.put("cid",o.getId());
-            List<VehicleStatisticsResultVO> vehicleStatus = vehicleInfoMapper.getVehicleStatus(map);
-            ArrayList<String> attributes = vehicleStatus.stream().map(VehicleStatisticsResultVO::getAttribute).collect(Collectors.toCollection(ArrayList::new));
-
-
-            List<VehicleStatisticsResultVO> resultVOList = new ArrayList<>();
-
-            Stream.of("待命中", "出车中", "维修中").forEach(e->{
-                if(!attributes.contains(e)){
-                    VehicleStatisticsResultVO vehicleStatisticsResultVO = new VehicleStatisticsResultVO();
-                    vehicleStatisticsResultVO.setAttribute(e);
-                    vehicleStatisticsResultVO.setNumber(0L);
-                    resultVOList.add(vehicleStatisticsResultVO);
-                }
-                vehicleStatus.forEach(attribute->{
-                    if(attribute.getAttribute().equals(e)){
-                        resultVOList.add(attribute);
-                    }
-                });
-            });
-
+            List<VehicleStatisticsResultVO> resultVOList = vehicleStatisticsService.getVehicleStatus(map);
             selectAllInfoResultDTO.setData(resultVOList);
             resultDTOS.add(selectAllInfoResultDTO);
         }

@@ -1,5 +1,7 @@
 package com.thtf.office.common.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @Author: liwencai
  * @Date: 2023/3/3 10:45
@@ -28,5 +30,32 @@ public enum VehicleStatusEnum {
         this.desc = desc;
     }
 
+    /**
+     * 根据状态获取中文状态
+     *
+     * @param status
+     * @return {@link String}
+     * @author liwencai
+     */
+    public static String getDescByStatus(Integer status){
+        for (VehicleStatusEnum value : VehicleStatusEnum.values()) {
+            if(value.getStatus().equals(status)){
+                return value.getDesc();
+            }
+        }
+        return null;
+    }
+
+    public static String getDescByStatus(String status){
+        if(StringUtils.isEmpty(status)) {
+            return null;
+        }
+        for (VehicleStatusEnum value : VehicleStatusEnum.values()) {
+            if(value.getStatus().equals(Integer.parseInt(status))){
+                return value.getDesc();
+            }
+        }
+        return null;
+    }
 
 }
