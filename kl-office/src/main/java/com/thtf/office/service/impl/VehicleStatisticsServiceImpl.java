@@ -1,5 +1,6 @@
 package com.thtf.office.service.impl;
 
+import com.thtf.office.common.enums.VehicleStatusEnum;
 import com.thtf.office.dto.VehicleNumberTypeCodeDTO;
 import com.thtf.office.mapper.TblVehicleInfoMapper;
 import com.thtf.office.mapper.TblVehicleMaintenanceMapper;
@@ -41,9 +42,11 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     @Override
     public List<VehicleStatisticsResultVO> getVehicleStatus(Map<String,Object> map) {
         List<VehicleStatisticsResultVO> result = vehicleInfoMapper.getVehicleStatus(map);
+        // 不展示
+        result.removeIf(e->e.getAttribute().equals(String.valueOf(VehicleStatusEnum.ELIMINATED.getDesc())));
         ArrayList<String> attributes = result.stream().map(VehicleStatisticsResultVO::getAttribute).collect(Collectors.toCollection(ArrayList::new));
         /* 数据库中不存在的状态设置为空 */
-        Stream.of("待命中","出车中","维修中").forEach(e->{
+        Stream.of(VehicleStatusEnum.STANDBY.getDesc(),VehicleStatusEnum.OUT.getDesc(),VehicleStatusEnum.MAINTAIN.getDesc()).forEach(e->{
             if(!attributes.contains(e)){
                 VehicleStatisticsResultVO vehicleStatisticsResultVO = new VehicleStatisticsResultVO();
                 vehicleStatisticsResultVO.setAttribute(e);
