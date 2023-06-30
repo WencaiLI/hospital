@@ -9,6 +9,7 @@ import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -124,6 +125,9 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
      * @author liwencai
      */
     void improveRankingsInfo(List<VehicleRankingsResultVO> rankings){
+        if(CollectionUtils.isEmpty(rankings)){
+            return;
+        }
         List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
         List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
         for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
