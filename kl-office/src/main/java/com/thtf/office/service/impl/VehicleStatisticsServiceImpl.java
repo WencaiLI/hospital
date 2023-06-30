@@ -42,14 +42,16 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     @Override
     public List<VehicleStatisticsResultVO> getVehicleStatus(Map<String,Object> map) {
         List<VehicleStatisticsResultVO> result = vehicleInfoMapper.getVehicleStatus(map);
-        // 不展示
-        result.removeIf(e->e.getAttribute().equals(String.valueOf(VehicleStatusEnum.ELIMINATED.getDesc())));
-        ArrayList<String> attributes = result.stream().map(VehicleStatisticsResultVO::getAttribute).collect(Collectors.toCollection(ArrayList::new));
+        // 不展示已淘汰的车辆
+        result.removeIf(e->e.getAttribute().equals(String.valueOf(VehicleStatusEnum.ELIMINATED.getStatus())));
         /* 数据库中不存在的状态设置为空 */
-        Stream.of(VehicleStatusEnum.STANDBY.getDesc(),VehicleStatusEnum.OUT.getDesc(),VehicleStatusEnum.MAINTAIN.getDesc()).forEach(e->{
-            if(!attributes.contains(e)){
+        result.forEach(e-> e.setAttribute(VehicleStatusEnum.getDescByStatus(e.getAttribute())));
+        ArrayList<String> attributes = result.stream().map(VehicleStatisticsResultVO::getAttribute).collect(Collectors.toCollection(ArrayList::new));
+        /* 补齐字段 */
+        Stream.of(VehicleStatusEnum.STANDBY,VehicleStatusEnum.OUT,VehicleStatusEnum.MAINTAIN).forEach(e->{
+            if(!attributes.contains(e.getDesc())){
                 VehicleStatisticsResultVO vehicleStatisticsResultVO = new VehicleStatisticsResultVO();
-                vehicleStatisticsResultVO.setAttribute(e);
+                vehicleStatisticsResultVO.setAttribute(e.getDesc());
                 vehicleStatisticsResultVO.setNumber(0L);
                 result.add(vehicleStatisticsResultVO);
             }
