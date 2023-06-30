@@ -10,7 +10,7 @@ public enum VehicleStatusEnum {
     STANDBY(0,"待命中"),
     OUT(1,"出车中"),
     MAINTAIN(2,"维修中"),
-    ELIMINATED(3,"被淘汰");
+    ELIMINATED(3,"已淘汰");
 
     private Integer status;
 
