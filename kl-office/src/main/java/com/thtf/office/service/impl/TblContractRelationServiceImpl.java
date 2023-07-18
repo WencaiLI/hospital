@@ -19,4 +19,5 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 @Service
 public class TblContractRelationServiceImpl extends ServiceImpl<TblContractRelationMapper, TblContractRelation> implements TblContractRelationService {
 
+
 }

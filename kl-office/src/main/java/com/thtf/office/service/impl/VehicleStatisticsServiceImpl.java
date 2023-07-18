@@ -9,6 +9,7 @@ import com.thtf.office.service.VehicleStatisticsService;
 import com.thtf.office.vo.VehicleRankingsResultVO;
 import com.thtf.office.vo.VehicleStatisticsParamVO;
 import com.thtf.office.vo.VehicleStatisticsResultVO;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -68,7 +69,6 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
      */
     @Override
     public List<VehicleStatisticsResultVO> getVehicleCategory(VehicleStatisticsParamVO paramVO) {
-
         return vehicleInfoMapper.getVehicleCategory(paramVO);
     }
 
@@ -83,15 +83,7 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     public List<VehicleRankingsResultVO> getRankings(Map<String, Object> map) {
         List<VehicleRankingsResultVO> rankings = vehicleInfoMapper.getRankings(map);
         if(null !=map.get("isNeedCategory") && (Boolean) map.get("isNeedCategory")){
-            List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
-            List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
-            for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
-                for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
-                    if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
-                        vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
-                    }
-                }
-            }
+            improveRankingsInfo(rankings);
         }
 
         return rankings;
@@ -107,15 +99,7 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     @Override
     public List<VehicleRankingsResultVO> getMaintenanceRankings(VehicleStatisticsParamVO paramVO) {
         List<VehicleRankingsResultVO> rankings = vehicleMaintenanceMapper.getMaintenanceRankings(paramVO);
-        List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
-        List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
-        for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
-            for (VehicleNumberTypeCodeDTO vehicleNumberTypeCodeDTO : vehicleNumberTypeCodeDTOS) {
-                if(vehicleRankingsResultVO.getAttribute().equals(vehicleNumberTypeCodeDTO.getCarNumber())){
-                    vehicleRankingsResultVO.setAttributeTwo(vehicleNumberTypeCodeDTO.getTypeName());
-                }
-            }
-        }
+        improveRankingsInfo(rankings);
         return rankings;
     }
 
@@ -129,6 +113,21 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
     @Override
     public List<VehicleRankingsResultVO> rankingsOfSchWD(VehicleStatisticsParamVO paramVO) {
         List<VehicleRankingsResultVO> rankings = vehicleSchedulingMapper.rankingsOfSchWD(paramVO);
+        improveRankingsInfo(rankings);
+        return rankings;
+    }
+
+
+    /**
+     * 完善排行信息 (完善车牌号和车辆类别信息)
+     *
+     * @param rankings List<VehicleRankingsResultVO>
+     * @author liwencai
+     */
+    void improveRankingsInfo(List<VehicleRankingsResultVO> rankings){
+        if(CollectionUtils.isEmpty(rankings)){
+            return;
+        }
         List<String> carNumberList = rankings.stream().map(VehicleRankingsResultVO::getAttribute).collect(Collectors.toList());
         List<VehicleNumberTypeCodeDTO> vehicleNumberTypeCodeDTOS = vehicleInfoMapper.listCarTypeCodeList(carNumberList);
         for (VehicleRankingsResultVO vehicleRankingsResultVO : rankings) {
@@ -138,6 +137,5 @@ public class VehicleStatisticsServiceImpl implements VehicleStatisticsService {
                 }
             }
         }
-        return rankings;
     }
 }
