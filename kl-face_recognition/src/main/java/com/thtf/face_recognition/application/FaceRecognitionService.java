@@ -14,6 +14,7 @@ import com.thtf.face_recognition.application.vo.PageInfoVO;
  */
 public interface FaceRecognitionService {
 
+
     /**
      * @Author: liwencai
      * @Description: 获取设备展示信息
