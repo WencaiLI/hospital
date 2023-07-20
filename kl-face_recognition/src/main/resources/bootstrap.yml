@@ -5,6 +5,8 @@ spring:
     active: ${PROFILE:dev}
   cloud:
     nacos:
+      username: nacos
+      password: Thtf@600100Nacos[10.10.49.220]
       config:
         # data id 扩展名
         file-extension: ${FILE_EXTENSION:yml}
