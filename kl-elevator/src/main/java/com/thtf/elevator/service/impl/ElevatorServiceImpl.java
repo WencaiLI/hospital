@@ -394,6 +394,12 @@ public class ElevatorServiceImpl implements ElevatorService {
             elevatorInfoResult.setAreaCode(item.getAreaCode());
             elevatorInfoResult.setBuildingCode(item.getBuildingCode());
             elevatorInfoResult.setBuildingName(buildingMap.get(item.getBuildingCode()));
+            if(StringUtils.isNotBlank(item.getViewLongitude())){
+                elevatorInfoResult.setEye(Arrays.stream(item.getViewLongitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
+            if(StringUtils.isNotBlank(item.getViewLatitude())){
+                elevatorInfoResult.setCenter(Arrays.stream(item.getViewLatitude().split(",")).map(Integer::valueOf).collect(Collectors.toList()));
+            }
             if(ItemConstants.ITEM_ALARM_TRUE.equals(item.getAlarm())){
                 elevatorInfoResult.setAlarmCategory(AlarmConstants.ALARM_CATEGORY_INTEGER.toString());
             }
