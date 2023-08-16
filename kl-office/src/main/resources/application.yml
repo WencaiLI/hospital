@@ -1,11 +1,11 @@
 # 数据库配置
 spring:
-  # 配置数据源
-  datasource:
-    url: jdbc:mysql://10.10.49.18:3306/kl_hospital?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
-    username: root
-    password: root123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+#  # 配置数据源
+#  datasource:
+#    url: jdbc:mysql://10.10.49.18:3306/kl_hospital?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+#    username: root
+#    password: root123
+#    driver-class-name: com.mysql.cj.jdbc.Driver
 # 对feign的请求进行拦截和求情方法保留
 feign:
   httpclient:
